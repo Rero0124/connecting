@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @db.VarChar(255) @unique
+  name String? @db.VarChar(100)
+  password String
+  createdAt DateTime @default(now()) @map("created_at")
+  masterRoom Room[]
+  roomInUser RoomUser[]
+  @@map("user")
+}
+
+model Room {
+  id String @db.VarChar(36) @id @default(uuid())
+  name String @db.VarChar(100)
+  masterId Int @map("master_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  master User @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  roomUser RoomUser[]
+  @@map("room")
+}
+
+model RoomUser {
+  id Int @id @default(autoincrement())
+  roomId String @db.VarChar(36) @map("room_id") 
+  userId Int @map("user_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([roomId, userId])
+  @@map("room_user")
+}
