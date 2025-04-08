@@ -21,8 +21,43 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   masterRoom Room[]
   roomInUser RoomUser[]
+  messageInUser MessageUser[]
+  friendByUser UserFriends[] @relation(name: "friend_by_user")
+  userFriends UserFriends[] @relation(name: "user_friends")
   @@map("user")
 }
+
+model UserFriends {
+  id Int @id @default(autoincrement())
+  userId Int @map("user_id")
+  friendId Int @map("friend_id")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, name: "friend_by_user")
+  friend User @relation(fields: [friendId], references: [id], onDelete: Cascade, name: "user_friends")
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@map("user_friends")
+}
+
+model Message {
+  id String @db.VarChar(36) @id @default(uuid())
+  name String @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  messageUser MessageUser[]
+  @@map("message")
+}
+
+model MessageUser {
+  id Int @id @default(autoincrement())
+  messageId String @db.VarChar(36) @map("message_id") 
+  userId Int @map("user_id")
+  joinedAt DateTime @default(now()) @map("joined_at")
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([messageId, userId])
+  @@map("message_user")
+}
+
+
 
 model Room {
   id String @db.VarChar(36) @id @default(uuid())

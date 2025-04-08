@@ -12,7 +12,7 @@ export async function GET() {
 		const rooms = await prisma.room.findMany({
 			where: {
 				roomUser: {
-					every: {
+					some: {
 						userId: sessionCheck.userId
 					}
 				}

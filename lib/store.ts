@@ -1,11 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
-import savedataReducer from './features/savedata/savedataSlice'
+import savedataReducer, { setCookieBySaveData } from './features/savedata/savedataSlice'
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       savedata: savedataReducer
-    }
+    },
+    middleware: getDefaultMiddleware => 
+      getDefaultMiddleware()
+      .concat(setCookieBySaveData)
   })
 }
 

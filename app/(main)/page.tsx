@@ -1,4 +1,4 @@
-export default function Nav() {
+export default function main() {
   return (
     <div>
       mains
