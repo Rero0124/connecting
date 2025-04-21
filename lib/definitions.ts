@@ -1,11 +1,20 @@
 import { z } from 'zod'
  
 export const LoginFormSchema = z.object({
-  email: z.string().trim(),
+  profileId: z
+    .string()
+    .transform(v => v === '' ? undefined : v)
+    .optional()
+    .refine(v => v === undefined || !isNaN(Number(v)), { message: 'Number Invalide' })
+    .transform(v => v === undefined ? 0 : Number(v)),
+  email: z.string().email({ message: 'Please enter a valid email.' }).trim(),
   password: z.string().trim(),
 })
 
 export const JoinFormSchema = z.object({
+  tag: z
+    .string()
+    .trim(),
   name: z
     .string()
     .min(2, { message: 'Name must be at least 2 characters long.' })
@@ -33,12 +42,23 @@ export type LoginFormState =
         password?: string[]
       }
       message?: string
+      isLogin?: boolean
+      profiles?: {
+        id: number
+        userTag: string
+        userName?: string
+        isCompany: boolean
+        information?: string
+        image: string
+        createdAt: Date
+      }[]
     }
   | undefined
  
 export type JoinFormState =
   | {
       data?: {
+        tag?: string
         name?: string
         email?: string
         password?: string
@@ -55,6 +75,7 @@ export type JoinFormState =
 export type SessionPayload = 
   | {
       userId: number
+      profileId: number
       expiresAt: Date
     }
   | undefined

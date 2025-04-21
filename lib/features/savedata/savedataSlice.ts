@@ -1,67 +1,95 @@
 import { createSlice, Middleware, PayloadAction } from '@reduxjs/toolkit'
-import { Prisma } from '@prisma/client';
 import { getCookieValue } from '@/lib/util';
+import { RootState } from '@/lib/store';
 
-interface savedataState {
+interface SaveDataState {
   initLoad: boolean;
-  selectedFriend?: string;
-  selectedMessage?: string;
+  selectedFriendMenu?: string;
+  selectedFriendSubMenu?: string;
+  selectedMessageMenu?: string;
   title: string;
-  rooms: Prisma.RoomSelect[];
-  friends: Prisma.UserSelect[];
+  profile?: {
+    id: number
+    userTag: string
+    userName?: string
+    isCompany: boolean
+    information?: string
+    image: string
+    createdAt: Date
+  };
   navSize: number;
 }
 
-const oldSavedata: { 
-  selectedFriend?: string;
-  selectedMessage?: string;
-  navSize: number;
+const oldSaveData: { 
+  selectedFriendMenu?: string;
+  selectedFriendSubMenu?: string;
+  selectedMessageMenu?: string;
+  navSize?: number;
 } = JSON.parse(getCookieValue('savedata') ?? '{}')
 
-const initialState: savedataState = {
+const initialState: SaveDataState = {
   initLoad: false,
   title: '',
-  rooms: [],
-  friends: [],
-  navSize: oldSavedata.navSize ?? 200,
-  selectedFriend: oldSavedata.selectedFriend,
-  selectedMessage: oldSavedata.selectedMessage
+  navSize: oldSaveData.navSize ?? 200,
+  selectedFriendMenu: oldSaveData.selectedFriendMenu,
+  selectedFriendSubMenu: oldSaveData.selectedFriendSubMenu,
+  selectedMessageMenu: oldSaveData.selectedMessageMenu
 }
 
-export const savedataSlice = createSlice({
-  name: 'savedata',
+const setCookieBySaveData = (state: SaveDataState) => {
+  const { selectedFriendMenu, selectedFriendSubMenu, selectedMessageMenu, navSize } = state;
+  document.cookie = 'savedata=' + JSON.stringify({ selectedFriendMenu, selectedFriendSubMenu, selectedMessageMenu, navSize })
+}
+
+export const saveDataSlice = createSlice({
+  name: 'saveData',
   initialState,
   reducers: {
     setInitLoadEnd: state => {
       state.initLoad = true
     },
-    setRooms: (state, action: PayloadAction<Prisma.RoomSelect[]>) => {
-      state.rooms = action.payload
-    },
-    setFriends: (state, action: PayloadAction<Prisma.UserSelect[]>) => {
-      state.friends = action.payload
+    setProfile: (state, action: PayloadAction<{
+      id: number
+      userTag: string
+      userName?: string
+      isCompany: boolean
+      information?: string
+      image: string
+      createdAt: Date
+    }>) => {
+      state.profile = action.payload
     },
     setTitle: (state, action: PayloadAction<string>) => {
       state.title = action.payload
+      setCookieBySaveData(state);
     },
     setNavSize: (state, action: PayloadAction<number>) => {
       state.navSize = action.payload
+      setCookieBySaveData(state);
     },
-    setSelectedFriend: (state, action: PayloadAction<string>) => {
-      state.selectedFriend = action.payload
+    setSelectedFriendMenu: (state, action: PayloadAction<string>) => {
+      state.selectedFriendMenu = action.payload
+      setCookieBySaveData(state);
     },
-    setSelectedMessage: (state, action: PayloadAction<string>) => {
-      state.selectedMessage = action.payload
+    setSelectedFriendSubMenu: (state, action: PayloadAction<string>) => {
+      state.selectedFriendSubMenu = action.payload
+      setCookieBySaveData(state);
+    },
+    setSelectedMessageMenu: (state, action: PayloadAction<string>) => {
+      state.selectedMessageMenu = action.payload
+      setCookieBySaveData(state);
     }
-  }
+  },
 })
 
-export const { setInitLoadEnd, setRooms, setFriends, setTitle, setNavSize, setSelectedFriend } = savedataSlice.actions
+export const { setInitLoadEnd, setProfile, setTitle, setNavSize, setSelectedFriendMenu, setSelectedFriendSubMenu, setSelectedMessageMenu } = saveDataSlice.actions
 
-export const setCookieBySaveData: Middleware = state => next => action => {
-  next(action)
-  const { selectedFriend, selectedMessage, navSize } = state.getState().savedata
-  document.cookie = 'savedata=' + JSON.stringify({ selectedFriend, selectedMessage, navSize })
-}
+export const getInitLoadEnd = (state: RootState) => state.saveData.initLoad;
+export const getProfile = (state: RootState) => state.saveData.profile;
+export const getTitle = (state: RootState) => state.saveData.title;
+export const getNavSize = (state: RootState) => state.saveData.navSize;
+export const getSelectedFriendMenu = (state: RootState) => state.saveData.selectedFriendMenu;
+export const getSelectedFriendSubMenu = (state: RootState) => state.saveData.selectedFriendSubMenu;
+export const getSelectedMessageMenu = (state: RootState) => state.saveData.selectedMessageMenu;
 
-export default savedataSlice.reducer
+export default saveDataSlice.reducer

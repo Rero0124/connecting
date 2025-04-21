@@ -1,28 +1,20 @@
 "use client";
 
-import { useSelector } from "react-redux";
-import { RootState } from "@/lib/store";
 import Link from "next/link";
-import { useAppDispatch } from "@/lib/hooks";
-import { setTitle } from "@/lib/features/savedata/savedataSlice";
-import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 
 export default function Main() {
-  const savedata = useSelector((state: RootState) => state.savedata);
+  const messageData = useAppSelector(state => state.messageData);
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(setTitle('friends'))
-  }, [])
 
   return (
     <div className="">
       <main className="">
         <div className="flex flex-col">
-          {savedata.friends.map((friend) => {
+          {messageData.allowedMessages.map((allowedMessage) => {
             return (
-              <Link key={`key_friend_` + friend.id} href={`/friends/${friend.id}`} className="block">
-                <p>{friend.name}</p>
+              <Link key={`key_allowed_message_` + allowedMessage.id} href={`/message/${allowedMessage.id}`} className="block">
+                <p>{allowedMessage.name}</p>
               </Link>
             );
           })}

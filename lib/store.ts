@@ -1,14 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit'
-import savedataReducer, { setCookieBySaveData } from './features/savedata/savedataSlice'
+import saveDataReducer from './features/saveData/saveDataSlice'
+import friendDataReducer from './features/friendData/friendDataSlice'
+import messageDataReducer from './features/messageData/messageDataSlice'
+import roomDataReducer from './features/roomData/roomDataSlice'
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      savedata: savedataReducer
-    },
-    middleware: getDefaultMiddleware => 
-      getDefaultMiddleware()
-      .concat(setCookieBySaveData)
+      saveData: saveDataReducer,
+      friendsData: friendDataReducer,
+      messageData: messageDataReducer,
+      roomDate: roomDataReducer
+    }
   })
 }
 

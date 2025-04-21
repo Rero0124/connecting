@@ -11,7 +11,7 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="">
+    <div className="flex flex-row justify-center items-center h-full">
       {children}
     </div>
   );

@@ -5,14 +5,17 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/room/my',
+        destination: '/message',
         permanent: true
       }
     ]
   },
   experimental: {
     useCache: true,
-  }
+  },
+  allowedDevOrigins: [
+    'connecting.rero0124.com'
+  ]
 };
 
 export default nextConfig;

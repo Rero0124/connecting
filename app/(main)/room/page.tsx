@@ -1,6 +1,6 @@
 "use client";
 
-import { setTitle } from "@/lib/features/savedata/savedataSlice";
+import { setTitle } from "@/lib/features/saveData/saveDataSlice";
 import { useAppDispatch } from "@/lib/hooks";
 import { useEffect } from "react";
 

@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/lib/hooks";
 import { RootState } from "@/lib/store";
 import Link from "next/link";
 import { useSelector } from "react-redux";
@@ -21,21 +22,21 @@ const NavSepar = () => {
 }
 
 export default function Nav () {
-  const savedata = useSelector((state: RootState) => state.savedata);
+  const roomDate = useAppSelector(state => state.roomDate);
 
   return (
     <div className="flex flex-col h-full w-18 py-2 border-r-[1px]">
       <div className="flex flex-col grow overflow-y-auto h-0">
         <div className="relative inset-0 overflow-y-auto">
-          <NavButton href={savedata.selectedFriend ?? '/friends'}>
+          <NavButton href="/friend">
             친구
           </NavButton>
-          <NavButton href={savedata.selectedMessage ?? '/message'}>
+          <NavButton href="/message">
             DM
           </NavButton>
           <NavSepar />
           {
-            savedata.rooms.map((room) => {
+            roomDate.rooms.map((room) => {
               return (
                 <NavButton key={`nav_room_link_${room.id}`} href={`/room/${room.id}`}>
                   {room.name}
@@ -43,7 +44,7 @@ export default function Nav () {
               )
             })
           }
-          { savedata.rooms.length > 0 && <NavSepar /> } 
+          { roomDate.rooms.length > 0 && <NavSepar /> } 
           <NavButton href="/">
             생성
           </NavButton>

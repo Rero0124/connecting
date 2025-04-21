@@ -1,19 +1,22 @@
 import prisma from "@/lib/prisma";
 import { verifySession } from "@/lib/session"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function GET() {
-	try {
-		const sessionCheck = await verifySession();
-		if(!sessionCheck.isAuth) {
-			return NextResponse.json({ error: '먼저 로그인을 해주세요' }, { status: 401 })
-		}
+export async function GET(request: NextRequest) {
+  try {
+    const sessionCheck = await verifySession();
+    if(!sessionCheck.isAuth) {
+      return NextResponse.json({ error: '먼저 로그인을 해주세요' }, { status: 401 })
+    }
 
 		const rooms = await prisma.room.findMany({
 			where: {
 				roomUser: {
 					some: {
-						userId: sessionCheck.userId
+						userProfile: {
+							id: sessionCheck.profileId,
+							userId: sessionCheck.userId
+						}
 					}
 				}
 			}
