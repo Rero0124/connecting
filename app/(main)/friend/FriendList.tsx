@@ -1,5 +1,5 @@
 "use client";
-import {setSelectedFriendSubMenu} from "@/lib/features/savedata/saveDataSlice";
+import {setSelectedFriendSubMenu} from "@/lib/features/saveData/saveDataSlice";
 import {useAppDispatch} from "@/lib/hooks";
 import {RootState} from "@/lib/store";
 import {useEffect} from "react";

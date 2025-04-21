@@ -1,7 +1,7 @@
 "use client";
 
 import DragAbleDiv, {DragAbleDivOption} from "@/app/_components/DragAbleDiv";
-import {setNavSize, setSelectedFriendMenu, setTitle} from "@/lib/features/savedata/saveDataSlice";
+import {setNavSize, setSelectedFriendMenu, setTitle} from "@/lib/features/saveData/saveDataSlice";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {useEffect, useRef} from "react";
 
