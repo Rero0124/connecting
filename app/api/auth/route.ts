@@ -1,8 +1,16 @@
+<<<<<<< HEAD
+import prisma from "@/lib/prisma"
+import { NextResponse, type NextRequest } from "next/server"
+import bcryptjs from "bcryptjs"
+import { LoginFormSchema } from "@/lib/definitions"
+import { createSession, deleteSession, verifySession } from "@/lib/session";
+=======
 import prisma from "@/lib/prisma";
 import {NextResponse, type NextRequest} from "next/server";
 import bcryptjs from "bcryptjs";
 import {LoginFormSchema} from "@/lib/definitions";
 import {createSession, deleteSession, verifySession} from "@/lib/session";
+>>>>>>> 8d7cbae3435b75188e345cfe1eda49768fe672d5
 
 export async function GET(request: NextRequest) {
     try {
@@ -29,11 +37,27 @@ export async function POST(request: NextRequest) {
             password: rawData.password,
         });
 
+<<<<<<< HEAD
+		if(!validatedFields.success) {
+			return NextResponse.json({ message: '입력값 형식이 잘못되었습니다.' }, { status: 400 })
+		}
+ 
+		const { email, password, profileId } = validatedFields.data
+		
+		const user = await prisma.user.findUnique({
+			where: { email }
+		})
+		
+		let statusCode = 403;
+		let message = '이메일 또는 비밀번호가 일치하지 않습니다.';
+		let passwordCheck = false;
+=======
         if (!validatedFields.success) {
             return NextResponse.json({message: "입력값 형식이 잘못되었습니다."}, {status: 400});
         }
 
         const {email, password, profileId} = validatedFields.data;
+>>>>>>> 8d7cbae3435b75188e345cfe1eda49768fe672d5
 
         const user = await prisma.user.findUnique({
             where: {email},
