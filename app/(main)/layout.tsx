@@ -8,7 +8,7 @@ import Nav from "@/app/(main)/Nav";
 import {setRooms} from "@/lib/features/roomData/roomDataSlice";
 import {setAllowedMessages, setNotAllowedMessages} from "@/lib/features/messageData/messageDataSlice";
 import {setFriends} from "@/lib/features/friendData/friendDataSlice";
-import ChangeProfileModal from "./changeProfileModal";
+import ChangeProfileModal from "./ChangeProfileModal";
 import LoginModal from "./LoginModal";
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
