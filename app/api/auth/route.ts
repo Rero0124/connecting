@@ -3,7 +3,6 @@ import { NextResponse, type NextRequest } from "next/server"
 import bcryptjs from "bcryptjs"
 import { LoginFormSchema } from "@/lib/definitions"
 import { createSession, deleteSession, verifySession } from "@/lib/session";
-import { ApiGetRequest } from "@/app/docs/api/request/type";
 
 export async function GET(request: NextRequest) {
 	try {
@@ -26,8 +25,6 @@ export async function POST(request: NextRequest) {
 			email: rawData.email,
 			password: rawData.password
 		})
-
-		console.log(validatedFields.error)
 
 		if(!validatedFields.success) {
 			return NextResponse.json({ message: '입력값 형식이 잘못되었습니다.' }, { status: 400 })

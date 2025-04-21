@@ -2,6 +2,27 @@ import prisma from "@/lib/prisma"
 import { NextResponse, type NextRequest } from "next/server"
 import bcryptjs from "bcryptjs"
 import { LoginFormSchema } from "@/lib/definitions"
+import { verifySession } from "@/lib/session";
+
+export async function GET(request: NextRequest) {
+	try {
+		const sessionCheck = await verifySession();
+			
+		if(!sessionCheck.isAuth) {
+      return NextResponse.json({ error: '먼저 로그인을 해주세요' }, { status: 401 })
+    }
+		
+		const profiles = await prisma.userProfile.findMany({
+			where: { 
+				userId: sessionCheck.userId
+			}
+		})
+
+		return NextResponse.json({ result: true, message: '', profiles: profiles }, { status: 200 })
+	} catch {
+		return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+	}
+}
 
 export async function POST(request: NextRequest) {
 	try {
@@ -10,11 +31,11 @@ export async function POST(request: NextRequest) {
 			email: rawData.email,
 			password: rawData.password
 		})
-
+		
 		if(!validatedFields.success) {
 			return NextResponse.json({ message: '입력값 형식이 잘못되었습니다.' }, { status: 400 })
 		}
- 
+	
 		const { email, password } = validatedFields.data
 		
 		const user = await prisma.user.findUnique({
