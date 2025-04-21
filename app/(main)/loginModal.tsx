@@ -2,7 +2,7 @@
 
 import {useActionState, useEffect, useRef, useState} from "react";
 import {login} from "@/app/actions/auth";
-import LoginProfileSelect from "./loginProfileSelect";
+import LoginProfileSelect from "./LoginProfileSelect";
 
 interface Props {
     open: boolean;

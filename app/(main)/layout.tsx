@@ -9,7 +9,7 @@ import {setRooms} from "@/lib/features/roomData/roomDataSlice";
 import {setAllowedMessages, setNotAllowedMessages} from "@/lib/features/messageData/messageDataSlice";
 import {setFriends} from "@/lib/features/friendData/friendDataSlice";
 import ChangeProfileModal from "./changeProfileModal";
-import LoginModal from "./loginModal";
+import LoginModal from "./LoginModal";
 
 <<<<<<< HEAD
 export default function RootLayout({
