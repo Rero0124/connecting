@@ -1,5 +1,4 @@
 import { FlatCompat } from '@eslint/eslintrc'
-import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 const compat = new FlatCompat({
   // import.meta.dirname is available after Node.js v20.11.0
@@ -14,8 +13,7 @@ const eslintConfig = [
       '@next/next/no-page-custom-font': 'off',
       'react-hooks/exhaustive-deps': 'off',
     },
-  }),
-  eslintConfigPrettier
+  })
 ]
 
 export default eslintConfig

@@ -48,10 +48,6 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		const a = () => {
-			console.log('')
-		}
-
 		const sendAddFriends = rawSendAddFriends.map((rawSendFriend) => ({
 			userTag: rawSendFriend.userProfile.userTag,
 			userName: rawSendFriend.userProfile.userName ?? undefined,
