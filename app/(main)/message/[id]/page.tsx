@@ -1,11 +1,9 @@
-"use client";
+'use client'
 
 export default function Main() {
-  return (
-    <div className="">
-      <main className="">
-        
-      </main>
-    </div>
-  );
+	return (
+		<div className="">
+			<main className=""></main>
+		</div>
+	)
 }

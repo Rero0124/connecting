@@ -5,14 +5,14 @@ import messageDataReducer from './features/messageData/messageDataSlice'
 import roomDataReducer from './features/roomData/roomDataSlice'
 
 export const makeStore = () => {
-  return configureStore({
-    reducer: {
-      saveData: saveDataReducer,
-      friendsData: friendDataReducer,
-      messageData: messageDataReducer,
-      roomDate: roomDataReducer
-    }
-  })
+	return configureStore({
+		reducer: {
+			saveData: saveDataReducer,
+			friendsData: friendDataReducer,
+			messageData: messageDataReducer,
+			roomDate: roomDataReducer,
+		},
+	})
 }
 
 // Infer the type of makeStore

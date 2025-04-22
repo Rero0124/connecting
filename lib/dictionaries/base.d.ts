@@ -1,5 +1,3 @@
 export interface Dictionaries {
-  responseMessage: {
-    
-  }
+	responseMessage: {}
 }
