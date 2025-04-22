@@ -1,21 +1,19 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/message',
-        permanent: true
-      }
-    ]
-  },
-  experimental: {
-    useCache: true,
-  },
-  allowedDevOrigins: [
-    'connecting.rero0124.com'
-  ]
-};
+	async redirects() {
+		return [
+			{
+				source: '/',
+				destination: '/message',
+				permanent: true,
+			},
+		]
+	},
+	experimental: {
+		useCache: true,
+	},
+	allowedDevOrigins: ['connecting.rero0124.com'],
+}
 
-export default nextConfig;
+export default nextConfig

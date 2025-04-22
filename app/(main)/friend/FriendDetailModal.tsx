@@ -48,6 +48,8 @@ export default function FriendDetailModal({
 						<Image
 							src={friend.image}
 							alt="profile"
+							width={0}
+							height={0}
 							className="w-20 h-20 rounded-full border border-gray-500 object-cover"
 						/>
 					</div>

@@ -98,6 +98,8 @@ export default function ProfileEditModal({
 								<Image
 									src={imagePreview}
 									alt="프로필"
+									width={0}
+									height={0}
 									className="w-24 h-24 rounded-full border-4 border-[#1e1f22] object-cover"
 								/>
 							) : (

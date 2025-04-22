@@ -48,6 +48,8 @@ export default function ChangeProfileModal({
 								<Image
 									src={profile.image}
 									alt="프로필 이미지"
+									width={0}
+									height={0}
 									className="w-10 h-10 rounded-full mr-3 object-cover"
 								/>
 								<div className="text-sm">

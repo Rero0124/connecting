@@ -112,6 +112,8 @@ export default function Login() {
 												alt="사용자 이미지"
 												className="mr-2"
 												src={profile.image}
+												width={0}
+												height={0}
 											/>
 											<span className="mr-2">
 												{profile.isCompany ? '업무' : '개인'} -{' '}

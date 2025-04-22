@@ -22,6 +22,8 @@ export default function LoginProfileSelect({
 						<Image
 							alt="프로필 아이콘"
 							src={profile.image}
+							width={0}
+							height={0}
 							className="w-8 h-8 rounded-full"
 						/>
 						<span>{profile.userName ?? profile.userTag}</span>
