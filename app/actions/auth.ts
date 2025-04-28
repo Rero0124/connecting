@@ -3,7 +3,7 @@ import {
 	LoginFormState,
 	JoinFormSchema,
 	LoginFormSchema,
-} from '@/lib/definitions'
+} from '@/src/lib/definitions'
 import { redirect } from 'next/navigation'
 
 export async function login(

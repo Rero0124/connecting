@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useAppDispatch, useAppSelector } from '@/lib/hooks'
+import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 
 export default function Main() {
 	const messageData = useAppSelector((state) => state.messageData)

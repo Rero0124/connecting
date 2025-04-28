@@ -5,8 +5,8 @@ import {
 	setNavSize,
 	setSelectedFriendMenu,
 	setTitle,
-} from '@/lib/features/saveData/saveDataSlice'
-import { useAppDispatch, useAppSelector } from '@/lib/hooks'
+} from '@/src/lib/features/saveData/saveDataSlice'
+import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useEffect, useRef } from 'react'
 
 export default function Layout({

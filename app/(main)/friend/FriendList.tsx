@@ -1,7 +1,7 @@
 'use client'
-import { setSelectedFriendSubMenu } from '@/lib/features/saveData/saveDataSlice'
-import { useAppDispatch } from '@/lib/hooks'
-import { RootState } from '@/lib/store'
+import { setSelectedFriendSubMenu } from '@/src/lib/features/saveData/saveDataSlice'
+import { useAppDispatch } from '@/src/lib/hooks'
+import { RootState } from '@/src/lib/store'
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 

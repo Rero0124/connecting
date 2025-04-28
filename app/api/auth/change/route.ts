@@ -1,7 +1,7 @@
-import prisma from '@/lib/prisma'
+import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
-import { LoginFormSchema } from '@/lib/definitions'
-import { createSession, verifySession } from '@/lib/session'
+import { LoginFormSchema } from '@/src/lib/definitions'
+import { createSession, verifySession } from '@/src/lib/session'
 
 export async function POST(request: NextRequest) {
 	try {

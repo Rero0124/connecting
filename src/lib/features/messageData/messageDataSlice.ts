@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from '@/lib/store'
+import { RootState } from '@/src/lib/store'
 
 export interface MessageType {
 	name: string

@@ -1,6 +1,6 @@
 import { createSlice, Middleware, PayloadAction } from '@reduxjs/toolkit'
-import { getCookieValue } from '@/lib/util'
-import { RootState } from '@/lib/store'
+import { getCookieValue } from '@/src/lib/util'
+import { RootState } from '@/src/lib/store'
 
 interface SaveDataState {
 	initLoad: boolean

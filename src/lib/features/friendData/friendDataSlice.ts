@@ -1,4 +1,4 @@
-import { RootState } from '@/lib/store'
+import { RootState } from '@/src/lib/store'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface FriendType {

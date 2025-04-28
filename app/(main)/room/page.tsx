@@ -1,7 +1,7 @@
 'use client'
 
-import { setTitle } from '@/lib/features/saveData/saveDataSlice'
-import { useAppDispatch } from '@/lib/hooks'
+import { setTitle } from '@/src/lib/features/saveData/saveDataSlice'
+import { useAppDispatch } from '@/src/lib/hooks'
 import { useEffect } from 'react'
 
 export default function Main() {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { socket } from '../../../../lib/socket'
+import { socket } from '../../../../src/lib/socket'
 
 export default function Main() {
 	const [isConnected, setIsConnected] = useState(false)

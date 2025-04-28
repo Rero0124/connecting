@@ -1,5 +1,5 @@
-import prisma from '@/lib/prisma'
-import { verifySession } from '@/lib/session'
+import prisma from '@/src/lib/prisma'
+import { verifySession } from '@/src/lib/session'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -34,9 +34,34 @@ export async function GET(request: NextRequest) {
 	}
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+	const data: {
+		profileData?: string
+		name?: string
+		userProfileIds?: number[]
+	} = await request.json()
 	try {
-		return NextResponse.json({})
+		if (!data || !data.profileData || !data.name || !data.userProfileIds)
+			return NextResponse.json(
+				{ message: '인자가 올바르지 않습니다.' },
+				{ status: 400 }
+			)
+		const room = await prisma.message.create({
+			data: {
+				profileType: 'image',
+				profileData: data.profileData,
+				name: data.name,
+				messageUser: {
+					createMany: {
+						data: data.userProfileIds.map((userProfileId) => ({
+							userProfileId: userProfileId,
+						})),
+					},
+				},
+			},
+		})
+
+		return NextResponse.json(room, { status: 204 })
 	} catch {
 		return NextResponse.json(
 			{ error: 'Internal Server Error' },

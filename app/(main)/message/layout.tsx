@@ -5,15 +5,17 @@ import {
 	setNavSize,
 	setSelectedMessageMenu,
 	setTitle,
-} from '@/lib/features/saveData/saveDataSlice'
-import { useAppDispatch, useAppSelector } from '@/lib/hooks'
-import { useEffect, useRef } from 'react'
+} from '@/src/lib/features/saveData/saveDataSlice'
+import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
+import { useEffect, useRef, useState } from 'react'
+import AddMessageModal from '@/app/(main)/message/AddMessageModal'
 
 export default function Layout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
 }>) {
+	const [addMessageModalOpen, setAddMessageModalOpen] = useState<boolean>(false);
 	const { navSize, title, selectedMessageMenu } = useAppSelector(
 		(state) => state.saveData
 	)
@@ -98,6 +100,16 @@ export default function Layout({
 		)
 	}
 
+	const openAddMessageModal = () => {
+		setAddMessageModalOpen(true);
+	}
+
+	const closeAddMessageModal = () => {
+		setAddMessageModalOpen(false);
+	}
+
+	
+
 	return (
 		<>
 			<DragAbleDiv
@@ -121,11 +133,11 @@ export default function Layout({
 					>
 						메세지 요청 & 스팸
 					</Menu>
-					<hr className="" />
+					<hr className="mt-1" />
 					<div className="flex flex-row px-2.5 py-0.5 mb-1 justify-between min-h-12 leading-12">
 						<span>메세지</span>
 						<div className="flex flex-row justify-between w-8">
-							<span>+</span>
+							<span className="cursor-pointer" onClick={openAddMessageModal}>+</span>
 							<span>∇</span>
 						</div>
 					</div>
@@ -138,6 +150,7 @@ export default function Layout({
 					중요 알림 (친한친구 채팅 및 약속)
 				</div>
 			</div>
+			<AddMessageModal isOpen={addMessageModalOpen} onClose={() => {setAddMessageModalOpen(false)}} />
 		</>
 	)
 }

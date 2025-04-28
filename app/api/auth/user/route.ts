@@ -1,7 +1,7 @@
-import prisma from '@/lib/prisma'
+import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
-import { JoinFormSchema } from '@/lib/definitions'
+import { JoinFormSchema } from '@/src/lib/definitions'
 
 export async function POST(request: NextRequest) {
 	let user

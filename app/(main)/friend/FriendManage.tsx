@@ -1,5 +1,5 @@
 'use client'
-import { RootState } from '@/lib/store'
+import { RootState } from '@/src/lib/store'
 import { useSelector } from 'react-redux'
 
 export default function FriendManage() {

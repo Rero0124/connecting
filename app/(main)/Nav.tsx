@@ -1,6 +1,6 @@
 'use client'
 
-import { useAppSelector } from '@/lib/hooks'
+import { useAppSelector } from '@/src/lib/hooks'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import ProfileEditModal from './ProfileEditModal' // 모달 임포트

@@ -1,8 +1,8 @@
-import prisma from '@/lib/prisma'
+import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
-import { LoginFormSchema } from '@/lib/definitions'
-import { createSession, deleteSession, verifySession } from '@/lib/session'
+import { LoginFormSchema } from '@/src/lib/definitions'
+import { createSession, deleteSession, verifySession } from '@/src/lib/session'
 
 export async function GET(request: NextRequest) {
 	try {

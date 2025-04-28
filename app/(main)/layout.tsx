@@ -3,17 +3,17 @@
 import {
 	setInitLoadEnd,
 	setProfile,
-} from '@/lib/features/saveData/saveDataSlice'
-import { useAppDispatch, useAppSelector } from '@/lib/hooks'
-import { socket } from '@/lib/socket'
+} from '@/src/lib/features/saveData/saveDataSlice'
+import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
+import { socket } from '@/src/lib/socket'
 import { useEffect, useState } from 'react'
 import Nav from '@/app/(main)/Nav'
-import { setRooms } from '@/lib/features/roomData/roomDataSlice'
+import { setRooms } from '@/src/lib/features/roomData/roomDataSlice'
 import {
 	setAllowedMessages,
 	setNotAllowedMessages,
-} from '@/lib/features/messageData/messageDataSlice'
-import { setFriends } from '@/lib/features/friendData/friendDataSlice'
+} from '@/src/lib/features/messageData/messageDataSlice'
+import { setFriends } from '@/src/lib/features/friendData/friendDataSlice'
 import ChangeProfileModal from './ChangeProfileModal'
 import LoginModal from './LoginModal'
 
@@ -25,20 +25,24 @@ export default function RootLayout({
 	const [openChangeProfileModal, setOpenChangeProfileModal] = useState(false)
 	const [openLoginModal, setOpenLoginModal] = useState(false)
 	const [loginModalKey, setLoginModalKey] = useState(0)
-	const [profiles, setProfiles] = useState<any[]>([])
+	const [profiles, setProfiles] = useState<{
+		id: number
+		userTag: string
+		userName?: string
+		image: string
+		createdAt: Date
+	}[]>([])
+	const [isConnected, setIsConnected] = useState(false);
+  const [transport, setTransport] = useState("N/A");
 
 	const saveData = useAppSelector((state) => state.saveData)
 	const dispatch = useAppDispatch()
 
 	async function getSaveData() {
 		const [profileRes, roomRes, messageRes, friendRes] = await Promise.all([
-			fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/user/profile`, {
-				cache: 'no-store',
-			}),
+			fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/user/profile`, { cache: 'no-store' }),
 			fetch(`${process.env.NEXT_PUBLIC_API_URL}/room`, { cache: 'no-store' }),
-			fetch(`${process.env.NEXT_PUBLIC_API_URL}/message`, {
-				cache: 'no-store',
-			}),
+			fetch(`${process.env.NEXT_PUBLIC_API_URL}/message`, { cache: 'no-store' }),
 			fetch(`${process.env.NEXT_PUBLIC_API_URL}/friend`, { cache: 'no-store' }),
 		])
 
@@ -104,10 +108,36 @@ export default function RootLayout({
 				fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth`, { cache: 'no-store' })
 					.then((res) => res.json())
 					.then((data) => {
-						socket.emit('send', 'userId', data.userId)
+						socket.emit('send userProfileId', data.profileId)
 					})
 			})
 		}
+
+		if (socket.connected) {
+      onConnect();
+    }
+
+    function onConnect() {
+      setIsConnected(true);
+      setTransport(socket.io.engine.transport.name);
+
+      socket.io.engine.on("upgrade", (transport) => {
+        setTransport(transport.name);
+      });
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+      setTransport("N/A");
+    }
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
 	}, [])
 
 	return (
