@@ -15,7 +15,7 @@ export default function Layout({
 }: Readonly<{
 	children: React.ReactNode
 }>) {
-	const [addMessageModalOpen, setAddMessageModalOpen] = useState<boolean>(false);
+	const [addMessageModalOpen, setAddMessageModalOpen] = useState<boolean>(false)
 	const { navSize, title, selectedMessageMenu } = useAppSelector(
 		(state) => state.saveData
 	)
@@ -101,14 +101,12 @@ export default function Layout({
 	}
 
 	const openAddMessageModal = () => {
-		setAddMessageModalOpen(true);
+		setAddMessageModalOpen(true)
 	}
 
 	const closeAddMessageModal = () => {
-		setAddMessageModalOpen(false);
+		setAddMessageModalOpen(false)
 	}
-
-	
 
 	return (
 		<>
@@ -137,7 +135,9 @@ export default function Layout({
 					<div className="flex flex-row px-2.5 py-0.5 mb-1 justify-between min-h-12 leading-12">
 						<span>메세지</span>
 						<div className="flex flex-row justify-between w-8">
-							<span className="cursor-pointer" onClick={openAddMessageModal}>+</span>
+							<span className="cursor-pointer" onClick={openAddMessageModal}>
+								+
+							</span>
 							<span>∇</span>
 						</div>
 					</div>
@@ -150,7 +150,12 @@ export default function Layout({
 					중요 알림 (친한친구 채팅 및 약속)
 				</div>
 			</div>
-			<AddMessageModal isOpen={addMessageModalOpen} onClose={() => {setAddMessageModalOpen(false)}} />
+			<AddMessageModal
+				isOpen={addMessageModalOpen}
+				onClose={() => {
+					setAddMessageModalOpen(false)
+				}}
+			/>
 		</>
 	)
 }

@@ -10,11 +10,7 @@ export async function PATCH(
 ) {
 	const userId = Number((await params).userId)
 	try {
-		const rawData: {
-			tag: string
-			name: string
-			email: string
-		} = await request.json()
+		const body = await request.json()
 
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
@@ -49,6 +45,37 @@ export async function PATCH(
 				{ status: 400 }
 			)
 		}
+
+		if (!body || !(body.email && typeof body.email === 'string')) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '인자가 잘못되었습니다. email을 다시 확인하세요',
+				},
+				{ status: 400 }
+			)
+		}
+
+		const email: string = body.email
+
+		await prisma.user.update({
+			where: {
+				id: sessionCheck.userId,
+			},
+			data: {
+				email: email,
+			},
+		})
+
+		return NextResponse.json<SuccessResponse>(
+			{
+				status: 'success',
+				code: ResponseDictionary.kr.RESPONSE_USER_UPDATE_SUCCESS.code,
+				message: ResponseDictionary.kr.RESPONSE_USER_UPDATE_SUCCESS.message,
+			},
+			{ status: ResponseDictionary.kr.RESPONSE_USER_UPDATE_SUCCESS.status }
+		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(
 			{
@@ -67,12 +94,6 @@ export async function DELETE(
 ) {
 	const userId = Number((await params).userId)
 	try {
-		const rawData: {
-			tag: string
-			name: string
-			email: string
-		} = await request.json()
-
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
@@ -118,10 +139,10 @@ export async function DELETE(
 		return NextResponse.json<SuccessResponse>(
 			{
 				status: 'success',
-				code: 0x0,
-				message: '회원탈퇴가 완료되었습니다.',
+				code: ResponseDictionary.kr.RESPONSE_USER_DELETE_SUCCESS.code,
+				message: ResponseDictionary.kr.RESPONSE_USER_DELETE_SUCCESS.message,
 			},
-			{ status: 204 }
+			{ status: ResponseDictionary.kr.RESPONSE_USER_DELETE_SUCCESS.status }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(
