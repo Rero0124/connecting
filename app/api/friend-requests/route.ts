@@ -184,8 +184,6 @@ export async function POST(request: NextRequest) {
 			},
 		})
 
-		console.log(';aaaa')
-
 		socket.emit('update_friendRequests', [sessionCheck.profileId])
 
 		return NextResponse.json<SuccessResponse>(
