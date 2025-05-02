@@ -1,14 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '@/src/lib/store'
-
-export interface RoomType {
-	name: string
-	id: string
-	masterProfileId: number
-	createdAt: Date
-	iconType: string
-	iconData: string
-}
+import { RoomList } from '@/src/types/api'
 
 export interface RoomChatType {
 	id: number
@@ -22,7 +14,7 @@ export interface RoomChatType {
 }
 
 interface RoomDataState {
-	rooms: RoomType[]
+	rooms: RoomList
 	roomChats: {
 		roomId: string
 		chats: RoomChatType[]
@@ -38,7 +30,7 @@ export const roomDataSlice = createSlice({
 	name: 'roomData',
 	initialState,
 	reducers: {
-		setRooms: (state, action: PayloadAction<RoomType[]>) => {
+		setRooms: (state, action: PayloadAction<RoomList>) => {
 			state.rooms = action.payload
 		},
 		addRoomChat: (

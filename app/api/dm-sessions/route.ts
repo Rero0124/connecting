@@ -1,6 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { DmSessionList, ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -48,20 +48,8 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json<
 			SuccessResponse<{
-				allowedDmSessions: {
-					name: string
-					id: string
-					iconType: string
-					iconData: string
-					createdAt: Date
-				}[]
-				notAllowedDmSessions: {
-					name: string
-					id: string
-					iconType: string
-					iconData: string
-					createdAt: Date
-				}[]
+				allowedDmSessions: DmSessionList
+				notAllowedDmSessions: DmSessionList
 			}>
 		>(
 			{

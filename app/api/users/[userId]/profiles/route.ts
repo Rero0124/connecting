@@ -1,6 +1,11 @@
 import prisma from '@/src/lib/prisma'
 import { verifyUserIdInSession } from '@/src/lib/serverUtil'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import {
+	ErrorResponse,
+	ProfileDetail,
+	ProfileList,
+	SuccessResponse,
+} from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -27,23 +32,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<
-			SuccessResponse<
-				{
-					image: string
-					name: string | null
-					userId: number
-					id: number
-					statusType: string
-					statusId: number
-					tag: string
-					information: string
-					isCompany: boolean
-					isOnline: boolean
-					createdAt: Date
-				}[]
-			>
-		>(
+		return NextResponse.json<SuccessResponse<ProfileList>>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -129,28 +118,14 @@ export async function POST(
 			},
 		})
 
-		return NextResponse.json<
-			SuccessResponse<{
-				userId: number
-				id: number
-				statusType: string
-				statusId: number
-				tag: string
-				name: string | null
-				information: string
-				image: string
-				isCompany: boolean
-				isOnline: boolean
-				createdAt: Date
-			}>
-		>(
+		return NextResponse.json<SuccessResponse<ProfileDetail>>(
 			{
 				status: 'success',
 				code: 0x0,
 				message: '해당 유저의 프로필을 생성하였습니다.',
 				data: profile,
 			},
-			{ status: 201 }
+			{ status: 200 }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(

@@ -1,6 +1,11 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import {
+	ErrorResponse,
+	RoomJoinCodeDetail,
+	RoomJoinCodeList,
+	SuccessResponse,
+} from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -61,17 +66,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<
-			SuccessResponse<
-				{
-					id: number
-					code: string
-					roomId: string
-					authorProfileId: number
-					expiresAt: Date
-				}[]
-			>
-		>(
+		return NextResponse.json<SuccessResponse<RoomJoinCodeList>>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -163,15 +158,7 @@ export async function POST(
 			},
 		})
 
-		return NextResponse.json<
-			SuccessResponse<{
-				roomId: string
-				id: number
-				code: string
-				authorProfileId: number
-				expiresAt: Date
-			}>
-		>(
+		return NextResponse.json<SuccessResponse<RoomJoinCodeDetail>>(
 			{
 				status: 'success',
 				code: 0x0,

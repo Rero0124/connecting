@@ -1,6 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse, RoomList, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -31,18 +31,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<
-			SuccessResponse<
-				{
-					id: string
-					name: string
-					masterProfileId: number
-					iconType: string
-					iconData: string
-					createdAt: Date
-				}[]
-			>
-		>(
+		return NextResponse.json<SuccessResponse<RoomList>>(
 			{
 				status: 'success',
 				code: 0x0,

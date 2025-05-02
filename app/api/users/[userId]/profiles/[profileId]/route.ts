@@ -3,7 +3,7 @@ import {
 	verifyProfileIdInSession,
 	verifyUserIdInSession,
 } from '@/src/lib/serverUtil'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse, ProfileDetail, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -54,21 +54,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<
-			SuccessResponse<{
-				id: number
-				name: string | null
-				createdAt: Date
-				tag: string
-				userId: number
-				statusType: string
-				statusId: number
-				information: string
-				image: string
-				isCompany: boolean
-				isOnline: boolean
-			}>
-		>(
+		return NextResponse.json<SuccessResponse<ProfileDetail>>(
 			{
 				status: 'success',
 				code: 0x0,

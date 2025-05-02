@@ -1,6 +1,10 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import {
+	DmSessionDetail,
+	ErrorResponse,
+	SuccessResponse,
+} from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -65,30 +69,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<
-			SuccessResponse<{
-				message: {
-					profile: {
-						name: string | null
-						tag: string
-						image: string
-					}
-					id: number
-					profileId: number
-					dmSessionId: string
-					contentType: string
-					content: string
-					isPinned: boolean
-					sentAt: Date
-					updatedAt: Date | null
-				}[]
-				id: string
-				name: string
-				iconType: string
-				iconData: string
-				createdAt: Date
-			}>
-		>(
+		return NextResponse.json<SuccessResponse<DmSessionDetail>>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,

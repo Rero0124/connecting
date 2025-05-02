@@ -1,31 +1,16 @@
 import { RootState } from '@/src/lib/store'
+import {
+	FilterProfileList,
+	FriendList,
+	FriendRequestList,
+} from '@/src/types/api'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-export interface FriendType {
-	image: string
-	tag: string
-	statusType: string
-	statusId: number
-	name: string | null
-	isOnline: boolean
-	createdAt: Date
-}
-
-export interface FriendRequestType {
-	profile: FriendType
-	id: number
-	sentAt: Date
-}
-
-export interface FilterUserType extends FriendType {
-	filterType: string
-}
-
 interface FriendDataState {
-	friends: FriendType[]
-	sentFriendRequests: FriendRequestType[]
-	receivedFriendRequests: FriendRequestType[]
-	filterFriends: FilterUserType[]
+	friends: FriendList
+	sentFriendRequests: FriendRequestList
+	receivedFriendRequests: FriendRequestList
+	filterFriends: FilterProfileList
 }
 
 const initialState: FriendDataState = {
@@ -39,22 +24,22 @@ export const friendDataSlice = createSlice({
 	name: 'savedata',
 	initialState,
 	reducers: {
-		setFriends: (state, action: PayloadAction<FriendType[]>) => {
+		setFriends: (state, action: PayloadAction<FriendList>) => {
 			state.friends = action.payload
 		},
 		setSentFriendRequests: (
 			state,
-			action: PayloadAction<FriendRequestType[]>
+			action: PayloadAction<FriendRequestList>
 		) => {
 			state.sentFriendRequests = action.payload
 		},
 		setReceivedFriendRequests: (
 			state,
-			action: PayloadAction<FriendRequestType[]>
+			action: PayloadAction<FriendRequestList>
 		) => {
 			state.receivedFriendRequests = action.payload
 		},
-		setFilterFriends: (state, action: PayloadAction<FilterUserType[]>) => {
+		setFilterFriends: (state, action: PayloadAction<FilterProfileList>) => {
 			state.filterFriends = action.payload
 		},
 	},
@@ -98,7 +83,7 @@ export const getReceivedAddFriends = (state: RootState, tag?: string) => {
 export const getFilterFriends = (state: RootState, tag?: string) => {
 	if (tag) {
 		return state.friendsData.filterFriends.find(
-			(filterFriend) => filterFriend.tag === tag
+			(filterFriend) => filterFriend.profile.tag === tag
 		)
 	} else {
 		return state.friendsData.filterFriends

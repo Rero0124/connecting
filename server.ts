@@ -54,12 +54,12 @@ app.prepare().then(() => {
 
 		socket.on('chat message', async (messageId, chat) => {
 			if (socket.data.profileId) {
-				const room = await prisma.message.findUnique({
+				const room = await prisma.dmSession.findUnique({
 					where: {
 						id: messageId,
-						messageUser: {
+						participant: {
 							some: {
-								userProfileId: socket.data.profileId,
+								profileId: socket.data.profileId,
 							},
 						},
 					},
@@ -78,9 +78,9 @@ app.prepare().then(() => {
 				const room = await prisma.room.findUnique({
 					where: {
 						id: roomId,
-						roomUser: {
+						participant: {
 							some: {
-								userProfileId: socket.data.profileId,
+								profileId: socket.data.profileId,
 							},
 						},
 					},

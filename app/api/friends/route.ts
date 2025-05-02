@@ -1,6 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse, FriendList, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -40,19 +40,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<
-			SuccessResponse<
-				{
-					name: string | null
-					createdAt: Date
-					statusType: string
-					statusId: number
-					tag: string
-					image: string
-					isOnline: boolean
-				}[]
-			>
-		>(
+		return NextResponse.json<SuccessResponse<FriendList>>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_FRIEND_LIST_SUCCESS.code,

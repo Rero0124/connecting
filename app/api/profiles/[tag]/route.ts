@@ -1,5 +1,5 @@
 import prisma from '@/src/lib/prisma'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse, ProfileDetail, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -38,19 +38,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<
-			SuccessResponse<{
-				tag: string
-				statusType: string
-				statusId: number
-				name: string | null
-				information: string
-				image: string
-				isCompany: boolean
-				isOnline: boolean
-				createdAt: Date
-			}>
-		>(
+		return NextResponse.json<SuccessResponse<ProfileDetail>>(
 			{
 				status: 'success',
 				code: 0x0,

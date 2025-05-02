@@ -20,7 +20,15 @@ import {
 } from '@/src/lib/features/friendData/friendDataSlice'
 import ChangeProfileModal from './changeProfileModal'
 import LoginModal from './loginModal'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import {
+	DmSessionList,
+	ErrorResponse,
+	FriendList,
+	FriendRequestList,
+	ProfileDetail,
+	RoomList,
+	SuccessResponse,
+} from '@/src/types/api'
 import { VerifySessionType } from '@/src/lib/session'
 
 export default function RootLayout({
@@ -57,57 +65,21 @@ export default function RootLayout({
 			sessionResponse.data &&
 			sessionResponse.data.authType === 'profile'
 		) {
-			const profileResponse:
-				| SuccessResponse<{
-						image: string
-						tag: string
-						id: number
-						userId: number
-						statusType: string
-						statusId: number
-						name: string | null
-						information: string
-						isCompany: boolean
-						isOnline: boolean
-						createdAt: Date
-				  }>
-				| ErrorResponse = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data.userId}/profiles/${sessionResponse.data.profileId}`,
-				{
+			const profileResponse: SuccessResponse<ProfileDetail> | ErrorResponse =
+				await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data.userId}/profiles/${sessionResponse.data.profileId}`,
+					{
+						cache: 'no-store',
+					}
+				).then((res) => res.json())
+			const roomsResponse: SuccessResponse<RoomList> | ErrorResponse =
+				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
 					cache: 'no-store',
-				}
-			).then((res) => res.json())
-			const roomsResponse:
-				| SuccessResponse<
-						{
-							id: string
-							name: string
-							createdAt: Date
-							masterProfileId: number
-							iconType: string
-							iconData: string
-						}[]
-				  >
-				| ErrorResponse = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/rooms`,
-				{ cache: 'no-store' }
-			).then((res) => res.json())
+				}).then((res) => res.json())
 			const dmSessionResponse:
 				| SuccessResponse<{
-						allowedDmSessions: {
-							name: string
-							id: string
-							iconType: string
-							iconData: string
-							createdAt: Date
-						}[]
-						notAllowedDmSessions: {
-							name: string
-							id: string
-							iconType: string
-							iconData: string
-							createdAt: Date
-						}[]
+						allowedDmSessions: DmSessionList
+						notAllowedDmSessions: DmSessionList
 				  }>
 				| ErrorResponse = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`,
@@ -115,50 +87,14 @@ export default function RootLayout({
 					cache: 'no-store',
 				}
 			).then((res) => res.json())
-			const friendsResponse:
-				| SuccessResponse<
-						{
-							image: string
-							tag: string
-							statusType: string
-							statusId: number
-							name: string | null
-							isOnline: boolean
-							createdAt: Date
-						}[]
-				  >
-				| ErrorResponse = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/friends`,
-				{ cache: 'no-store' }
-			).then((res) => res.json())
+			const friendsResponse: SuccessResponse<FriendList> | ErrorResponse =
+				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, {
+					cache: 'no-store',
+				}).then((res) => res.json())
 			const friendRequestsResponse:
 				| SuccessResponse<{
-						receivedfriendRequests: {
-							profile: {
-								statusType: string
-								statusId: number
-								tag: string
-								name: string | null
-								image: string
-								isOnline: boolean
-								createdAt: Date
-							}
-							id: number
-							sentAt: Date
-						}[]
-						sentfriendRequests: {
-							profile: {
-								name: string | null
-								image: string
-								statusType: string
-								statusId: number
-								tag: string
-								isOnline: boolean
-								createdAt: Date
-							}
-							id: number
-							sentAt: Date
-						}[]
+						receivedfriendRequests: FriendRequestList
+						sentfriendRequests: FriendRequestList
 				  }>
 				| ErrorResponse = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
