@@ -81,6 +81,13 @@ export async function PATCH(
 				},
 			})
 
+			await prisma.friend.create({
+				data: {
+					profileId: friendRequest.requestProfileId,
+					friendProfileId: friendRequest.profileId,
+				},
+			})
+
 			socket.emit('update_friends', [
 				friendRequest.profileId,
 				friendRequest.requestProfileId,

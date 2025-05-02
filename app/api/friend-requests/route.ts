@@ -177,14 +177,46 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		await prisma.friendRequest.create({
-			data: {
-				profileId: profile.id,
-				requestProfileId: sessionCheck.profileId,
+		const receivedFriendRequest = await prisma.friendRequest.findFirst({
+			where: {
+				profileId: sessionCheck.profileId,
+				requestProfileId: profile.id,
 			},
 		})
 
-		socket.emit('update_friendRequests', [sessionCheck.profileId])
+		if (receivedFriendRequest) {
+			await prisma.friend.create({
+				data: {
+					profileId: sessionCheck.profileId,
+					friendProfileId: profile.id,
+				},
+			})
+
+			await prisma.friend.create({
+				data: {
+					profileId: profile.id,
+					friendProfileId: sessionCheck.profileId,
+				},
+			})
+
+			await prisma.friendRequest.deleteMany({
+				where: {
+					profileId: sessionCheck.profileId,
+					requestProfileId: profile.id,
+				},
+			})
+
+			socket.emit('update_friends', [sessionCheck.profileId, profile.id])
+		} else {
+			await prisma.friendRequest.create({
+				data: {
+					profileId: profile.id,
+					requestProfileId: sessionCheck.profileId,
+				},
+			})
+		}
+
+		socket.emit('update_friendRequests', [sessionCheck.profileId, profile.id])
 
 		return NextResponse.json<SuccessResponse>(
 			{
