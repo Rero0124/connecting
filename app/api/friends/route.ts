@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 				isOnline: true,
 			},
 			where: {
-				friendByProfile: {
+				friendProfile: {
 					some: {
 						byProfile: {
 							id: sessionCheck.profileId,
