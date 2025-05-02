@@ -1,18 +1,11 @@
 'use client'
 
+import { ProfileList } from '@/src/types/api'
 import Image from 'next/image'
-
-interface Profile {
-	id: number
-	userTag: string
-	userName?: string
-	image: string
-	createdAt: Date
-}
 
 interface Props {
 	open: boolean
-	profiles?: Profile[]
+	profiles?: ProfileList
 	onClose: () => void
 	onSelect: (profileId: number) => void
 	onLoginAnotherAccount?: () => void
@@ -53,8 +46,8 @@ export default function ChangeProfileModal({
 									className="w-10 h-10 rounded-full mr-3 object-cover"
 								/>
 								<div className="text-sm">
-									<div>{profile.userName ?? profile.userTag}</div>
-									<div className="text-gray-400 text-xs">{profile.userTag}</div>
+									<div>{profile.name ?? profile.tag}</div>
+									<div className="text-gray-400 text-xs">{profile.tag}</div>
 								</div>
 							</div>
 						))

@@ -1,6 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { deleteSession, verifySession } from '@/src/lib/session'
 import { verifyUserIdInSession } from '@/src/lib/serverUtil'
@@ -22,11 +22,20 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<SuccessResponse>(
-			{
-				...data.response,
+		const profiles = await prisma.profile.findMany({
+			where: {
+				userId: data.response.data.userId,
 			},
-			{ status: data.status }
+		})
+
+		return NextResponse.json<SuccessResponse<ProfileList>>(
+			{
+				status: 'success',
+				code: 0x0,
+				message: '사용자의 프로필들을 조회하였습니다.',
+				data: profiles,
+			},
+			{ status: 200 }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(

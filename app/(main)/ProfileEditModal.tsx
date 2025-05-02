@@ -1,5 +1,8 @@
 'use client'
 
+import { VerifySessionType } from '@/src/lib/session'
+import { getSession } from '@/src/lib/util'
+import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -52,22 +55,31 @@ export default function ProfileEditModal({
 
 	const handleSave = async () => {
 		try {
-			const response = await fetch('/api/auth/user/profile', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					userName: userName || undefined,
-					statusName: statusName || undefined,
-					information: information || undefined,
-					image: imageEncoded || undefined,
-				}),
-			})
+			const session = await getSession()
 
-			const result = await response.json()
-			if (response.ok && result.result) {
-				onClose()
+			if (session.isLogin && session.authType === 'profile') {
+				const response = await fetch(
+					`/api/users/${session.userId}/profiles/${session.profileId}`,
+					{
+						method: 'PATCH',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							userName: userName || undefined,
+							statusName: statusName || undefined,
+							information: information || undefined,
+							image: imageEncoded || undefined,
+						}),
+					}
+				)
+
+				const result = await response.json()
+				if (response.ok && result.result) {
+					onClose()
+				} else {
+					alert('프로필 업데이트에 실패했습니다.')
+				}
 			} else {
 				alert('프로필 업데이트에 실패했습니다.')
 			}

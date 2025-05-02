@@ -26,10 +26,12 @@ import {
 	FriendList,
 	FriendRequestList,
 	ProfileDetail,
+	ProfileList,
 	RoomList,
 	SuccessResponse,
 } from '@/src/types/api'
 import { VerifySessionType } from '@/src/lib/session'
+import { getSession, promiseAll } from '@/src/lib/util'
 
 export default function RootLayout({
 	children,
@@ -39,15 +41,7 @@ export default function RootLayout({
 	const [openChangeProfileModal, setOpenChangeProfileModal] = useState(false)
 	const [openLoginModal, setOpenLoginModal] = useState(false)
 	const [loginModalKey, setLoginModalKey] = useState(0)
-	const [profiles, setProfiles] = useState<
-		{
-			id: number
-			userTag: string
-			userName?: string
-			image: string
-			createdAt: Date
-		}[]
-	>([])
+	const [profiles, setProfiles] = useState<ProfileList>([])
 	const [isConnected, setIsConnected] = useState(false)
 	const [transport, setTransport] = useState('N/A')
 
@@ -55,51 +49,55 @@ export default function RootLayout({
 	const dispatch = useAppDispatch()
 
 	async function getSaveData() {
-		const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse =
-			await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
-				cache: 'no-store',
-			}).then((res) => res.json())
+		const session = await getSession()
 
-		if (
-			sessionResponse.status === 'success' &&
-			sessionResponse.data &&
-			sessionResponse.data.authType === 'profile'
-		) {
-			const profileResponse: SuccessResponse<ProfileDetail> | ErrorResponse =
-				await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data.userId}/profiles/${sessionResponse.data.profileId}`,
+		if (session.isLogin && session.authType === 'profile') {
+			const [
+				profileResponse,
+				roomsResponse,
+				dmSessionResponse,
+				friendsResponse,
+				friendRequestsResponse,
+			] = await promiseAll<
+				[
+					SuccessResponse<ProfileDetail> | ErrorResponse,
+					SuccessResponse<RoomList> | ErrorResponse,
+					(
+						| SuccessResponse<{
+								allowedDmSessions: DmSessionList
+								notAllowedDmSessions: DmSessionList
+						  }>
+						| ErrorResponse
+					),
+					SuccessResponse<FriendList> | ErrorResponse,
+					(
+						| SuccessResponse<{
+								receivedfriendRequests: FriendRequestList
+								sentfriendRequests: FriendRequestList
+						  }>
+						| ErrorResponse
+					),
+				]
+			>([
+				fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles/${session.profileId}`,
 					{
 						cache: 'no-store',
 					}
-				).then((res) => res.json())
-			const roomsResponse: SuccessResponse<RoomList> | ErrorResponse =
-				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
+				).then((res) => res.json()),
+				fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
 					cache: 'no-store',
-				}).then((res) => res.json())
-			const dmSessionResponse:
-				| SuccessResponse<{
-						allowedDmSessions: DmSessionList
-						notAllowedDmSessions: DmSessionList
-				  }>
-				| ErrorResponse = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`,
-				{
+				}).then((res) => res.json()),
+				fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`, {
 					cache: 'no-store',
-				}
-			).then((res) => res.json())
-			const friendsResponse: SuccessResponse<FriendList> | ErrorResponse =
-				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, {
+				}).then((res) => res.json()),
+				fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, {
 					cache: 'no-store',
-				}).then((res) => res.json())
-			const friendRequestsResponse:
-				| SuccessResponse<{
-						receivedfriendRequests: FriendRequestList
-						sentfriendRequests: FriendRequestList
-				  }>
-				| ErrorResponse = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
-				{ cache: 'no-store' }
-			).then((res) => res.json())
+				}).then((res) => res.json()),
+				fetch(`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`, {
+					cache: 'no-store',
+				}).then((res) => res.json()),
+			])
 
 			if (
 				profileResponse.status === 'success' &&
@@ -129,25 +127,24 @@ export default function RootLayout({
 	}
 
 	async function changeProfile() {
-		const res = await fetch(
-			`${process.env.NEXT_PUBLIC_API_URL}/auth/check/profile`,
-			{
-				headers: { 'Content-Type': 'application/json' },
-				cache: 'no-store',
+		const session = await getSession()
+
+		if (session.isLogin) {
+			const profileResponse: SuccessResponse<ProfileList> | ErrorResponse =
+				await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles`
+				).then((res) => res.json())
+
+			if (profileResponse.status === 'success') {
+				setOpenChangeProfileModal(true)
+				setProfiles(profileResponse.data)
 			}
-		)
-
-		const data = await res.json()
-
-		if (res.status === 200) {
-			setOpenChangeProfileModal(true)
-			setProfiles(data.profiles)
 		}
 	}
 
 	async function selectProfile(profileId: number) {
-		const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/change`, {
-			method: 'POST',
+		const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			cache: 'no-store',
 			body: JSON.stringify({ profileId }),
@@ -165,17 +162,9 @@ export default function RootLayout({
 	useEffect(() => {
 		if (!saveData.initLoad) {
 			getSaveData().then(async () => {
-				const sessionResponse:
-					| SuccessResponse<VerifySessionType>
-					| ErrorResponse = await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL}/session`,
-					{ cache: 'no-store' }
-				).then((res) => res.json())
-				if (
-					sessionResponse.status === 'success' &&
-					sessionResponse.data.authType === 'profile'
-				) {
-					socket.emit('send userProfileId', sessionResponse.data.profileId)
+				const session = await getSession()
+				if (session.isLogin && session.authType === 'profile') {
+					socket.emit('send userProfileId', session.profileId)
 				}
 			})
 		}
