@@ -228,6 +228,14 @@ export default function RootLayout({
 				setTransport(transport.name)
 			})
 
+			socket.on('send_logout', () => {
+				fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+					method: 'DELETE',
+				}).then(() => {
+					location.reload()
+				})
+			})
+
 			socket.on('update_profile', () => {
 				updateProfile()
 			})

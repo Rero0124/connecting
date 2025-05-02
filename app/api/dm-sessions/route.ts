@@ -82,10 +82,12 @@ export async function POST(request: NextRequest) {
 			name,
 			iconType,
 			iconData,
+			participants,
 		}: {
 			name?: string
 			iconType?: 'text' | 'image'
 			iconData?: string
+			participants?: number[]
 		} = await request.json()
 		const sessionCheck = await verifySession()
 
@@ -103,14 +105,35 @@ export async function POST(request: NextRequest) {
 		if (
 			typeof name !== 'string' ||
 			!(iconType === 'text' || iconType === 'image') ||
-			typeof iconData !== 'string'
+			typeof iconData !== 'string' ||
+			!Array.isArray(participants) ||
+			!participants.every(
+				(id) => typeof id === 'number' && Number.isInteger(id) && id >= 0
+			)
 		) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
 					message:
-						'인자가 잘못되었습니다. name, iconType, iconData를 다시 확인하세요',
+						'인자가 잘못되었습니다. name, iconType, iconData, participants 를 다시 확인하세요',
+				},
+				{ status: 400 }
+			)
+		}
+
+		const validProfiles = await prisma.profile.findMany({
+			where: {
+				id: { in: participants },
+			},
+			select: { id: true },
+		})
+		if (validProfiles.length !== participants.length) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '존재하지 않는 프로필 ID가 포함되어 있습니다.',
 				},
 				{ status: 400 }
 			)
@@ -122,8 +145,15 @@ export async function POST(request: NextRequest) {
 				iconType: iconType,
 				iconData: iconData,
 				participant: {
-					create: {
-						profileId: sessionCheck.profileId,
+					createMany: {
+						data: [
+							{
+								profileId: sessionCheck.profileId,
+							},
+							...participants.map((id) => ({
+								profileId: id,
+							})),
+						],
 					},
 				},
 			},
@@ -137,7 +167,7 @@ export async function POST(request: NextRequest) {
 				code: 0x0,
 				message: 'DM이 생성되었습니다.',
 			},
-			{ status: 204 }
+			{ status: 201 }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(

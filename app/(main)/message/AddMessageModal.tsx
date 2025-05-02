@@ -1,7 +1,8 @@
 'use client'
 import { useAppSelector } from '@/src/lib/hooks'
+import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface NewMessageModalProps {
 	isOpen: boolean
@@ -19,29 +20,27 @@ export default function NewMessageModal({
 		saveData.profile?.image ?? ''
 	)
 	const [imageEncoded, setImageEncoded] = useState<string | null>(null)
-	const [recipients, setRecipients] = useState<string[]>([])
-	const [searchText, setSearchText] = useState<string>('')
-	const [searchedUsers, setSearchedUsers] = useState<
+	const [recipients, setRecipients] = useState<
 		{
-			image: string
 			id: number
-			userId: number
-			userTag: string
-			isCompany: boolean
-			userName: string | null
-			isOnline: boolean
-			statusName: string | null
-			information: string | null
-			createdAt: Date
+			label: string
 		}[]
 	>([])
+	const [searchText, setSearchText] = useState<string>('')
+	const [searchedUsers, setSearchedUsers] = useState<ProfileList>([])
 
 	const handleRecipientsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const selectedOptions = Array.from(
-			e.target.selectedOptions,
-			(option) => option.value
+		const selectedOptions = Array.from(e.target.selectedOptions, (option) => ({
+			id: Number(option.value),
+			label: option.innerText,
+		}))
+		setRecipients(
+			selectedOptions.filter((selectedOption) => !isNaN(selectedOption.id))
 		)
-		setRecipients(selectedOptions)
+	}
+
+	const removeRecipient = (id: number) => {
+		setRecipients((prev) => prev.filter((recipient) => recipient.id !== id))
 	}
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,12 +67,13 @@ export default function NewMessageModal({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
-		fetch(`${process.env.NEXT_PUBLIC_API_URL}/message`, {
+		fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`, {
 			method: 'POST',
 			body: JSON.stringify({
-				title,
-				profileData: imageEncoded,
-				profileIds: recipients,
+				name: title,
+				iconType: imageEncoded ? 'image' : 'text',
+				iconData: imageEncoded ?? title,
+				participants: recipients.map((recipient) => recipient.id),
 			}),
 		})
 		onClose()
@@ -85,27 +85,30 @@ export default function NewMessageModal({
 		e.preventDefault()
 		setSearchText(e.currentTarget.value)
 		if (e.currentTarget.value !== '') {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_API_URL}/search/user/${e.currentTarget.value}`
-			)
-			const users: {
-				image: string
-				id: number
-				userId: number
-				userTag: string
-				isCompany: boolean
-				userName: string | null
-				isOnline: boolean
-				statusName: string | null
-				information: string | null
-				createdAt: Date
-			}[] = await res.json()
-
-			if (res.status === 200) {
-				setSearchedUsers(users)
+			const profilesResponse: SuccessResponse<ProfileList> | ErrorResponse =
+				await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}/profiles?tag=${e.currentTarget.value}`
+				).then((res) => res.json())
+			if (profilesResponse.status === 'success') {
+				setSearchedUsers(
+					profilesResponse.data.filter(
+						(profile) => profile.tag !== saveData.profile?.tag
+					)
+				)
 			}
 		}
 	}
+
+	useEffect(() => {
+		if (!isOpen) {
+			setTitle('')
+			setImagePreview(saveData.profile?.image ?? '')
+			setImageEncoded(null)
+			setRecipients([])
+			setSearchText('')
+			setSearchedUsers([])
+		}
+	}, [isOpen])
 
 	if (!isOpen) return null
 
@@ -143,30 +146,71 @@ export default function NewMessageModal({
 					</div>
 					<div className="mb-4">
 						<label className="block text-sm font-medium mb-1">
+							선택된 수신자
+						</label>
+						<div className="flex space-x-2 overflow-x-auto p-1 border rounded">
+							{recipients.length === 0 ? (
+								<span className="text-gray-500">수신자가 없습니다.</span>
+							) : (
+								recipients.map((recipient) => {
+									const user = searchedUsers.find(
+										(u) => String(u.id) === String(recipient.id)
+									)
+									return (
+										<div
+											key={recipient.id}
+											className="flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 whitespace-nowrap"
+										>
+											<span className="text-sm">{recipient.label}</span>
+											<button
+												type="button"
+												onClick={() => removeRecipient(recipient.id)}
+												className="ml-2 hover:text-blue-600"
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													className="h-4 w-4"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														strokeLinecap="round"
+														strokeLinejoin="round"
+														strokeWidth={2}
+														d="M6 18L18 6M6 6l12 12"
+													/>
+												</svg>
+											</button>
+										</div>
+									)
+								})
+							)}
+						</div>
+					</div>
+					<div className="mb-4">
+						<label className="block text-sm font-medium mb-1">
 							수신자 선택
 						</label>
 						<div className="flex flex-col border">
 							<input
-								className="m-2 border"
+								className="m-1 border px-2 py-1"
 								value={searchText}
 								onChange={handleSearchUserTag}
+								placeholder="태그로 검색..."
 							/>
 							<select
 								multiple
-								className="w-full border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-								value={recipients}
+								className="w-full h-32 px-3 py-2 focus:outline-none"
+								value={recipients.map((recipient) => String(recipient.id))}
 								onChange={handleRecipientsChange}
-								required
 							>
 								{searchedUsers.length === 0 ? (
-									<option>사용자가 없습니다.</option>
+									<option disabled>사용자가 없습니다.</option>
 								) : (
-									searchedUsers.map((searchedUser) => (
-										<option
-											key={`add_message_modal_search_user_tag_${searchedUser.userTag}`}
-											value={searchedUser.userId}
-										>
-											{searchedUser.userName ?? searchedUser.userTag}
+									searchedUsers.map((profile) => (
+										<option key={profile.id} value={String(profile.id)}>
+											{profile.name ?? profile.tag}
 										</option>
 									))
 								)}

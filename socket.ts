@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 import prisma from './src/lib/prisma'
 
 export interface ServerToClientEvents {
+	send_logout: () => void
 	update_profile: () => void
 	update_rooms: () => void
 	update_dmSessions: () => void
@@ -79,6 +80,10 @@ io.on('connection', (socket) => {
 	socket.on('set_profileId', (profileId) => {
 		if (typeof profileId === 'number' && profileId > 0) {
 			socket.data.profileId = profileId
+			const oldSocket = socketMap.get(profileId)
+			if (oldSocket) {
+				socket.to(oldSocket).emit('send_logout')
+			}
 			socketMap.set(profileId, socket.id)
 		}
 	})
