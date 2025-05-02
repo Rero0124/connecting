@@ -1,5 +1,6 @@
 'use client'
 import { join } from '@/app/actions/auth'
+import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import Link from 'next/link'
 import { useActionState, useRef, useState } from 'react'
 
@@ -17,12 +18,11 @@ export default function Join() {
 		}
 		setTagFetching(true)
 		if (tagRef.current && tagRef.current.value !== '') {
-			fetch(`/api/auth/check/duplication/tag/${tagRef.current.value}`, {
+			fetch(`/api/profiles/${tagRef.current.value}`, {
 				cache: 'no-cache',
 			})
-				.then((res) => res.json())
-				.then((data) => {
-					setTagUsed(data.isUsed)
+				.then((res) => {
+					setTagUsed(res.status !== 404)
 					setTagFetching(false)
 				})
 		} else {
@@ -48,7 +48,7 @@ export default function Join() {
 					name="tag"
 					placeholder="tag"
 					defaultValue={state?.data?.tag}
-					onKeyUp={tagCheck}
+					onChange={tagCheck}
 				/>
 			</div>
 			{initTagFetch &&

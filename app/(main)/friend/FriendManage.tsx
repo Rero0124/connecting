@@ -9,8 +9,8 @@ export default function FriendManage() {
 		<div className="flex flex-col">
 			{friendsData.friends.map((friend) => {
 				return (
-					<div key={`key_friend_` + friend.userTag} className="block">
-						<p>{friend.userName ?? friend.userTag}</p>
+					<div key={`key_friend_` + friend.tag} className="block">
+						<p>{friend.name ?? friend.tag}</p>
 					</div>
 				)
 			})}

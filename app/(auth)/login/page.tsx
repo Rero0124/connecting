@@ -25,7 +25,7 @@ export default function Login() {
 	}, [state])
 
 	const cancelLogin = () => {
-		fetch('/api/auth', {
+		fetch('/api/session', {
 			method: 'DELETE',
 		}).then(() => {
 			setSelectProfileModelOpen(false)
@@ -119,9 +119,9 @@ export default function Login() {
 												{profile.isCompany ? '업무' : '개인'} -{' '}
 											</span>
 											<span>
-												{profile.userName
-													? `${profile.userName}(${profile.userTag})`
-													: profile.userTag}
+												{profile.name
+													? `${profile.name}(${profile.tag})`
+													: profile.tag}
 											</span>
 										</div>
 									)

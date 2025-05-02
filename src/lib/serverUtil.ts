@@ -1,0 +1,183 @@
+'use server'
+import { NextResponse } from 'next/server'
+import { ErrorResponse, SuccessResponse } from '../types/api'
+import { deleteSession, verifySession } from './session'
+import { ResponseDictionary } from '../types/dictionaries/res/dict'
+import prisma from './prisma'
+
+export async function verifyUserIdInSession(userId: any): Promise<{
+	response:
+		| SuccessResponse<{
+				userId: number
+				email: string
+		  }>
+		| ErrorResponse
+	status: number
+}> {
+	const userIdNumber = Number(userId)
+	const sessionCheck = await verifySession()
+	if (sessionCheck.authType === 'none') {
+		return {
+			response: {
+				status: 'error',
+				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
+				message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
+			},
+			status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status,
+		}
+	}
+
+	if (isNaN(userIdNumber)) {
+		return {
+			response: {
+				status: 'error',
+				code: 0x0,
+				message: '유저 아이디의 형식이 잘못되었습니다.',
+			},
+			status: 400,
+		}
+	}
+
+	if (sessionCheck.userId !== userIdNumber) {
+		return {
+			response: {
+				status: 'error',
+				code: 0x0,
+				message: '현재 로그인된 사용자와 일치하지 않습니다.',
+			},
+			status: 400,
+		}
+	}
+
+	const user = await prisma.user.findUnique({
+		where: {
+			id: sessionCheck.userId,
+		},
+		select: {
+			id: true,
+			email: true,
+		},
+	})
+
+	if (!user) {
+		await deleteSession()
+
+		return {
+			response: {
+				status: 'error',
+				code: 0x0,
+				message: '사용자가 존재하지 않습니다.',
+			},
+			status: 404,
+		}
+	}
+
+	return {
+		response: {
+			status: 'success',
+			code: 0x0,
+			message: '사용자 검증이 완료되었습니다',
+			data: {
+				userId: user.id,
+				email: user.email,
+			},
+		},
+		status: 200,
+	}
+}
+
+export async function verifyProfileIdInSession(
+	userId: any,
+	profileId: any
+): Promise<{
+	response:
+		| SuccessResponse<{
+				userId: number
+				profileId: number
+				tag: string
+		  }>
+		| ErrorResponse
+	status: number
+}> {
+	const profileIdNumber = Number(profileId)
+	const sessionCheck = await verifySession()
+
+	const data = await verifyUserIdInSession(userId)
+	if (data.response.status === 'error') {
+		return {
+			response: data.response,
+			status: data.status,
+		}
+	}
+
+	if (sessionCheck.authType !== 'profile') {
+		return {
+			response: {
+				status: 'error',
+				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
+				message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
+			},
+			status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status,
+		}
+	}
+
+	if (isNaN(profileIdNumber)) {
+		return {
+			response: {
+				status: 'error',
+				code: 0x0,
+				message: '프로필 아이디의 형식이 잘못되었습니다.',
+			},
+			status: 400,
+		}
+	}
+
+	if (sessionCheck.profileId !== profileIdNumber) {
+		return {
+			response: {
+				status: 'error',
+				code: 0x0,
+				message: '현재 로그인된 프로필과 일치하지 않습니다.',
+			},
+			status: 400,
+		}
+	}
+
+	const profile = await prisma.profile.findFirst({
+		where: {
+			id: sessionCheck.profileId,
+			userId: sessionCheck.userId,
+		},
+		select: {
+			id: true,
+			tag: true,
+		},
+	})
+
+	if (!profile) {
+		await deleteSession()
+
+		return {
+			response: {
+				status: 'error',
+				code: 0x0,
+				message: '프로필이 존재하지 않습니다.',
+			},
+			status: 404,
+		}
+	}
+
+	return {
+		response: {
+			status: 'success',
+			code: 0x0,
+			message: '사용자 검증이 완료되었습니다',
+			data: {
+				userId: sessionCheck.userId,
+				profileId: profile.id,
+				tag: profile.tag,
+			},
+		},
+		status: 200,
+	}
+}

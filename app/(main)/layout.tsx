@@ -9,13 +9,12 @@ import { socket } from '@/src/lib/socket'
 import { useEffect, useState } from 'react'
 import Nav from '@/app/(main)/Nav'
 import { setRooms } from '@/src/lib/features/roomData/roomDataSlice'
-import {
-	setAllowedMessages,
-	setNotAllowedMessages,
-} from '@/src/lib/features/messageData/messageDataSlice'
-import { setFriends } from '@/src/lib/features/friendData/friendDataSlice'
-import ChangeProfileModal from './ChangeProfileModal'
-import LoginModal from './LoginModal'
+import { setAllowedDmSession, setNotAllowedDmSession } from '@/src/lib/features/dmData/dmDataSlice'
+import { setFriends, setReceivedFriendRequests, setSentFriendRequests } from '@/src/lib/features/friendData/friendDataSlice'
+import ChangeProfileModal from './changeProfileModal'
+import LoginModal from './loginModal'
+import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { VerifySessionType } from '@/src/lib/session'
 
 export default function RootLayout({
 	children,
@@ -41,36 +40,104 @@ export default function RootLayout({
 	const dispatch = useAppDispatch()
 
 	async function getSaveData() {
-		const [profileRes, roomRes, messageRes, friendRes] = await Promise.all([
-			fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/user/profile`, {
-				cache: 'no-store',
-			}),
-			fetch(`${process.env.NEXT_PUBLIC_API_URL}/room`, { cache: 'no-store' }),
-			fetch(`${process.env.NEXT_PUBLIC_API_URL}/message`, {
-				cache: 'no-store',
-			}),
-			fetch(`${process.env.NEXT_PUBLIC_API_URL}/friend`, { cache: 'no-store' }),
-		])
+		const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+			cache: 'no-store',
+		}).then(res => res.json());
 
-		if (
-			[profileRes, roomRes, messageRes, friendRes].every(
-				(res) => res.status === 200
-			)
-		) {
-			const [profileData, roomData, messageData, friendData] =
-				await Promise.all([
-					profileRes.json(),
-					roomRes.json(),
-					messageRes.json(),
-					friendRes.json(),
-				])
-
-			dispatch(setProfile(profileData))
-			dispatch(setRooms(roomData))
-			dispatch(setAllowedMessages(messageData))
-			dispatch(setNotAllowedMessages(messageData))
-			dispatch(setFriends(friendData))
-			dispatch(setInitLoadEnd())
+		if(sessionResponse.status === 'success' && sessionResponse.data && sessionResponse.data.authType === 'profile') {
+			const profileResponse: SuccessResponse<{
+				image: string;
+				tag: string;
+				id: number;
+				userId: number;
+				statusType: string;
+				statusId: number;
+				name: string | null;
+				information: string;
+				isCompany: boolean;
+				isOnline: boolean;
+				createdAt: Date;
+		}> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data.userId}/profiles/${sessionResponse.data.profileId}`, {
+				cache: 'no-store',
+			}).then(res => res.json());
+			const roomsResponse: SuccessResponse<{
+				id: string;
+				name: string;
+				createdAt: Date;
+				masterProfileId: number;
+				iconType: string;
+				iconData: string;
+		}[]> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, { cache: 'no-store' }).then(res => res.json())
+			const dmSessionResponse: SuccessResponse<{
+				allowedDmSessions: {
+					name: string
+					id: string
+					iconType: string
+					iconData: string
+					createdAt: Date
+				}[]
+				notAllowedDmSessions: {
+					name: string
+					id: string
+					iconType: string
+					iconData: string
+					createdAt: Date
+				}[]
+			}> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`, {
+				cache: 'no-store',
+			}).then(res => res.json())
+			const friendsResponse: SuccessResponse<{
+				image: string;
+				tag: string;
+				statusType: string;
+				statusId: number;
+				name: string | null;
+				isOnline: boolean;
+				createdAt: Date;
+			}[]> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, { cache: 'no-store' }).then(res => res.json())
+			const friendRequestsResponse: 
+			SuccessResponse<{
+				receivedfriendRequests: {
+					profile: {
+						statusType: string
+						statusId: number
+						tag: string
+						name: string | null
+						image: string
+						isOnline: boolean
+						createdAt: Date
+					}
+					id: number
+					sentAt: Date
+				}[]
+				sentfriendRequests: {
+					profile: {
+						name: string | null
+						image: string
+						statusType: string
+						statusId: number
+						tag: string
+						isOnline: boolean
+						createdAt: Date
+					}
+					id: number
+					sentAt: Date
+				}[]
+			}> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`, { cache: 'no-store' }).then(res => res.json())
+		
+	
+			if (
+				profileResponse.status === 'success' && roomsResponse.status === 'success' && dmSessionResponse.status === 'success' && friendsResponse.status === 'success' && friendRequestsResponse.status === 'success'
+			) {
+				dispatch(setProfile(profileResponse.data))
+				dispatch(setRooms(roomsResponse.data))
+				dispatch(setAllowedDmSession(dmSessionResponse.data.allowedDmSessions))
+				dispatch(setNotAllowedDmSession(dmSessionResponse.data.notAllowedDmSessions))
+				dispatch(setFriends(friendsResponse.data))
+				dispatch(setSentFriendRequests(friendRequestsResponse.data.sentfriendRequests))
+				dispatch(setReceivedFriendRequests(friendRequestsResponse.data.receivedfriendRequests))
+				dispatch(setInitLoadEnd())
+			}
 		}
 	}
 
@@ -110,12 +177,12 @@ export default function RootLayout({
 
 	useEffect(() => {
 		if (!saveData.initLoad) {
-			getSaveData().then(() => {
-				fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth`, { cache: 'no-store' })
+			getSaveData().then(async () => {
+				const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, { cache: 'no-store' })
 					.then((res) => res.json())
-					.then((data) => {
-						socket.emit('send userProfileId', data.profileId)
-					})
+				if(sessionResponse.status === 'success' && sessionResponse.data.authType === 'profile') {
+					socket.emit('send userProfileId', sessionResponse.data.profileId);
+				}
 			})
 		}
 
@@ -154,7 +221,7 @@ export default function RootLayout({
 						{/* 왼쪽 영역 */}
 						<div className="flex-1 flex items-center pl-4">
 							<p className="text-base font-medium">
-								{saveData.profile?.userName ?? saveData.profile?.userTag}
+								{saveData.profile?.name ?? saveData.profile?.tag}
 							</p>
 						</div>
 

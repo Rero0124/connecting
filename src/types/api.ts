@@ -5,12 +5,19 @@ export interface ApiResponse<T> {
 	data?: T
 }
 
-export interface SuccessResponse<T = any> {
+interface SuccessResponseWithoutData {
 	status: 'success'
 	code: number
 	message: string
-  data?: T
 }
+interface SuccessResponseWithData<T> {
+	status: 'success'
+	code: number
+	message: string,
+	data: T
+}
+
+export type SuccessResponse<T = void> = T extends void ? SuccessResponseWithoutData : SuccessResponseWithData<T>;
 
 export interface ErrorResponse {
 	status: 'error'

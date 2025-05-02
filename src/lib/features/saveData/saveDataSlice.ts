@@ -10,10 +10,10 @@ interface SaveDataState {
 	title: string
 	profile?: {
 		id: number
-		userTag: string
-		userName?: string
+		tag: string
+		name: string | null
 		isCompany: boolean
-		information?: string
+		information: string
 		image: string
 		createdAt: Date
 	}
@@ -64,10 +64,10 @@ export const saveDataSlice = createSlice({
 			state,
 			action: PayloadAction<{
 				id: number
-				userTag: string
-				userName?: string
+				tag: string
+				name: string | null
 				isCompany: boolean
-				information?: string
+				information: string
 				image: string
 				createdAt: Date
 			}>

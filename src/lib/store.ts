@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import saveDataReducer from './features/saveData/saveDataSlice'
 import friendDataReducer from './features/friendData/friendDataSlice'
-import messageDataReducer from './features/messageData/messageDataSlice'
+import dmDataReducer from './features/dmData/dmDataSlice'
 import roomDataReducer from './features/roomData/roomDataSlice'
 
 export const makeStore = () => {
@@ -9,7 +9,7 @@ export const makeStore = () => {
 		reducer: {
 			saveData: saveDataReducer,
 			friendsData: friendDataReducer,
-			messageData: messageDataReducer,
+			dmData: dmDataReducer,
 			roomDate: roomDataReducer,
 		},
 	})

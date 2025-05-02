@@ -13,16 +13,17 @@ const userData: Prisma.UserCreateInput[] = [
 	},
 ]
 
-const getUserProfileData = (
-	userIds: number[]
-): Prisma.UserProfileCreateInput[] => [
+const getUserProfileData = (userIds: number[]): Prisma.ProfileCreateInput[] => [
 	{
 		user: {
 			connect: {
 				id: userIds[0],
 			},
 		},
-		userTag: 'rero0124',
+		tag: 'rero0124',
+		information: '',
+		statusType: 'common',
+		statusId: 0,
 	},
 	{
 		user: {
@@ -30,7 +31,10 @@ const getUserProfileData = (
 				id: userIds[0],
 			},
 		},
-		userTag: 'rero01211',
+		tag: 'rero01211',
+		information: '',
+		statusType: 'common',
+		statusId: 0,
 	},
 	{
 		user: {
@@ -38,7 +42,10 @@ const getUserProfileData = (
 				id: userIds[1],
 			},
 		},
-		userTag: '테스트',
+		tag: '테스트',
+		information: '테스트 입니다.',
+		statusType: 'common',
+		statusId: 0,
 	},
 	{
 		user: {
@@ -46,31 +53,34 @@ const getUserProfileData = (
 				id: userIds[1],
 			},
 		},
-		userTag: '테스트1',
+		tag: '테스트1',
+		information: '',
+		statusType: 'custom',
+		statusId: 0,
 	},
 ]
 
 const getRoomData = (userProfileIds: number[]): Prisma.RoomCreateInput[] => [
 	{
 		name: '테스트',
-		master: {
+		masterProfile: {
 			connect: {
 				id: userProfileIds[0],
 			},
 		},
-		profileType: 'text',
-		profileData: '테스트',
-		roomUser: {
+		iconType: 'text',
+		iconData: '테스트',
+		participant: {
 			createMany: {
 				data: [
 					{
-						userProfileId: userProfileIds[0],
+						profileId: userProfileIds[0],
 					},
 					{
-						userProfileId: userProfileIds[1],
+						profileId: userProfileIds[1],
 					},
 					{
-						userProfileId: userProfileIds[2],
+						profileId: userProfileIds[2],
 					},
 				],
 			},
@@ -78,24 +88,24 @@ const getRoomData = (userProfileIds: number[]): Prisma.RoomCreateInput[] => [
 	},
 	{
 		name: '테스트2',
-		master: {
+		masterProfile: {
 			connect: {
 				id: userProfileIds[3],
 			},
 		},
-		profileType: 'text',
-		profileData: '테스트2',
-		roomUser: {
+		iconType: 'text',
+		iconData: '테스트2',
+		participant: {
 			createMany: {
 				data: [
 					{
-						userProfileId: userProfileIds[0],
+						profileId: userProfileIds[0],
 					},
 					{
-						userProfileId: userProfileIds[1],
+						profileId: userProfileIds[1],
 					},
 					{
-						userProfileId: userProfileIds[3],
+						profileId: userProfileIds[3],
 					},
 				],
 			},
@@ -113,10 +123,10 @@ export async function main() {
 	const userProfileData = getUserProfileData(userIds)
 
 	for (const up of userProfileData) {
-		await prisma.userProfile.create({ data: up })
+		await prisma.profile.create({ data: up })
 	}
 
-	const userProfileIds = (await prisma.userProfile.findMany()).map((u) => u.id)
+	const userProfileIds = (await prisma.profile.findMany()).map((u) => u.id)
 
 	const roomData = getRoomData(userProfileIds)
 

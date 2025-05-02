@@ -2,14 +2,20 @@ import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
 import { LoginFormSchema } from '@/src/lib/definitions'
-import { createSession, deleteSession, verifySession } from '@/src/lib/session'
+import {
+	createSession,
+	deleteSession,
+	verifySession,
+	VerifySessionType,
+} from '@/src/lib/session'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 
 export async function GET(request: NextRequest) {
 	try {
 		const sessionCheck = await verifySession()
-		if (!sessionCheck.isAuth) {
+
+		if (sessionCheck.authType === 'none') {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -19,17 +25,25 @@ export async function GET(request: NextRequest) {
 				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
 			)
 		}
-		return NextResponse.json<
-			SuccessResponse<{ userId: number; profileId: number }>
-		>(
+
+		if (sessionCheck.authType === 'user') {
+			return NextResponse.json<SuccessResponse<VerifySessionType>>(
+				{
+					status: 'success',
+					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
+					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.message,
+					data: sessionCheck,
+				},
+				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
+			)
+		}
+
+		return NextResponse.json<SuccessResponse<VerifySessionType>>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
 				message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.message,
-				data: {
-					userId: sessionCheck.userId,
-					profileId: sessionCheck.profileId,
-				},
+				data: sessionCheck,
 			},
 			{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
 		)
@@ -49,7 +63,6 @@ export async function POST(request: NextRequest) {
 	try {
 		const rawData = await request.json()
 		const validatedFields = LoginFormSchema.safeParse({
-			profileId: rawData.profileId.toString(),
 			email: rawData.email,
 			password: rawData.password,
 		})
@@ -65,7 +78,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		const { email, password, profileId } = validatedFields.data
+		const { email, password } = validatedFields.data
 
 		const user = await prisma.user.findUnique({
 			where: { email },
@@ -82,7 +95,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		if (bcryptjs.compareSync(password, user.password)) {
+		if (!bcryptjs.compareSync(password, user.password)) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -93,31 +106,39 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		const userProfile = await prisma.userProfile.findUnique({
-			where: {
-				id: profileId,
-				userId: user.id,
-			},
-		})
+		await createSession(user.id)
 
-		if (!userProfile) {
+		const sessionCheck = await verifySession()
+
+		if (sessionCheck.authType === 'none') {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: 0x0,
-					message: '프로필이 존재하지 않습니다.',
+					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
+					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
 				},
-				{ status: 404 }
+				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
 			)
 		}
 
-		await createSession(user.id, userProfile.id)
+		if (sessionCheck.authType === 'user') {
+			return NextResponse.json<SuccessResponse<VerifySessionType>>(
+				{
+					status: 'success',
+					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
+					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.message,
+					data: sessionCheck,
+				},
+				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
+			)
+		}
 
-		return NextResponse.json<SuccessResponse>(
+		return NextResponse.json<SuccessResponse<VerifySessionType>>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.code,
 				message: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.message,
+				data: sessionCheck,
 			},
 			{ status: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.status }
 		)
@@ -135,9 +156,10 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
 	try {
+		const { profileId } = await request.json()
 		const sessionCheck = await verifySession()
 
-		if (!sessionCheck.isAuth) {
+		if (sessionCheck.authType === 'none') {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -148,9 +170,7 @@ export async function PATCH(request: NextRequest) {
 			)
 		}
 
-		const data = await request.json()
-
-		if (!data.profileId || isNaN(Number(data.profileId))) {
+		if (typeof profileId !== 'number') {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -165,9 +185,7 @@ export async function PATCH(request: NextRequest) {
 			)
 		}
 
-		const profileId = Number(data.profileId)
-
-		const userProfile = await prisma.userProfile.findUnique({
+		const userProfile = await prisma.profile.findFirst({
 			where: {
 				id: profileId,
 				userId: sessionCheck.userId,
@@ -189,7 +207,7 @@ export async function PATCH(request: NextRequest) {
 			)
 		}
 
-		await createSession(sessionCheck.userId, profileId)
+		await createSession(userProfile.userId, userProfile.id)
 		return NextResponse.json<SuccessResponse>(
 			{
 				status: 'success',

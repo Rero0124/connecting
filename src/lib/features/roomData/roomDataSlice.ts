@@ -4,21 +4,21 @@ import { RootState } from '@/src/lib/store'
 export interface RoomType {
 	name: string
 	id: string
-	sendedUserTag: string
+	masterProfileId: number
 	createdAt: Date
-	profileType: string
-	profileData: string
+	iconType: string
+	iconData: string
 }
 
 export interface RoomChatType {
 	id: number
-	sendedUserTag: string
-	sendedUserName?: string
-	sendedUserImage: string
+	sendtUserTag: string
+	sendtUserName?: string
+	sendtUserImage: string
 	contentType: string
 	content: string
 	isPinned: boolean
-	sendedAt: Date
+	sendtAt: Date
 }
 
 interface RoomDataState {

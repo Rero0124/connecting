@@ -36,11 +36,14 @@ export async function POST(request: NextRequest) {
 			data: { email, password: hashedPassword },
 		})
 
-		await prisma.userProfile.create({
+		await prisma.profile.create({
 			data: {
-				userTag: tag,
+				tag: tag,
 				userId: user.id,
-				userName: name,
+				name: name,
+				information: '',
+				statusType: 'common',
+				statusId: 0,
 			},
 		})
 

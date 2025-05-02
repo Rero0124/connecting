@@ -1,23 +1,17 @@
 'use client'
 
+import { FriendRequestType } from '@/src/lib/features/friendData/friendDataSlice'
 import Image from 'next/image'
 
-interface FriendInfo {
-	userTag: string
-	userName?: string
-	image?: string
-	createdAt: string
-}
-
 interface FriendDetailModalProps {
-	friend: FriendInfo
+	friendRequest: FriendRequestType
 	onClose: () => void
 	onAccept?: () => void
 	onCancel?: () => void
 }
 
 export default function FriendDetailModal({
-	friend,
+	friendRequest,
 	onClose,
 	onAccept,
 	onCancel,
@@ -32,21 +26,21 @@ export default function FriendDetailModal({
 				<div className="mb-3">
 					<p className="mb-1">
 						<span className="text-gray-400">닉네임:</span>{' '}
-						{friend.userName || '(미입력)'}
+						{friendRequest.profile.name || '(미입력)'}
 					</p>
 					<p className="mb-1">
-						<span className="text-gray-400">태그:</span> {friend.userTag}
+						<span className="text-gray-400">태그:</span> {friendRequest.profile.tag}
 					</p>
 					<p className="mb-1">
 						<span className="text-gray-400">요청일:</span>{' '}
-						{new Date(friend.createdAt).toLocaleString()}
+						{new Date(friendRequest.sentAt).toLocaleString()}
 					</p>
 				</div>
 
-				{friend.image && (
+				{friendRequest.profile.image && (
 					<div className="mb-4">
 						<Image
-							src={friend.image}
+							src={friendRequest.profile.image}
 							alt="profile"
 							width={0}
 							height={0}

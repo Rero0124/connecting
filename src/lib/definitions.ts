@@ -44,12 +44,16 @@ export type LoginFormState =
 			message?: string
 			isLogin?: boolean
 			profiles?: {
+				tag: string
+				name: string | null
 				id: number
-				userTag: string
-				userName?: string
-				isCompany: boolean
-				information?: string
+				userId: number
+				statusType: string
+				statusId: number
+				information: string
 				image: string
+				isCompany: boolean
+				isOnline: boolean
 				createdAt: Date
 			}[]
 	  }
@@ -75,7 +79,7 @@ export type JoinFormState =
 export type SessionPayload =
 	| {
 			userId: number
-			profileId: number
+			profileId?: number
 			expiresAt: Date
 	  }
 	| undefined

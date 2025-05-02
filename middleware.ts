@@ -14,12 +14,12 @@ export default async function middleware(req: NextRequest) {
 	const cookie = (await cookies()).get('session')?.value
 	const session = await decrypt(cookie)
 
-	if (!isAuthRoute && !session?.userId) {
+	if (!isAuthRoute && !session?.profileId) {
 		return NextResponse.redirect(new URL('/login', req.nextUrl))
 	}
 
 	// 5. Redirect to /dashboard if the user is authenticated
-	if (isAuthRoute && session?.userId) {
+	if (isAuthRoute && session?.profileId) {
 		return NextResponse.redirect(new URL('/', req.nextUrl))
 	}
 

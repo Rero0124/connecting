@@ -2,10 +2,19 @@ import { RootState } from '@/src/lib/store'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 export interface FriendType {
-	userTag: string
-	userName?: string
 	image: string
+	tag: string
+	statusType: string
+	statusId: number
+	name: string | null
+	isOnline: boolean
 	createdAt: Date
+}
+
+export interface FriendRequestType {
+	profile: FriendType
+	id: number
+	sentAt: Date
 }
 
 export interface FilterUserType extends FriendType {
@@ -14,15 +23,15 @@ export interface FilterUserType extends FriendType {
 
 interface FriendDataState {
 	friends: FriendType[]
-	sendAddFriends: FriendType[]
-	reciveAddFriends: FriendType[]
+	sentFriendRequests: FriendRequestType[]
+	receivedFriendRequests: FriendRequestType[]
 	filterFriends: FilterUserType[]
 }
 
 const initialState: FriendDataState = {
 	friends: [],
-	sendAddFriends: [],
-	reciveAddFriends: [],
+	sentFriendRequests: [],
+	receivedFriendRequests: [],
 	filterFriends: [],
 }
 
@@ -33,11 +42,17 @@ export const friendDataSlice = createSlice({
 		setFriends: (state, action: PayloadAction<FriendType[]>) => {
 			state.friends = action.payload
 		},
-		setSendAddFriends: (state, action: PayloadAction<FriendType[]>) => {
-			state.sendAddFriends = action.payload
+		setSentFriendRequests: (
+			state,
+			action: PayloadAction<FriendRequestType[]>
+		) => {
+			state.sentFriendRequests = action.payload
 		},
-		setReciveAddFriends: (state, action: PayloadAction<FriendType[]>) => {
-			state.reciveAddFriends = action.payload
+		setReceivedFriendRequests: (
+			state,
+			action: PayloadAction<FriendRequestType[]>
+		) => {
+			state.receivedFriendRequests = action.payload
 		},
 		setFilterFriends: (state, action: PayloadAction<FilterUserType[]>) => {
 			state.filterFriends = action.payload
@@ -47,45 +62,43 @@ export const friendDataSlice = createSlice({
 
 export const {
 	setFriends,
-	setSendAddFriends,
-	setReciveAddFriends,
+	setSentFriendRequests,
+	setReceivedFriendRequests,
 	setFilterFriends,
 } = friendDataSlice.actions
 
-export const getFriends = (state: RootState, userTag?: string) => {
-	if (userTag) {
-		return state.friendsData.friends.find(
-			(friend) => friend.userTag === userTag
-		)
+export const getFriends = (state: RootState, tag?: string) => {
+	if (tag) {
+		return state.friendsData.friends.find((friend) => friend.tag === tag)
 	} else {
 		return state.friendsData.friends
 	}
 }
 
-export const getSendAddFriends = (state: RootState, userTag?: string) => {
-	if (userTag) {
-		return state.friendsData.sendAddFriends.find(
-			(sendAddFriend) => sendAddFriend.userTag === userTag
+export const getSentAddFriends = (state: RootState, tag?: string) => {
+	if (tag) {
+		return state.friendsData.sentFriendRequests.find(
+			(sentFriendRequest) => sentFriendRequest.profile.tag === tag
 		)
 	} else {
-		return state.friendsData.sendAddFriends
+		return state.friendsData.sentFriendRequests
 	}
 }
 
-export const getReciveAddFriends = (state: RootState, userTag?: string) => {
-	if (userTag) {
-		return state.friendsData.reciveAddFriends.find(
-			(reciveAddFriend) => reciveAddFriend.userTag === userTag
+export const getReceivedAddFriends = (state: RootState, tag?: string) => {
+	if (tag) {
+		return state.friendsData.receivedFriendRequests.find(
+			(receivedFriendRequest) => receivedFriendRequest.profile.tag === tag
 		)
 	} else {
-		return state.friendsData.reciveAddFriends
+		return state.friendsData.receivedFriendRequests
 	}
 }
 
-export const getFilterFriends = (state: RootState, userTag?: string) => {
-	if (userTag) {
+export const getFilterFriends = (state: RootState, tag?: string) => {
+	if (tag) {
 		return state.friendsData.filterFriends.find(
-			(filterFriend) => filterFriend.userTag === userTag
+			(filterFriend) => filterFriend.tag === tag
 		)
 	} else {
 		return state.friendsData.filterFriends

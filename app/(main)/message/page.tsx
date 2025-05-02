@@ -4,21 +4,21 @@ import Link from 'next/link'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 
 export default function Main() {
-	const messageData = useAppSelector((state) => state.messageData)
+	const dmData = useAppSelector((state) => state.dmData)
 	const dispatch = useAppDispatch()
 
 	return (
 		<div className="">
 			<main className="">
 				<div className="flex flex-col">
-					{messageData.allowedMessages.map((allowedMessage) => {
+					{dmData.allowedDmSessions.map((allowedDmSession) => {
 						return (
 							<Link
-								key={`key_allowed_message_` + allowedMessage.id}
-								href={`/message/${allowedMessage.id}`}
+								key={`key_allowed_message_` + allowedDmSession.id}
+								href={`/message/${allowedDmSession.id}`}
 								className="block"
 							>
-								<p>{allowedMessage.name}</p>
+								<p>{allowedDmSession.name}</p>
 							</Link>
 						)
 					})}

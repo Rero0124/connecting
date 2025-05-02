@@ -1,4 +1,5 @@
 'use client'
+import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { useState } from 'react'
 
 export default function FriendAddPage() {
@@ -10,23 +11,21 @@ export default function FriendAddPage() {
 		if (!tag.trim()) return
 
 		try {
-			const response = await fetch('/api/friend/request', {
+			const response: SuccessResponse | ErrorResponse = await fetch('/api/friend-requests', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ userTag: tag }),
-			})
+				body: JSON.stringify({ tag: tag }),
+			}).then(res => res.json())
 
-			const result = await response.json()
-
-			if (response.ok && result.result === true) {
+			if (response.status === 'success') {
 				setStatus('success')
 				setMessage('친구 요청을 보냈어요.')
 				setTag('') // 입력 초기화
 			} else {
 				setStatus('error')
-				setMessage(result.message || '친구 요청에 실패했어요.')
+				setMessage(response.message || '친구 요청에 실패했어요.')
 			}
 		} catch (err) {
 			setStatus('error')

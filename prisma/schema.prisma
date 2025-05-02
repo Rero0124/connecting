@@ -18,126 +18,148 @@ model User {
   email String @db.VarChar(255) @unique
   password String
   createdAt DateTime @default(now()) @map("created_at")
-  profile UserProfile[]
-  profileStatus UserProfileStatus[]
+  profile Profile[]
+  profileStatus ProfileStatus[]
   @@map("user")
 }
 
-model UserProfile {
+model Profile {
   id Int @id @default(autoincrement())
   userId Int @map("user_id")
-  userTag String @unique @map("user_tag")
-  isCompany Boolean @default(false) @map("is_company")
-  userName String? @db.VarChar(100) @map("user_name")
-  isOnline Boolean @default(false) @map("is_online")
-  statusName String? @db.VarChar(20) @map("status_name")
-  information String? @db.VarChar(255)
+  statusType String @db.Char(6)
+  statusId Int @map("status_id")
+  tag String @unique @map("user_tag")
+  name String? @db.VarChar(100) @map("user_name")
+  information String @db.VarChar(255)
   image String @default("/public/image/profile/default.jpg")
+  isCompany Boolean @default(false) @map("is_company")
+  isOnline Boolean @default(false) @map("is_online")
   createdAt DateTime @default(now()) @map("created_at")
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  friendByUserProfile UserFriends[] @relation(name: "friend_by_user_profile")
-  userFriends UserFriends[] @relation(name: "user_friends_profile")
-  addFriendByUserProfile AddFriends[] @relation(name: "add_friend_by_user_profile")
-  userAddFriends AddFriends[] @relation(name: "user_add_friends_profile")
-  filterByUserProfile FilterUser[] @relation(name: "filter_by_user_profile")
-  filterProfile FilterUser[] @relation(name: "filter_profile")
-  masterRoom Room[]
-  roomInUser RoomUser[]
-  messageInUser DmParticipant[]
-  sendedMessageChat DmMessage[]
-  sendedRoomChat RoomMessage[]
-  @@unique([userId, isCompany, userName])
+  friendByProfile Friend[] @relation(name: "friend_by_profile")
+  friendProfile Friend[] @relation(name: "friend_profile")
+  friendRequestByProfile FriendRequest[] @relation(name: "friend_request_by_profile")
+  friendRequestProfile FriendRequest[] @relation(name: "friend_request_profile")
+  filterByProfile ProfileFilter[] @relation(name: "filter_by_profile")
+  filterProfile ProfileFilter[] @relation(name: "filter_profile")
+  masterOfRoom Room[]
+  joinedRoom RoomParticipant[]
+  joinedDm DmParticipant[]
+  sentRoomMessage RoomMessage[]
+  sentDmMessage DmMessage[]
+  joinCodeAuthor RoomJoinCode[]
+  @@unique([userId, isCompany, name])
   @@index([userId])
-  @@map("user_profile")
+  @@index([tag])
+  @@map("profile")
 }
 
-model UserProfileStatus {
+model DeletedProfile {
+  id Int @id
+  userId Int @map("user_id")
+  statusId Int @map("status_id")
+  tag String @unique @map("user_tag")
+  name String? @db.VarChar(100) @map("user_name")
+  information String @db.VarChar(255)
+  image String
+  isCompany Boolean @map("is_company")
+  isOnline Boolean @map("is_online")
+  createdAt DateTime @map("created_at")
+  @@unique([userId, isCompany, name])
+  @@index([userId])
+  @@map("deleted_profile")
+}
+
+model ProfileStatus {
+  id Int @id @default(autoincrement())
   name String
   userId Int @map("user_id")
   isOnline Boolean @map("is_online")
   isAlarm Boolean @map("is_alarm")
-  tmeout Int @default(0)
+  timeout Int @default(-1)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@id([name, userId])
+  @@unique([name, userId])
   @@index([userId])
   @@map("user_profile_status")
 }
 
-model UserFriends {
+model ProfileFilter {
   id Int @id @default(autoincrement())
-  userProfileId Int @map("user_profile_id")
-  friendProfileId Int @map("friend_profile_id")
-  isFavorite Boolean @map("is_favorite") @default(false)
-  userProfile UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade, name: "friend_by_user_profile")
-  friendProfile UserProfile @relation(fields: [friendProfileId], references: [id], onDelete: Cascade, name: "user_friends_profile")
-  @@unique([userProfileId, friendProfileId])
-  @@index([userProfileId])
-  @@map("user_friends")
-}
-
-model FilterUser {
-  id Int @id @default(autoincrement())
-  userProfileId Int @map("user_profile_id")
+  profileId Int @map("profile_id")
   filterProfileId Int @map("filter_profile_id")
   filterType String @map("filter_type")
-  userProfile UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade, name: "filter_by_user_profile")
-  filterProfile UserProfile @relation(fields: [filterProfileId], references: [id], onDelete: Cascade, name: "filter_profile")
-  @@unique([userProfileId, filterProfileId, filterType])
-  @@index([userProfileId])
+  byProfile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, name: "filter_by_profile")
+  profile Profile @relation(fields: [filterProfileId], references: [id], onDelete: Cascade, name: "filter_profile")
+  @@unique([profileId, filterProfileId, filterType])
+  @@index([profileId])
   @@map("filter_user")
 }
 
-model AddFriends {
+model Friend {
   id Int @id @default(autoincrement())
-  userProfileId Int @map("user_profile_id")
-  addFriendProfileId Int @map("friend_profile_id")
-  userProfile UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade, name: "add_friend_by_user_profile")
-  addFriendProfile UserProfile @relation(fields: [addFriendProfileId], references: [id], onDelete: Cascade, name: "user_add_friends_profile")
-  @@unique([userProfileId, addFriendProfileId])
-  @@index([userProfileId])
-  @@index([addFriendProfileId])
-  @@map("add_friends")
+  profileId Int @map("profile_id")
+  friendProfileId Int @map("friend_profile_id")
+  isFavorite Boolean @map("is_favorite") @default(false)
+  byProfile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, name: "friend_by_profile")
+  friendProfile Profile @relation(fields: [friendProfileId], references: [id], onDelete: Cascade, name: "friend_profile")
+  @@unique([profileId, friendProfileId])
+  @@index([profileId])
+  @@index([friendProfileId])
+  @@map("friend")
+}
+
+model FriendRequest {
+  id Int @id @default(autoincrement())
+  profileId Int @map("user_profile_id")
+  requestProfileId Int @map("friend_profile_id")
+  sentAt DateTime @default(now()) @map("sent_at")
+  byProfile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, name: "friend_request_by_profile")
+  requestProfile Profile @relation(fields: [requestProfileId], references: [id], onDelete: Cascade, name: "friend_request_profile")
+  @@unique([profileId, requestProfileId])
+  @@index([profileId])
+  @@index([requestProfileId])
+  @@map("friend_request")
 }
 
 model DmSession {
   id String @db.VarChar(25) @id @default(cuid())
   name String @db.VarChar(100)
-  profileType String @map("profile_type")
-  profileData String @map("profile_data")
+  iconType String @map("icon_type")
+  iconData String @map("icon_data")
   createdAt DateTime @default(now()) @map("created_at")
-  messageUser DmParticipant[]
-  messageChat DmMessage[]
+  participant DmParticipant[]
+  message DmMessage[]
   @@map("dm_session")
 }
 
 model DmParticipant {
   id Int @id @default(autoincrement())
-  messageId String @db.VarChar(25) @map("message_id") 
-  userProfileId Int @map("user_profile_id")
+  dmSessionId String @db.VarChar(25) @map("dm_session_id") 
+  profileId Int @map("profile_id")
   joinedAt DateTime @default(now()) @map("joined_at")
   isNotAllowed Boolean @default(false) @map("is_not_allowed")
-  message DmSession @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  userProfile UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
-  @@unique([messageId, userProfileId])
-  @@index([userProfileId])
+  dmSession DmSession @relation(fields: [dmSessionId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  @@unique([dmSessionId, profileId])
+  @@index([dmSessionId])
+  @@index([profileId])
   @@map("dm_participant")
 }
 
 model DmMessage {
   id Int @id @default(autoincrement())
-  messageId String @db.VarChar(25) @map("message_id") 
-  sendedUserProfileId Int @map("sended_user_profile_id")
+  dmSessionId String @db.VarChar(25) @map("dm_session_id") 
+  profileId Int @map("profile_id")
   contentType String @map("content_type")
   content String
   isPinned Boolean @map("is_pinned")
-  sendedAt DateTime @default(now()) @map("sended_at")
+  sentAt DateTime @default(now()) @map("sent_at")
   updatedAt DateTime? @map("updated_at")
-  isEdited Boolean @default(false) @map("is_edited")
-  message DmSession @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  sendedMessageUserProfile UserProfile @relation(fields: [sendedUserProfileId], references: [id])
-  @@index([messageId, isPinned])
-  @@index([messageId])
-  @@index([sendedAt])
+  dmSession DmSession @relation(fields: [dmSessionId], references: [id], onDelete: Cascade)
+  profile Profile @relation(fields: [profileId], references: [id])
+  @@index([dmSessionId, isPinned])
+  @@index([dmSessionId])
+  @@index([sentAt])
   @@map("dm_message")
 }
 
@@ -145,42 +167,58 @@ model DmMessage {
 model Room {
   id String @db.VarChar(25) @id @default(cuid())
   name String @db.VarChar(100)
-  masterId Int @map("master_id")
-  profileType String @map("profile_type")
-  profileData String @map("profile_data")
+  masterProfileId Int @map("master_profile_id")
+  iconType String @map("icon_type")
+  iconData String @map("icon_data")
   createdAt DateTime @default(now()) @map("created_at")
-  master UserProfile @relation(fields: [masterId], references: [id], onDelete: Cascade)
-  roomUser RoomUser[]
-  roomChat RoomMessage[]
+  masterProfile Profile @relation(fields: [masterProfileId], references: [id], onDelete: Cascade)
+  participant RoomParticipant[]
+  message RoomMessage[]
+  joinCode RoomJoinCode[]
+  @@index([name])
   @@map("room")
 }
 
-model RoomUser {
+model RoomJoinCode {
+  id Int @id @default(autoincrement())
+  code String @db.VarChar(25) @unique @default(cuid())
+  authorProfileId Int @map("author_profile_id")
+  roomId String @db.VarChar(25) @map("room_id")
+  expiresAt DateTime @map("expiresAt")
+  authorProfile Profile @relation(fields: [authorProfileId], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  @@index([code, roomId])
+  @@index([roomId])
+  @@index([expiresAt])
+  @@map("room_join_code")
+}
+
+model RoomParticipant {
   id Int @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
-  userProfileId Int @map("user_profile_id")
+  profileId Int @map("user_profile_id")
   joinedAt DateTime @default(now()) @map("joined_at")
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  userProfile UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
-  @@unique([roomId, userProfileId])
-  @@index([userProfileId])
-  @@map("room_user")
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  @@unique([roomId, profileId])
+  @@index([profileId])
+  @@map("room_participant")
 }
 
 model RoomMessage {
   id Int @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
-  sendedUserProfileId Int @map("sended_user_profile_id")
+  profileId Int @map("profile_id")
   contentType String @map("content_type")
   content String
   isPinned Boolean @map("is_pinned")
-  sendedAt DateTime @default(now()) @map("sended_at")
+  sentAt DateTime @default(now()) @map("sent_at")
   updatedAt DateTime? @map("updated_at")
   isEdited Boolean @default(false) @map("is_edited")
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  sendedUserProfile UserProfile @relation(fields: [sendedUserProfileId], references: [id])
+  profile Profile @relation(fields: [profileId], references: [id])
   @@index([roomId, isPinned])
   @@index([roomId])
-  @@index([sendedAt])
+  @@index([sentAt])
   @@map("room_message")
 }

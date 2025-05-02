@@ -1,0 +1,57 @@
+import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
+import { useSearchParams } from 'next/navigation'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function GET(request: NextRequest) {
+	try {
+		const searchParams = useSearchParams()
+
+		const profiles = await prisma.profile.findMany({
+			where: {
+				tag: {
+					startsWith: searchParams.get('tag') ?? '',
+				},
+			},
+			orderBy: {
+				tag: 'asc',
+			},
+		})
+
+		return NextResponse.json<
+			SuccessResponse<
+				{
+					tag: string
+					id: number
+					userId: number
+					statusType: string
+					statusId: number
+					name: string | null
+					information: string
+					image: string
+					isCompany: boolean
+					isOnline: boolean
+					createdAt: Date
+				}[]
+			>
+		>(
+			{
+				status: 'success',
+				code: 0x0,
+				message: '프로필 목록을 조회하였습니다.',
+				data: profiles,
+			},
+			{ status: 200 }
+		)
+	} catch {
+		return NextResponse.json<ErrorResponse>(
+			{
+				status: 'error',
+				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
+				message: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.message,
+			},
+			{ status: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.status }
+		)
+	}
+}
