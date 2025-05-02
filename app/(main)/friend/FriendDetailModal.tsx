@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 
 interface FriendDetailModalProps {
 	friendRequestId: number
+	type: 'send' | 'receive'
 	onClose: () => void
 	onAccept?: () => void
 	onCancel?: () => void
@@ -14,6 +15,7 @@ interface FriendDetailModalProps {
 
 export default function FriendDetailModal({
 	friendRequestId,
+	type,
 	onClose,
 	onAccept,
 	onCancel,
@@ -77,12 +79,22 @@ export default function FriendDetailModal({
 					)}
 
 					<div className="flex justify-end gap-2 mt-4">
-						<button
-							onClick={onCancel}
-							className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-						>
-							✖️ 취소
-						</button>
+						{type === 'receive' && (
+							<button
+								onClick={onAccept}
+								className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+							>
+								⭕ 승인
+							</button>
+						)}
+						{type === 'send' && (
+							<button
+								onClick={onCancel}
+								className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+							>
+								✖️ 취소
+							</button>
+						)}
 						<button
 							onClick={onClose}
 							className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded"

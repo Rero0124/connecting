@@ -14,10 +14,7 @@ export default function FriendSendPage() {
 		setSelectedFriendRequestId(friendRequestId)
 	}
 
-	const handleFriendRequestChange = async (
-		friendRequestId: number,
-		type: 'accept' | 'cancel'
-	) => {
+	const handleFriendRequestCancel = async (friendRequestId: number) => {
 		try {
 			const response: SuccessResponse | ErrorResponse = await fetch(
 				`/api/friend-requests/${friendRequestId}`,
@@ -26,7 +23,7 @@ export default function FriendSendPage() {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ type: type }),
+					body: JSON.stringify({ type: 'cancel' }),
 				}
 			).then((res) => res.json())
 
@@ -63,7 +60,7 @@ export default function FriendSendPage() {
 									className="text-red-600 hover:underline"
 									onClick={(e) => {
 										e.stopPropagation() // 이벤트 버블링 방지
-										handleFriendRequestChange(friendRequest.id, 'cancel')
+										handleFriendRequestCancel(friendRequest.id)
 									}}
 								>
 									❌
@@ -77,16 +74,11 @@ export default function FriendSendPage() {
 			{selectedFriendRequestId && (
 				<FriendDetailModal
 					friendRequestId={selectedFriendRequestId}
+					type="send"
 					onClose={() => setSelectedFriendRequestId(undefined)}
-					onAccept={() => {
-						if (selectedFriendRequestId) {
-							handleFriendRequestChange(selectedFriendRequestId, 'accept')
-							setSelectedFriendRequestId(undefined)
-						}
-					}}
 					onCancel={() => {
 						if (selectedFriendRequestId) {
-							handleFriendRequestChange(selectedFriendRequestId, 'cancel')
+							handleFriendRequestCancel(selectedFriendRequestId)
 							setSelectedFriendRequestId(undefined)
 						}
 					}}
