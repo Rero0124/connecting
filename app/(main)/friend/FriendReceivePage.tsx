@@ -1,11 +1,9 @@
 'use client'
 
-import { useAppSelector } from "@/src/lib/hooks"
+import { useAppSelector } from '@/src/lib/hooks'
 
 export default function FriendReceivePage() {
-	const friendsData = useAppSelector(
-		state => state.friendsData
-	)
+	const friendsData = useAppSelector((state) => state.friendsData)
 
 	return (
 		<div className="p-6">

@@ -1,12 +1,11 @@
 import prisma from '@/src/lib/prisma'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { useSearchParams } from 'next/navigation'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
 	try {
-		const searchParams = useSearchParams()
+		const searchParams = request.nextUrl.searchParams
 
 		const profiles = await prisma.profile.findMany({
 			where: {

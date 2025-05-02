@@ -20,11 +20,10 @@ export default function Join() {
 		if (tagRef.current && tagRef.current.value !== '') {
 			fetch(`/api/profiles/${tagRef.current.value}`, {
 				cache: 'no-cache',
+			}).then((res) => {
+				setTagUsed(res.status !== 404)
+				setTagFetching(false)
 			})
-				.then((res) => {
-					setTagUsed(res.status !== 404)
-					setTagFetching(false)
-				})
 		} else {
 			setTagUsed(true)
 			setTagFetching(false)

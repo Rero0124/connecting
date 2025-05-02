@@ -9,8 +9,15 @@ import { socket } from '@/src/lib/socket'
 import { useEffect, useState } from 'react'
 import Nav from '@/app/(main)/Nav'
 import { setRooms } from '@/src/lib/features/roomData/roomDataSlice'
-import { setAllowedDmSession, setNotAllowedDmSession } from '@/src/lib/features/dmData/dmDataSlice'
-import { setFriends, setReceivedFriendRequests, setSentFriendRequests } from '@/src/lib/features/friendData/friendDataSlice'
+import {
+	setAllowedDmSession,
+	setNotAllowedDmSession,
+} from '@/src/lib/features/dmData/dmDataSlice'
+import {
+	setFriends,
+	setReceivedFriendRequests,
+	setSentFriendRequests,
+} from '@/src/lib/features/friendData/friendDataSlice'
 import ChangeProfileModal from './changeProfileModal'
 import LoginModal from './loginModal'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
@@ -40,102 +47,146 @@ export default function RootLayout({
 	const dispatch = useAppDispatch()
 
 	async function getSaveData() {
-		const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
-			cache: 'no-store',
-		}).then(res => res.json());
+		const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse =
+			await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+				cache: 'no-store',
+			}).then((res) => res.json())
 
-		if(sessionResponse.status === 'success' && sessionResponse.data && sessionResponse.data.authType === 'profile') {
-			const profileResponse: SuccessResponse<{
-				image: string;
-				tag: string;
-				id: number;
-				userId: number;
-				statusType: string;
-				statusId: number;
-				name: string | null;
-				information: string;
-				isCompany: boolean;
-				isOnline: boolean;
-				createdAt: Date;
-		}> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data.userId}/profiles/${sessionResponse.data.profileId}`, {
-				cache: 'no-store',
-			}).then(res => res.json());
-			const roomsResponse: SuccessResponse<{
-				id: string;
-				name: string;
-				createdAt: Date;
-				masterProfileId: number;
-				iconType: string;
-				iconData: string;
-		}[]> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, { cache: 'no-store' }).then(res => res.json())
-			const dmSessionResponse: SuccessResponse<{
-				allowedDmSessions: {
-					name: string
-					id: string
-					iconType: string
-					iconData: string
-					createdAt: Date
-				}[]
-				notAllowedDmSessions: {
-					name: string
-					id: string
-					iconType: string
-					iconData: string
-					createdAt: Date
-				}[]
-			}> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`, {
-				cache: 'no-store',
-			}).then(res => res.json())
-			const friendsResponse: SuccessResponse<{
-				image: string;
-				tag: string;
-				statusType: string;
-				statusId: number;
-				name: string | null;
-				isOnline: boolean;
-				createdAt: Date;
-			}[]> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, { cache: 'no-store' }).then(res => res.json())
-			const friendRequestsResponse: 
-			SuccessResponse<{
-				receivedfriendRequests: {
-					profile: {
+		if (
+			sessionResponse.status === 'success' &&
+			sessionResponse.data &&
+			sessionResponse.data.authType === 'profile'
+		) {
+			const profileResponse:
+				| SuccessResponse<{
+						image: string
+						tag: string
+						id: number
+						userId: number
 						statusType: string
 						statusId: number
-						tag: string
 						name: string | null
-						image: string
+						information: string
+						isCompany: boolean
 						isOnline: boolean
 						createdAt: Date
-					}
-					id: number
-					sentAt: Date
-				}[]
-				sentfriendRequests: {
-					profile: {
-						name: string | null
-						image: string
-						statusType: string
-						statusId: number
-						tag: string
-						isOnline: boolean
-						createdAt: Date
-					}
-					id: number
-					sentAt: Date
-				}[]
-			}> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`, { cache: 'no-store' }).then(res => res.json())
-		
-	
+				  }>
+				| ErrorResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data.userId}/profiles/${sessionResponse.data.profileId}`,
+				{
+					cache: 'no-store',
+				}
+			).then((res) => res.json())
+			const roomsResponse:
+				| SuccessResponse<
+						{
+							id: string
+							name: string
+							createdAt: Date
+							masterProfileId: number
+							iconType: string
+							iconData: string
+						}[]
+				  >
+				| ErrorResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/rooms`,
+				{ cache: 'no-store' }
+			).then((res) => res.json())
+			const dmSessionResponse:
+				| SuccessResponse<{
+						allowedDmSessions: {
+							name: string
+							id: string
+							iconType: string
+							iconData: string
+							createdAt: Date
+						}[]
+						notAllowedDmSessions: {
+							name: string
+							id: string
+							iconType: string
+							iconData: string
+							createdAt: Date
+						}[]
+				  }>
+				| ErrorResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`,
+				{
+					cache: 'no-store',
+				}
+			).then((res) => res.json())
+			const friendsResponse:
+				| SuccessResponse<
+						{
+							image: string
+							tag: string
+							statusType: string
+							statusId: number
+							name: string | null
+							isOnline: boolean
+							createdAt: Date
+						}[]
+				  >
+				| ErrorResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/friends`,
+				{ cache: 'no-store' }
+			).then((res) => res.json())
+			const friendRequestsResponse:
+				| SuccessResponse<{
+						receivedfriendRequests: {
+							profile: {
+								statusType: string
+								statusId: number
+								tag: string
+								name: string | null
+								image: string
+								isOnline: boolean
+								createdAt: Date
+							}
+							id: number
+							sentAt: Date
+						}[]
+						sentfriendRequests: {
+							profile: {
+								name: string | null
+								image: string
+								statusType: string
+								statusId: number
+								tag: string
+								isOnline: boolean
+								createdAt: Date
+							}
+							id: number
+							sentAt: Date
+						}[]
+				  }>
+				| ErrorResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
+				{ cache: 'no-store' }
+			).then((res) => res.json())
+
 			if (
-				profileResponse.status === 'success' && roomsResponse.status === 'success' && dmSessionResponse.status === 'success' && friendsResponse.status === 'success' && friendRequestsResponse.status === 'success'
+				profileResponse.status === 'success' &&
+				roomsResponse.status === 'success' &&
+				dmSessionResponse.status === 'success' &&
+				friendsResponse.status === 'success' &&
+				friendRequestsResponse.status === 'success'
 			) {
 				dispatch(setProfile(profileResponse.data))
 				dispatch(setRooms(roomsResponse.data))
 				dispatch(setAllowedDmSession(dmSessionResponse.data.allowedDmSessions))
-				dispatch(setNotAllowedDmSession(dmSessionResponse.data.notAllowedDmSessions))
+				dispatch(
+					setNotAllowedDmSession(dmSessionResponse.data.notAllowedDmSessions)
+				)
 				dispatch(setFriends(friendsResponse.data))
-				dispatch(setSentFriendRequests(friendRequestsResponse.data.sentfriendRequests))
-				dispatch(setReceivedFriendRequests(friendRequestsResponse.data.receivedfriendRequests))
+				dispatch(
+					setSentFriendRequests(friendRequestsResponse.data.sentfriendRequests)
+				)
+				dispatch(
+					setReceivedFriendRequests(
+						friendRequestsResponse.data.receivedfriendRequests
+					)
+				)
 				dispatch(setInitLoadEnd())
 			}
 		}
@@ -178,10 +229,17 @@ export default function RootLayout({
 	useEffect(() => {
 		if (!saveData.initLoad) {
 			getSaveData().then(async () => {
-				const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, { cache: 'no-store' })
-					.then((res) => res.json())
-				if(sessionResponse.status === 'success' && sessionResponse.data.authType === 'profile') {
-					socket.emit('send userProfileId', sessionResponse.data.profileId);
+				const sessionResponse:
+					| SuccessResponse<VerifySessionType>
+					| ErrorResponse = await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL}/session`,
+					{ cache: 'no-store' }
+				).then((res) => res.json())
+				if (
+					sessionResponse.status === 'success' &&
+					sessionResponse.data.authType === 'profile'
+				) {
+					socket.emit('send userProfileId', sessionResponse.data.profileId)
 				}
 			})
 		}

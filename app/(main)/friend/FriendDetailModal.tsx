@@ -29,7 +29,8 @@ export default function FriendDetailModal({
 						{friendRequest.profile.name || '(미입력)'}
 					</p>
 					<p className="mb-1">
-						<span className="text-gray-400">태그:</span> {friendRequest.profile.tag}
+						<span className="text-gray-400">태그:</span>{' '}
+						{friendRequest.profile.tag}
 					</p>
 					<p className="mb-1">
 						<span className="text-gray-400">요청일:</span>{' '}

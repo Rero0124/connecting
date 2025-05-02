@@ -4,10 +4,10 @@ import FriendDetailModal from './FriendDetailModal'
 import { useAppSelector } from '@/src/lib/hooks'
 import { FriendRequestType } from '@/src/lib/features/friendData/friendDataSlice'
 
-
 export default function FriendSendPage() {
-	const friendsData = useAppSelector(state => state.friendsData)
-	const [selectedFriendRequest, setSelectedFriendRequest] = useState<FriendRequestType | null>(null)
+	const friendsData = useAppSelector((state) => state.friendsData)
+	const [selectedFriendRequest, setSelectedFriendRequest] =
+		useState<FriendRequestType | null>(null)
 
 	// row 클릭 시 호출되는 함수
 	const handleRowClick = (friendRequest: FriendRequestType) => {

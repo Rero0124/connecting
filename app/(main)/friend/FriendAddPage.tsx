@@ -11,13 +11,16 @@ export default function FriendAddPage() {
 		if (!tag.trim()) return
 
 		try {
-			const response: SuccessResponse | ErrorResponse = await fetch('/api/friend-requests', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ tag: tag }),
-			}).then(res => res.json())
+			const response: SuccessResponse | ErrorResponse = await fetch(
+				'/api/friend-requests',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ tag: tag }),
+				}
+			).then((res) => res.json())
 
 			if (response.status === 'success') {
 				setStatus('success')
