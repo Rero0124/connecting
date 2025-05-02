@@ -2,14 +2,38 @@
 import { useEffect, useState } from 'react'
 import FriendDetailModal from './FriendDetailModal'
 import { useAppSelector } from '@/src/lib/hooks'
+import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 
 export default function FriendSendPage() {
 	const friendsData = useAppSelector((state) => state.friendsData)
-	const [selectedFriendRequest, setSelectedFriendRequest] = useState<number>()
+	const [selectedFriendRequestId, setSelectedFriendRequestId] =
+		useState<number>()
 
 	// row 클릭 시 호출되는 함수
 	const handleRowClick = (friendRequestId: number) => {
-		setSelectedFriendRequest(friendRequestId)
+		setSelectedFriendRequestId(friendRequestId)
+	}
+
+	const handleFriendRequestChange = async (
+		friendRequestId: number,
+		type: 'accept' | 'cancel'
+	) => {
+		try {
+			const response: SuccessResponse | ErrorResponse = await fetch(
+				`/api/friend-requests/${friendRequestId}`,
+				{
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ type: type }),
+				}
+			).then((res) => res.json())
+
+			alert(response.message)
+		} catch (err) {
+			alert('알 수 없는 오류가 발생했어요요')
+		}
 	}
 
 	return (
@@ -39,7 +63,7 @@ export default function FriendSendPage() {
 									className="text-red-600 hover:underline"
 									onClick={(e) => {
 										e.stopPropagation() // 이벤트 버블링 방지
-										alert('취소 기능은 아직 구현되지 않았습니다.')
+										handleFriendRequestChange(friendRequest.id, 'cancel')
 									}}
 								>
 									❌
@@ -50,17 +74,21 @@ export default function FriendSendPage() {
 				</ul>
 			)}
 
-			{selectedFriendRequest && (
+			{selectedFriendRequestId && (
 				<FriendDetailModal
-					friendRequest={selectedFriendRequest}
-					onClose={() => setSelectedFriendRequest(undefined)}
+					friendRequestId={selectedFriendRequestId}
+					onClose={() => setSelectedFriendRequestId(undefined)}
 					onAccept={() => {
-						alert('수락 기능은 아직 미구현입니다.')
-						setSelectedFriendRequest(undefined)
+						if (selectedFriendRequestId) {
+							handleFriendRequestChange(selectedFriendRequestId, 'accept')
+							setSelectedFriendRequestId(undefined)
+						}
 					}}
 					onCancel={() => {
-						alert('취소 기능은 아직 미구현입니다.')
-						setSelectedFriendRequest(undefined)
+						if (selectedFriendRequestId) {
+							handleFriendRequestChange(selectedFriendRequestId, 'cancel')
+							setSelectedFriendRequestId(undefined)
+						}
 					}}
 				/>
 			)}

@@ -11,6 +11,7 @@ export async function PATCH(
 ) {
 	try {
 		const { requestId } = await params
+		const { type }: { type?: 'accept' | 'cancel' } = await request.json()
 		const requestIdNumber = Number(requestId)
 		const sessionCheck = await verifySession()
 
@@ -36,17 +37,32 @@ export async function PATCH(
 			)
 		}
 
+		if (type !== 'accept' && type !== 'cancel') {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '인자가 잘못되었습니다. type 을 다시 확인해주세요.',
+				},
+				{ status: 400 }
+			)
+		}
+
 		const friendRequest = await prisma.friendRequest.findFirst({
 			where: {
 				id: requestIdNumber,
-				byProfile: {
-					id: sessionCheck.profileId,
-					userId: sessionCheck.userId,
-				},
 			},
 		})
 
-		if (!friendRequest) {
+		if (
+			!(
+				friendRequest &&
+				((type === 'accept' &&
+					friendRequest.profileId === sessionCheck.profileId) ||
+					(type === 'cancel' &&
+						friendRequest.requestProfileId === sessionCheck.profileId))
+			)
+		) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -57,12 +73,19 @@ export async function PATCH(
 			)
 		}
 
-		await prisma.friend.create({
-			data: {
-				profileId: friendRequest.profileId,
-				friendProfileId: friendRequest.requestProfileId,
-			},
-		})
+		if (type === 'accept') {
+			await prisma.friend.create({
+				data: {
+					profileId: friendRequest.profileId,
+					friendProfileId: friendRequest.requestProfileId,
+				},
+			})
+
+			socket.emit('update_friends', [
+				friendRequest.profileId,
+				friendRequest.requestProfileId,
+			])
+		}
 
 		await prisma.friendRequest.delete({
 			where: {
@@ -75,14 +98,25 @@ export async function PATCH(
 			friendRequest.requestProfileId,
 		])
 
-		return NextResponse.json<SuccessResponse>(
-			{
-				status: 'success',
-				code: 0x0,
-				message: '친구신청을 승인하였습니다.',
-			},
-			{ status: 200 }
-		)
+		if (type === 'accept') {
+			return NextResponse.json<SuccessResponse>(
+				{
+					status: 'success',
+					code: 0x0,
+					message: '친구신청을 승인하였습니다.',
+				},
+				{ status: 201 }
+			)
+		} else {
+			return NextResponse.json<SuccessResponse>(
+				{
+					status: 'success',
+					code: 0x0,
+					message: '친구신청을 취소하였습니다.',
+				},
+				{ status: 201 }
+			)
+		}
 	} catch {
 		return NextResponse.json<ErrorResponse>(
 			{

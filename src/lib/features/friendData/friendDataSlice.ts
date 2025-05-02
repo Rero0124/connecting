@@ -52,41 +52,54 @@ export const {
 	setFilterFriends,
 } = friendDataSlice.actions
 
-export const getFriends = (state: RootState, tag?: string) => {
+export const getFriends = (state: FriendDataState, tag?: string) => {
 	if (tag) {
-		return state.friendsData.friends.find((friend) => friend.tag === tag)
+		return state.friends.find((friend) => friend.tag === tag)
 	} else {
-		return state.friendsData.friends
+		return state.friends
 	}
 }
 
-export const getSentAddFriends = (state: RootState, tag?: string) => {
+export const getFriendRequests = (
+	state: FriendDataState,
+	requestId?: number
+) => {
+	if (requestId) {
+		return [...state.sentFriendRequests, ...state.receivedFriendRequests].find(
+			(sentFriendRequest) => sentFriendRequest.id === requestId
+		)
+	} else {
+		return state.sentFriendRequests
+	}
+}
+
+export const getSentAddFriends = (state: FriendDataState, tag?: string) => {
 	if (tag) {
-		return state.friendsData.sentFriendRequests.find(
+		return state.sentFriendRequests.find(
 			(sentFriendRequest) => sentFriendRequest.profile.tag === tag
 		)
 	} else {
-		return state.friendsData.sentFriendRequests
+		return state.sentFriendRequests
 	}
 }
 
-export const getReceivedAddFriends = (state: RootState, tag?: string) => {
+export const getReceivedAddFriends = (state: FriendDataState, tag?: string) => {
 	if (tag) {
-		return state.friendsData.receivedFriendRequests.find(
+		return state.receivedFriendRequests.find(
 			(receivedFriendRequest) => receivedFriendRequest.profile.tag === tag
 		)
 	} else {
-		return state.friendsData.receivedFriendRequests
+		return state.receivedFriendRequests
 	}
 }
 
-export const getFilterFriends = (state: RootState, tag?: string) => {
+export const getFilterFriends = (state: FriendDataState, tag?: string) => {
 	if (tag) {
-		return state.friendsData.filterFriends.find(
+		return state.filterFriends.find(
 			(filterFriend) => filterFriend.profile.tag === tag
 		)
 	} else {
-		return state.friendsData.filterFriends
+		return state.filterFriends
 	}
 }
 
