@@ -1,5 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
+import { socket } from '@/src/lib/socket'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
@@ -25,6 +26,8 @@ export async function DELETE(
 		const friend = await prisma.friend.findFirst({
 			select: {
 				id: true,
+				profileId: true,
+				friendProfileId: true,
 			},
 			where: {
 				byProfile: {
@@ -53,6 +56,8 @@ export async function DELETE(
 				id: friend.id,
 			},
 		})
+
+		socket.emit('update_friends', [friend.profileId, friend.friendProfileId])
 
 		return NextResponse.json<SuccessResponse>(
 			{

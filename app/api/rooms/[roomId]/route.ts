@@ -1,5 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
+import { socket } from '@/src/lib/socket'
 import { ErrorResponse, RoomDetail, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
@@ -198,6 +199,22 @@ export async function PATCH(
 			},
 		})
 
+		const participantProfileIds = await prisma.roomParticipant.findMany({
+			where: {
+				roomId: oldRoom.id,
+			},
+			select: {
+				profileId: true,
+			},
+		})
+
+		socket.emit(
+			'update_rooms',
+			participantProfileIds.map(
+				(participantProfileId) => participantProfileId.profileId
+			)
+		)
+
 		return NextResponse.json<SuccessResponse>(
 			{
 				status: 'success',
@@ -276,11 +293,27 @@ export async function DELETE(
 			)
 		}
 
+		const participantProfileIds = await prisma.roomParticipant.findMany({
+			where: {
+				roomId: room.id,
+			},
+			select: {
+				profileId: true,
+			},
+		})
+
 		await prisma.room.delete({
 			where: {
 				id: room.id,
 			},
 		})
+
+		socket.emit(
+			'update_rooms',
+			participantProfileIds.map(
+				(participantProfileId) => participantProfileId.profileId
+			)
+		)
 
 		return NextResponse.json<SuccessResponse>(
 			{

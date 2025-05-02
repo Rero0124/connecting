@@ -31,7 +31,7 @@ import {
 	SuccessResponse,
 } from '@/src/types/api'
 import { VerifySessionType } from '@/src/lib/session'
-import { getSession, promiseAll } from '@/src/lib/util'
+import { getSession, promiseAll, SessionType } from '@/src/lib/util'
 
 export default function RootLayout({
 	children,
@@ -44,92 +44,131 @@ export default function RootLayout({
 	const [profiles, setProfiles] = useState<ProfileList>([])
 	const [isConnected, setIsConnected] = useState(false)
 	const [transport, setTransport] = useState('N/A')
+	const [session, setSession] = useState<SessionType>()
 
-	const saveData = useAppSelector((state) => state.saveData)
-	const dispatch = useAppDispatch()
-
-	async function getSaveData() {
-		const session = await getSession()
-
-		if (session.isLogin && session.authType === 'profile') {
-			const [
-				profileResponse,
-				roomsResponse,
-				dmSessionResponse,
-				friendsResponse,
-				friendRequestsResponse,
-			] = await promiseAll<
-				[
-					SuccessResponse<ProfileDetail> | ErrorResponse,
-					SuccessResponse<RoomList> | ErrorResponse,
-					(
-						| SuccessResponse<{
-								allowedDmSessions: DmSessionList
-								notAllowedDmSessions: DmSessionList
-						  }>
-						| ErrorResponse
-					),
-					SuccessResponse<FriendList> | ErrorResponse,
-					(
-						| SuccessResponse<{
-								receivedfriendRequests: FriendRequestList
-								sentfriendRequests: FriendRequestList
-						  }>
-						| ErrorResponse
-					),
-				]
-			>([
-				fetch(
+	const updateProfile = async () => {
+		if (session && session.isLogin && session.authType === 'profile') {
+			const profileResponse: SuccessResponse<ProfileDetail> | ErrorResponse =
+				await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles/${session.profileId}`,
 					{
 						cache: 'no-store',
 					}
-				).then((res) => res.json()),
-				fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
-					cache: 'no-store',
-				}).then((res) => res.json()),
-				fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`, {
-					cache: 'no-store',
-				}).then((res) => res.json()),
-				fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, {
-					cache: 'no-store',
-				}).then((res) => res.json()),
-				fetch(`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`, {
-					cache: 'no-store',
-				}).then((res) => res.json()),
-			])
+				).then((res) => res.json())
 
-			if (
-				profileResponse.status === 'success' &&
-				roomsResponse.status === 'success' &&
-				dmSessionResponse.status === 'success' &&
-				friendsResponse.status === 'success' &&
-				friendRequestsResponse.status === 'success'
-			) {
+			if (profileResponse.status === 'success') {
 				dispatch(setProfile(profileResponse.data))
+				return true
+			}
+		}
+		return false
+	}
+
+	const updateRooms = async () => {
+		if (session && session.isLogin && session.authType === 'profile') {
+			const roomsResponse: SuccessResponse<RoomList> | ErrorResponse =
+				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
+					cache: 'no-store',
+				}).then((res) => res.json())
+
+			if (roomsResponse.status === 'success') {
 				dispatch(setRooms(roomsResponse.data))
-				dispatch(setAllowedDmSession(dmSessionResponse.data.allowedDmSessions))
+				return true
+			}
+		}
+		return false
+	}
+
+	const updateDmSessions = async () => {
+		if (session && session.isLogin && session.authType === 'profile') {
+			const dmSessionsResponse:
+				| SuccessResponse<{
+						allowedDmSessions: DmSessionList
+						notAllowedDmSessions: DmSessionList
+				  }>
+				| ErrorResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`,
+				{
+					cache: 'no-store',
+				}
+			).then((res) => res.json())
+
+			if (dmSessionsResponse.status === 'success') {
+				dispatch(setAllowedDmSession(dmSessionsResponse.data.allowedDmSessions))
 				dispatch(
-					setNotAllowedDmSession(dmSessionResponse.data.notAllowedDmSessions)
+					setNotAllowedDmSession(dmSessionsResponse.data.notAllowedDmSessions)
 				)
+				return true
+			}
+		}
+		return false
+	}
+
+	const updateFriends = async () => {
+		if (session && session.isLogin && session.authType === 'profile') {
+			const friendsResponse: SuccessResponse<FriendList> | ErrorResponse =
+				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, {
+					cache: 'no-store',
+				}).then((res) => res.json())
+
+			if (friendsResponse.status === 'success') {
 				dispatch(setFriends(friendsResponse.data))
-				dispatch(
-					setSentFriendRequests(friendRequestsResponse.data.sentfriendRequests)
-				)
+				return true
+			}
+		}
+		return false
+	}
+
+	const updateFriendRequests = async () => {
+		if (session && session.isLogin && session.authType === 'profile') {
+			const friendRequestsResponse:
+				| SuccessResponse<{
+						receivedfriendRequests: FriendRequestList
+						sentfriendRequests: FriendRequestList
+				  }>
+				| ErrorResponse = await fetch(
+				`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
+				{
+					cache: 'no-store',
+				}
+			).then((res) => res.json())
+
+			if (friendRequestsResponse.status === 'success') {
 				dispatch(
 					setReceivedFriendRequests(
 						friendRequestsResponse.data.receivedfriendRequests
 					)
 				)
+
+				return true
+			}
+		}
+		return false
+	}
+
+	const saveData = useAppSelector((state) => state.saveData)
+	const dispatch = useAppDispatch()
+
+	async function getSaveData() {
+		if (session && session.isLogin && session.authType === 'profile') {
+			if (
+				(
+					await promiseAll([
+						updateProfile(),
+						updateRooms(),
+						updateDmSessions(),
+						updateFriends(),
+						updateFriendRequests(),
+					])
+				).every((v) => v)
+			) {
 				dispatch(setInitLoadEnd())
 			}
 		}
 	}
 
 	async function changeProfile() {
-		const session = await getSession()
-
-		if (session.isLogin) {
+		if (session && session.isLogin) {
 			const profileResponse: SuccessResponse<ProfileList> | ErrorResponse =
 				await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles`
@@ -160,11 +199,16 @@ export default function RootLayout({
 	}
 
 	useEffect(() => {
-		if (!saveData.initLoad) {
+		if (!session) {
+			getSession().then((sessionData) => {
+				setSession(sessionData)
+			})
+		}
+
+		if (!saveData.initLoad && session) {
 			getSaveData().then(async () => {
-				const session = await getSession()
 				if (session.isLogin && session.authType === 'profile') {
-					socket.emit('send userProfileId', session.profileId)
+					socket.emit('set_profileId', session.profileId)
 				}
 			})
 		}
@@ -180,6 +224,26 @@ export default function RootLayout({
 			socket.io.engine.on('upgrade', (transport) => {
 				setTransport(transport.name)
 			})
+
+			socket.on('update_profile', () => {
+				updateProfile()
+			})
+
+			socket.on('update_rooms', () => {
+				updateRooms()
+			})
+
+			socket.on('update_dmSessions', () => {
+				updateDmSessions()
+			})
+
+			socket.on('update_friends', () => {
+				updateFriends()
+			})
+
+			socket.on('update_friendRequests', () => {
+				updateFriendRequests()
+			})
 		}
 
 		function onDisconnect() {
@@ -194,7 +258,7 @@ export default function RootLayout({
 			socket.off('connect', onConnect)
 			socket.off('disconnect', onDisconnect)
 		}
-	}, [])
+	}, [session])
 
 	return (
 		<div className="flex flex-col h-full">

@@ -1,5 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
+import { socket } from '@/src/lib/socket'
 import {
 	DmSessionParticipantList,
 	ErrorResponse,
@@ -177,6 +178,22 @@ export async function POST(
 				profileId: profile.id,
 			},
 		})
+
+		const participantProfileIds = await prisma.dmParticipant.findMany({
+			where: {
+				dmSessionId: dmSession.id,
+			},
+			select: {
+				profileId: true,
+			},
+		})
+
+		socket.emit(
+			'update_dmSessions',
+			participantProfileIds.map(
+				(participantProfileId) => participantProfileId.profileId
+			)
+		)
 
 		return NextResponse.json<SuccessResponse>(
 			{

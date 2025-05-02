@@ -1,5 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
+import { socket } from '@/src/lib/socket'
 import { ErrorResponse, RoomList, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
@@ -105,6 +106,8 @@ export async function POST(request: NextRequest) {
 				},
 			},
 		})
+
+		socket.emit('update_rooms', [sessionCheck.profileId])
 
 		return NextResponse.json<SuccessResponse>(
 			{

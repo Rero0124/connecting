@@ -52,7 +52,7 @@ export type ProfileDetail = {
 	createdAt: Date
 }
 
-export type FilterProfileList = {
+export type ProfileFilterList = {
 	id: number
 	profileId: number
 	filterProfileId: number

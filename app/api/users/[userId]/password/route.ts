@@ -3,7 +3,6 @@ import bcryptjs from 'bcryptjs'
 import { NextResponse, type NextRequest } from 'next/server'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { verifySession } from '@/src/lib/session'
 import { verifyUserIdInSession } from '@/src/lib/serverUtil'
 
 export async function PATCH(

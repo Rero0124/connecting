@@ -17,7 +17,7 @@ export function getCookieValue(name: string) {
 	}
 }
 
-export async function getSession(): Promise<
+export type SessionType =
 	| {
 			isLogin: false
 	  }
@@ -32,7 +32,8 @@ export async function getSession(): Promise<
 			userId: number
 			profileId: number
 	  }
-> {
+
+export async function getSession(): Promise<SessionType> {
 	const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse =
 		await fetch('/api/session').then((res) => res.json())
 	if (

@@ -3,6 +3,7 @@ import {
 	verifyProfileIdInSession,
 	verifyUserIdInSession,
 } from '@/src/lib/serverUtil'
+import { socket } from '@/src/lib/socket'
 import { ErrorResponse, ProfileDetail, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextResponse, type NextRequest } from 'next/server'
@@ -187,6 +188,22 @@ export async function PATCH(
 				statusId,
 			},
 		})
+
+		const friendProfileIds = await prisma.friend.findMany({
+			where: {
+				profileId: profile.id,
+			},
+			select: {
+				friendProfileId: true,
+			},
+		})
+
+		socket.emit(
+			'update_friends',
+			friendProfileIds.map((friendProfileId) => friendProfileId.friendProfileId)
+		)
+
+		socket.emit('update_profile', [profile.id])
 
 		return NextResponse.json<SuccessResponse>(
 			{

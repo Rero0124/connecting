@@ -1,5 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
+import { socket } from '@/src/lib/socket'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
@@ -69,6 +70,11 @@ export async function PATCH(
 			},
 		})
 
+		socket.emit('update_friendRequests', [
+			friendRequest.profileId,
+			friendRequest.requestProfileId,
+		])
+
 		return NextResponse.json<SuccessResponse>(
 			{
 				status: 'success',
@@ -135,6 +141,11 @@ export async function DELETE(
 				id: friendRequest.id,
 			},
 		})
+
+		socket.emit('update_friendRequests', [
+			friendRequest.profileId,
+			friendRequest.requestProfileId,
+		])
 
 		return NextResponse.json<SuccessResponse>(
 			{

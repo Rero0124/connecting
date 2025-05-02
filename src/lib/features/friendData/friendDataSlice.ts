@@ -1,6 +1,6 @@
 import { RootState } from '@/src/lib/store'
 import {
-	FilterProfileList,
+	ProfileFilterList,
 	FriendList,
 	FriendRequestList,
 } from '@/src/types/api'
@@ -10,7 +10,7 @@ interface FriendDataState {
 	friends: FriendList
 	sentFriendRequests: FriendRequestList
 	receivedFriendRequests: FriendRequestList
-	filterFriends: FilterProfileList
+	filterFriends: ProfileFilterList
 }
 
 const initialState: FriendDataState = {
@@ -39,7 +39,7 @@ export const friendDataSlice = createSlice({
 		) => {
 			state.receivedFriendRequests = action.payload
 		},
-		setFilterFriends: (state, action: PayloadAction<FilterProfileList>) => {
+		setFilterFriends: (state, action: PayloadAction<ProfileFilterList>) => {
 			state.filterFriends = action.payload
 		},
 	},

@@ -1,5 +1,6 @@
 import prisma from '@/src/lib/prisma'
 import { verifySession } from '@/src/lib/session'
+import { socket } from '@/src/lib/socket'
 import {
 	ErrorResponse,
 	RoomParticipantList,
@@ -196,6 +197,8 @@ export async function POST(
 				profileId: sessionCheck.profileId,
 			},
 		})
+
+		socket.emit('update_rooms', [sessionCheck.profileId])
 
 		return NextResponse.json<SuccessResponse>(
 			{

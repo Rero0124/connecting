@@ -150,9 +150,9 @@ model DmMessage {
   id Int @id @default(autoincrement())
   dmSessionId String @db.VarChar(25) @map("dm_session_id") 
   profileId Int @map("profile_id")
-  contentType String @map("content_type")
+  contentType String @default("text") @map("content_type")
   content String
-  isPinned Boolean @map("is_pinned")
+  isPinned Boolean @default(false) @map("is_pinned")
   sentAt DateTime @default(now()) @map("sent_at")
   updatedAt DateTime? @map("updated_at")
   dmSession DmSession @relation(fields: [dmSessionId], references: [id], onDelete: Cascade)
@@ -209,9 +209,9 @@ model RoomMessage {
   id Int @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
   profileId Int @map("profile_id")
-  contentType String @map("content_type")
+  contentType String @default("text") @map("content_type")
   content String
-  isPinned Boolean @map("is_pinned")
+  isPinned Boolean @default(false) @map("is_pinned")
   sentAt DateTime @default(now()) @map("sent_at")
   updatedAt DateTime? @map("updated_at")
   isEdited Boolean @default(false) @map("is_edited")
