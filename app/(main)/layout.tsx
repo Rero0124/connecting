@@ -123,8 +123,8 @@ export default function RootLayout({
 		if (session && session.isLogin && session.authType === 'profile') {
 			const friendRequestsResponse:
 				| SuccessResponse<{
-						receivedfriendRequests: FriendRequestList
-						sentfriendRequests: FriendRequestList
+						receivedFriendRequests: FriendRequestList
+						sentFriendRequests: FriendRequestList
 				  }>
 				| ErrorResponse = await fetch(
 				`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
@@ -136,8 +136,11 @@ export default function RootLayout({
 			if (friendRequestsResponse.status === 'success') {
 				dispatch(
 					setReceivedFriendRequests(
-						friendRequestsResponse.data.receivedfriendRequests
+						friendRequestsResponse.data.receivedFriendRequests
 					)
+				)
+				dispatch(
+					setSentFriendRequests(friendRequestsResponse.data.sentFriendRequests)
 				)
 
 				return true

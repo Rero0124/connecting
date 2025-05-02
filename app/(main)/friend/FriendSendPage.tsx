@@ -2,16 +2,14 @@
 import { useEffect, useState } from 'react'
 import FriendDetailModal from './FriendDetailModal'
 import { useAppSelector } from '@/src/lib/hooks'
-import { FriendRequestType } from '@/src/lib/features/friendData/friendDataSlice'
 
 export default function FriendSendPage() {
 	const friendsData = useAppSelector((state) => state.friendsData)
-	const [selectedFriendRequest, setSelectedFriendRequest] =
-		useState<FriendRequestType | null>(null)
+	const [selectedFriendRequest, setSelectedFriendRequest] = useState<number>()
 
 	// row 클릭 시 호출되는 함수
-	const handleRowClick = (friendRequest: FriendRequestType) => {
-		setSelectedFriendRequest(friendRequest)
+	const handleRowClick = (friendRequestId: number) => {
+		setSelectedFriendRequest(friendRequestId)
 	}
 
 	return (
@@ -25,7 +23,7 @@ export default function FriendSendPage() {
 						<li
 							key={friendRequest.profile.tag}
 							className="border p-3 rounded flex justify-between items-center hover:bg-gray-100"
-							onClick={() => handleRowClick(friendRequest)}
+							onClick={() => handleRowClick(friendRequest.id)}
 						>
 							<div className="cursor-pointer">
 								<div className="font-medium">
@@ -55,14 +53,14 @@ export default function FriendSendPage() {
 			{selectedFriendRequest && (
 				<FriendDetailModal
 					friendRequest={selectedFriendRequest}
-					onClose={() => setSelectedFriendRequest(null)}
+					onClose={() => setSelectedFriendRequest(undefined)}
 					onAccept={() => {
 						alert('수락 기능은 아직 미구현입니다.')
-						setSelectedFriendRequest(null)
+						setSelectedFriendRequest(undefined)
 					}}
 					onCancel={() => {
 						alert('취소 기능은 아직 미구현입니다.')
-						setSelectedFriendRequest(null)
+						setSelectedFriendRequest(undefined)
 					}}
 				/>
 			)}

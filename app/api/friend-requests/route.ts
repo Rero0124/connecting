@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 			)
 		}
 
-		const rawReceivedfriendRequests = await prisma.friendRequest.findMany({
+		const rawReceivedFriendRequests = await prisma.friendRequest.findMany({
 			where: {
 				byProfile: {
 					id: sessionCheck.profileId,
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		const rawSentfriendRequests = await prisma.friendRequest.findMany({
+		const rawSentFriendRequests = await prisma.friendRequest.findMany({
 			where: {
 				requestProfile: {
 					id: sessionCheck.profileId,
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		const receivedfriendRequests = rawReceivedfriendRequests.map(
+		const receivedFriendRequests = rawReceivedFriendRequests.map(
 			(friendRequest) => ({
 				id: friendRequest.id,
 				sentAt: friendRequest.sentAt,
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 			})
 		)
 
-		const sentfriendRequests = rawSentfriendRequests.map((friendRequest) => ({
+		const sentFriendRequests = rawSentFriendRequests.map((friendRequest) => ({
 			id: friendRequest.id,
 			sentAt: friendRequest.sentAt,
 			profileId: friendRequest.requestProfileId,
@@ -85,8 +85,8 @@ export async function GET(request: NextRequest) {
 
 		return NextResponse.json<
 			SuccessResponse<{
-				receivedfriendRequests: FriendRequestList
-				sentfriendRequests: FriendRequestList
+				receivedFriendRequests: FriendRequestList
+				sentFriendRequests: FriendRequestList
 			}>
 		>(
 			{
@@ -94,8 +94,8 @@ export async function GET(request: NextRequest) {
 				code: 0x0,
 				message: '친구신청 목록을 조회하였습니다.',
 				data: {
-					receivedfriendRequests,
-					sentfriendRequests,
+					receivedFriendRequests,
+					sentFriendRequests,
 				},
 			},
 			{ status: 200 }
@@ -159,12 +159,32 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
+		const friendRequest = await prisma.friendRequest.findFirst({
+			where: {
+				profileId: profile.id,
+				requestProfileId: sessionCheck.profileId,
+			},
+		})
+
+		if (friendRequest) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '이미 친구신청이 진행중입니다.',
+				},
+				{ status: 404 }
+			)
+		}
+
 		await prisma.friendRequest.create({
 			data: {
 				profileId: profile.id,
 				requestProfileId: sessionCheck.profileId,
 			},
 		})
+
+		console.log(';aaaa')
 
 		socket.emit('update_friendRequests', [sessionCheck.profileId])
 
