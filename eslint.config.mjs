@@ -7,7 +7,25 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
 	{
-		ignores: ['.yarn/**', 'node_modules/**', 'build/**', 'dist/**', '**/*.cjs'],
+		ignores: [
+			'node_modules/**',
+			'.yarn/**',
+			'.next/**',
+			'.pnp/**',
+			'.pnp.*',
+			'out/**',
+			'build/**',
+			'coverage/**',
+			'.DS_Store',
+			'*.pem',
+			'npm-debug.log*',
+			'yarn-debug.log*',
+			'yarn-error.log*',
+			'.pnpm-debug.log*',
+			'.vercel',
+			'*.tsbuildinfo',
+			'src/types/**',
+		],
 	},
 	...compat.config({
 		extends: ['next', 'plugin:prettier/recommended'],
