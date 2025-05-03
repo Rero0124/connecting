@@ -6,7 +6,11 @@ import { useState } from 'react'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 
 export default function FriendReceivePage() {
-	const friendsData = useAppSelector((state) => state.friendsData)
+	const initialRequests = useAppSelector(
+		(state) => state.friendsData.receivedFriendRequests
+	)
+	const [receivedFriendRequests, setReceivedFriendRequests] =
+		useState(initialRequests)
 	const [selectedFriendRequestId, setSelectedFriendRequestId] =
 		useState<number>()
 
@@ -24,21 +28,50 @@ export default function FriendReceivePage() {
 			).then((res) => res.json())
 
 			alert(response.message)
-		} catch (err) {
-			alert('알 수 없는 오류가 발생했어요요')
+
+			if (response.status === 'success') {
+				setReceivedFriendRequests((prev) =>
+					prev.filter((req) => req.id !== friendRequestId)
+				)
+				setSelectedFriendRequestId(undefined)
+			}
+		} catch {
+			alert('알 수 없는 오류가 발생했어요.')
+		}
+	}
+
+	const handleFriendRequestReject = async (friendRequestId: number) => {
+		try {
+			const response: SuccessResponse | ErrorResponse = await fetch(
+				`/api/friend-requests/${friendRequestId}`,
+				{
+					method: 'DELETE',
+				}
+			).then((res) => res.json())
+
+			alert(response.message)
+
+			if (response.status === 'success') {
+				setReceivedFriendRequests((prev) =>
+					prev.filter((req) => req.id !== friendRequestId)
+				)
+				setSelectedFriendRequestId(undefined)
+			}
+		} catch {
+			alert('알 수 없는 오류가 발생했어요.')
 		}
 	}
 
 	return (
 		<div className="p-6">
 			<h2 className="text-xl font-bold mb-4">받은 친구 신청</h2>
-			{friendsData.receivedFriendRequests.length === 0 ? (
+			{receivedFriendRequests.length === 0 ? (
 				<p>받은 친구 신청이 없습니다.</p>
 			) : (
 				<ul className="space-y-3">
-					{friendsData.receivedFriendRequests.map((friendRequest, index) => (
+					{receivedFriendRequests.map((friendRequest) => (
 						<li
-							key={index}
+							key={friendRequest.id}
 							className="border p-3 rounded flex justify-between items-center hover:bg-gray-100"
 						>
 							<div className="cursor-pointer">
@@ -50,20 +83,32 @@ export default function FriendReceivePage() {
 								</div>
 							</div>
 							<div className="flex gap-2">
+								{/* 수락 */}
 								<button
-									className="text-red-600 hover:underline"
+									className="text-green-600 hover:underline"
 									onClick={(e) => {
-										e.stopPropagation() // 이벤트 버블링 방지
+										e.stopPropagation()
 										handleFriendRequestAccept(friendRequest.id)
 									}}
 								>
 									⭕
+								</button>
+								{/* 거절 */}
+								<button
+									className="text-red-600 hover:underline"
+									onClick={(e) => {
+										e.stopPropagation()
+										handleFriendRequestReject(friendRequest.id)
+									}}
+								>
+									❌
 								</button>
 							</div>
 						</li>
 					))}
 				</ul>
 			)}
+
 			{selectedFriendRequestId && (
 				<FriendDetailModal
 					friendRequestId={selectedFriendRequestId}
@@ -72,7 +117,6 @@ export default function FriendReceivePage() {
 					onAccept={() => {
 						if (selectedFriendRequestId) {
 							handleFriendRequestAccept(selectedFriendRequestId)
-							setSelectedFriendRequestId(undefined)
 						}
 					}}
 				/>
