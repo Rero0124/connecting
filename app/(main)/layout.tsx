@@ -55,7 +55,6 @@ export default function RootLayout({
 						cache: 'no-store',
 					}
 				).then((res) => res.json())
-
 			if (profileResponse.status === 'success') {
 				dispatch(setProfile(profileResponse.data))
 				return true

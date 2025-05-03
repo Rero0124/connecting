@@ -154,7 +154,7 @@ export async function join(state: JoinFormState, formData: FormData) {
 	const data: {
 		result?: boolean
 		message: string
-	} = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/user`, {
+	} = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		cache: 'force-cache',

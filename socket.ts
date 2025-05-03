@@ -68,7 +68,8 @@ const io = new Server<
 	SocketData
 >(server, {
 	cors: {
-		origin: 'https://connecting.rero0124.com',
+		// origin: 'https://connecting.rero0124.com',
+		origin: `http://localhost:3000`,
 	},
 })
 
