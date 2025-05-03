@@ -31,7 +31,7 @@ model Profile {
   tag String @unique @map("user_tag")
   name String? @db.VarChar(100) @map("user_name")
   information String @db.VarChar(255)
-  image String @default("ㄴㄴ/image/profile/default.png")
+  image String @default("/image/profile/default.png")
   isCompany Boolean @default(false) @map("is_company")
   isOnline Boolean @default(false) @map("is_online")
   createdAt DateTime @default(now()) @map("created_at")
