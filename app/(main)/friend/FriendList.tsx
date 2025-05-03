@@ -30,7 +30,7 @@ export default function FriendList() {
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
-		if (!['all', 'online', 'favorite'].includes(selectedFriendSubMenu)) {
+		if (!['all', 'online', 'favorite'].includes(selectedFriendSubMenu ?? '')) {
 			dispatch(setSelectedFriendSubMenu('all'))
 		}
 	}, [])
