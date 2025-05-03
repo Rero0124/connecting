@@ -29,6 +29,7 @@ export interface ErrorResponse {
 export type ProfileList = ProfileDetail[]
 
 export type ProfileDetail = {
+	id: number
 	tag: string
 	statusType: string
 	statusId: number

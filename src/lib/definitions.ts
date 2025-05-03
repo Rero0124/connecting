@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ProfileList } from '../types/api'
 
 export const LoginFormSchema = z.object({
 	profileId: z
@@ -43,19 +44,7 @@ export type LoginFormState =
 			}
 			message?: string
 			isLogin?: boolean
-			profiles?: {
-				tag: string
-				name: string | null
-				id: number
-				userId: number
-				statusType: string
-				statusId: number
-				information: string
-				image: string
-				isCompany: boolean
-				isOnline: boolean
-				createdAt: Date
-			}[]
+			profiles?: ProfileList
 	  }
 	| undefined
 
@@ -73,6 +62,7 @@ export type JoinFormState =
 				password?: string[]
 			}
 			message?: string
+			isJoin?: boolean
 	  }
 	| undefined
 

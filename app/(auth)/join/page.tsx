@@ -2,7 +2,8 @@
 import { join } from '@/app/actions/auth'
 import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import Link from 'next/link'
-import { useActionState, useRef, useState } from 'react'
+import { redirect } from 'next/navigation'
+import { useActionState, useEffect, useRef, useState } from 'react'
 
 export default function Join() {
 	const [state, action, pending] = useActionState(join, undefined)
@@ -29,6 +30,12 @@ export default function Join() {
 			setTagFetching(false)
 		}
 	}
+
+	useEffect(() => {
+		if (state?.isJoin) {
+			redirect('/login')
+		}
+	}, [state])
 
 	return (
 		<form

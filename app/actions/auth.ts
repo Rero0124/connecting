@@ -5,7 +5,7 @@ import {
 	LoginFormSchema,
 } from '@/src/lib/definitions'
 import { VerifySessionType } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
 import { redirect } from 'next/navigation'
 
 export async function login(
@@ -89,25 +89,10 @@ export async function login(
 		}
 	}
 
-	const profilesResponse:
-		| SuccessResponse<
-				{
-					tag: string
-					name: string | null
-					id: number
-					userId: number
-					statusType: string
-					statusId: number
-					information: string
-					image: string
-					isCompany: boolean
-					isOnline: boolean
-					createdAt: Date
-				}[]
-		  >
-		| ErrorResponse = await fetch(
-		`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data?.userId}/profiles`
-	).then((res) => res.json())
+	const profilesResponse: SuccessResponse<ProfileList> | ErrorResponse =
+		await fetch(
+			`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data?.userId}/profiles`
+		).then((res) => res.json())
 
 	if (profilesResponse.status === 'error') {
 		return {
@@ -129,7 +114,10 @@ export async function login(
 	}
 }
 
-export async function join(state: JoinFormState, formData: FormData) {
+export async function join(
+	state: JoinFormState,
+	formData: FormData
+): Promise<JoinFormState> {
 	const validatedFields = JoinFormSchema.safeParse({
 		tag: formData.get('tag'),
 		name: formData.get('name'),
@@ -151,32 +139,37 @@ export async function join(state: JoinFormState, formData: FormData) {
 
 	const { tag, name, email, password } = validatedFields.data
 
-	const data: {
-		result?: boolean
-		message: string
-	} = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		cache: 'force-cache',
-		body: JSON.stringify({
-			tag,
-			name,
-			email,
-			password,
-		}),
-	}).then((res) => {
-		if (res.status === 200) {
-			redirect('/login')
+	const userResponse: SuccessResponse | ErrorResponse = await fetch(
+		`${process.env.NEXT_PUBLIC_API_URL}/users`,
+		{
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			cache: 'no-cache',
+			body: JSON.stringify({
+				tag,
+				name,
+				email,
+				password,
+			}),
 		}
+	).then((res) => res.json())
 
-		return res.json()
-	})
+	if (userResponse.status === 'error') {
+		return {
+			data: {
+				email: formData.get('email')?.toString(),
+				password: formData.get('password')?.toString(),
+			},
+			message: userResponse.message,
+		}
+	}
 
 	return {
 		data: {
 			email: formData.get('email')?.toString(),
 			password: formData.get('password')?.toString(),
 		},
-		message: data.message,
+		message: userResponse.message,
+		isJoin: true,
 	}
 }
