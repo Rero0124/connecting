@@ -38,6 +38,9 @@ export async function GET(
 		}
 
 		const profile = await prisma.profile.findFirst({
+			omit: {
+				userId: true,
+			},
 			where: {
 				userId: data.response.data?.userId,
 				id: numberProfileId,

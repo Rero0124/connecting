@@ -11,16 +11,8 @@ export async function GET(
 		const { tag } = await params
 
 		const profile = await prisma.profile.findFirst({
-			select: {
-				image: true,
-				createdAt: true,
-				name: true,
-				tag: true,
-				statusType: true,
-				statusId: true,
-				isOnline: true,
-				information: true,
-				isCompany: true,
+			omit: {
+				userId: true,
 			},
 			where: {
 				tag: tag,

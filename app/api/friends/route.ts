@@ -19,14 +19,8 @@ export async function GET(request: NextRequest) {
 		}
 
 		const friends = await prisma.profile.findMany({
-			select: {
-				image: true,
-				createdAt: true,
-				tag: true,
-				name: true,
-				statusType: true,
-				statusId: true,
-				isOnline: true,
+			omit: {
+				userId: true,
 			},
 			where: {
 				friendProfile: {

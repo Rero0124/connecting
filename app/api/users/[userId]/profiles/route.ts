@@ -27,6 +27,9 @@ export async function GET(
 		}
 
 		const profiles = await prisma.profile.findMany({
+			omit: {
+				userId: true,
+			},
 			where: {
 				userId: data.response.data?.userId,
 			},

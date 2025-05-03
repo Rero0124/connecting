@@ -32,14 +32,8 @@ export async function GET(request: NextRequest) {
 			},
 			include: {
 				requestProfile: {
-					select: {
-						image: true,
-						createdAt: true,
-						name: true,
-						tag: true,
-						statusType: true,
-						statusId: true,
-						isOnline: true,
+					omit: {
+						userId: true,
 					},
 				},
 			},
@@ -54,14 +48,8 @@ export async function GET(request: NextRequest) {
 			},
 			include: {
 				byProfile: {
-					select: {
-						image: true,
-						createdAt: true,
-						name: true,
-						tag: true,
-						statusType: true,
-						statusId: true,
-						isOnline: true,
+					omit: {
+						userId: true,
 					},
 				},
 			},

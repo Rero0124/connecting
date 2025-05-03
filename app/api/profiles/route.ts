@@ -8,6 +8,9 @@ export async function GET(request: NextRequest) {
 		const searchParams = request.nextUrl.searchParams
 
 		const profiles = await prisma.profile.findMany({
+			omit: {
+				userId: true,
+			},
 			where: {
 				tag: {
 					startsWith: searchParams.get('tag') ?? '',

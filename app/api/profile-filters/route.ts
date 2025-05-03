@@ -31,14 +31,8 @@ export async function GET(request: NextRequest) {
 			},
 			include: {
 				profile: {
-					select: {
-						image: true,
-						createdAt: true,
-						name: true,
-						tag: true,
-						statusType: true,
-						statusId: true,
-						isOnline: true,
+					omit: {
+						userId: true,
 					},
 				},
 			},

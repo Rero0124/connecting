@@ -26,19 +26,7 @@ export interface ErrorResponse {
 	errors?: Record<string, any>
 }
 
-export type ProfileList = {
-	image: string
-	name: string | null
-	userId: number
-	id: number
-	statusType: string
-	statusId: number
-	tag: string
-	information: string
-	isCompany: boolean
-	isOnline: boolean
-	createdAt: Date
-}[]
+export type ProfileList = ProfileDetail[]
 
 export type ProfileDetail = {
 	tag: string
@@ -57,37 +45,13 @@ export type ProfileFilterList = {
 	profileId: number
 	filterProfileId: number
 	filterType: string
-	profile: {
-		statusType: string
-		statusId: number
-		tag: string
-		name: string | null
-		image: string
-		isOnline: boolean
-		createdAt: Date
-	}
+	profile: ProfileDetail
 }[]
 
-export type FriendList = {
-	name: string | null
-	createdAt: Date
-	statusType: string
-	statusId: number
-	tag: string
-	image: string
-	isOnline: boolean
-}[]
+export type FriendList = ProfileDetail[]
 
 export type FriendRequestList = {
-	profile: {
-		statusType: string
-		statusId: number
-		tag: string
-		name: string | null
-		image: string
-		isOnline: boolean
-		createdAt: Date
-	}
+	profile: ProfileDetail
 	id: number
 	sentAt: Date
 }[]
