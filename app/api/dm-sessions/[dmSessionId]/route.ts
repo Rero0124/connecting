@@ -72,11 +72,11 @@ export async function GET(
 		return NextResponse.json<SuccessResponse<DmSessionDetail>>(
 			{
 				status: 'success',
-				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
-				message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.message,
+				code: 0x0,
+				message: 'DM 상세정보를 가져왔습니다.',
 				data: dmSession,
 			},
-			{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
+			{ status: 200 }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(

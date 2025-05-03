@@ -9,18 +9,20 @@ import {
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useEffect, useRef, useState } from 'react'
 import AddMessageModal from '@/app/(main)/message/AddMessageModal'
+import Link from 'next/link'
 
 export default function Layout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
 }>) {
-	const [addMessageModalOpen, setAddMessageModalOpen] = useState<boolean>(false)
 	const { navSize, title, selectedMessageMenu } = useAppSelector(
 		(state) => state.saveData
 	)
+	const dmData = useAppSelector((state) => state.dmData)
 	const dispatch = useAppDispatch()
 
+	const [addMessageModalOpen, setAddMessageModalOpen] = useState<boolean>(false)
 	const navRef = useRef<HTMLDivElement>(null)
 
 	const messageMenus: {
@@ -80,23 +82,33 @@ export default function Layout({
 		children,
 		name,
 		classname = '',
+		href = '',
 	}: {
 		children?: React.ReactNode
 		name: string
 		classname?: string
+		href?: string
 	}) {
 		const onClick = () => {
 			dispatch(setSelectedMessageMenu(name))
 			dispatch(setTitle(getMessageMenuTitle(name) ?? name))
 		}
 
-		return (
+		return href === '' ? (
 			<div
-				className={`block h-12 px-2.5 py-0.5 leading-12 mb-1 rounded ${classname}`}
+				className={`${classname} block h-8 px-2.5 py-0.5 leading-12 mb-1 rounded`}
 				onClick={onClick}
 			>
 				{children}
 			</div>
+		) : (
+			<Link
+				href={href}
+				className={`${classname} block h-12 px-2.5 py-0.5 leading-12 mb-1 rounded`}
+				onClick={onClick}
+			>
+				{children}
+			</Link>
 		)
 	}
 
@@ -124,15 +136,15 @@ export default function Layout({
 					<Menu
 						name="allow"
 						classname={
-							selectedMessageMenu === 'allow'
+							(selectedMessageMenu === 'allow'
 								? 'bg-background-light'
-								: 'hover:bg-background-light'
+								: 'hover:bg-background-light') + ' min-h-12'
 						}
 					>
 						메세지 요청 & 스팸
 					</Menu>
 					<hr className="mt-1" />
-					<div className="flex flex-row px-2.5 py-0.5 mb-1 justify-between min-h-12 leading-12">
+					<div className="flex flex-row px-2.5 py-0.5 mb-1 justify-between h-10 leading-12">
 						<span>메세지</span>
 						<div className="flex flex-row justify-between w-8">
 							<span className="cursor-pointer" onClick={openAddMessageModal}>
@@ -141,7 +153,15 @@ export default function Layout({
 							<span>∇</span>
 						</div>
 					</div>
-					<Menu name="send" classname="flex h-auto"></Menu>
+					{dmData.allowedDmSessions.map((dmSession) => (
+						<Menu
+							key={dmSession.id}
+							href={`/message/${dmSession.id}`}
+							name="send"
+						>
+							{dmSession.name}
+						</Menu>
+					))}
 				</div>
 			</DragAbleDiv>
 			<div className="grow">{children}</div>

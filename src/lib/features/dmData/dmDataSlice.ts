@@ -1,61 +1,35 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '@/src/lib/store'
-
-export interface DmSessionType {
-	name: string
-	id: string
-	createdAt: Date
-	iconType: string
-	iconData: string
-}
-
-export interface DmMessageType {
-	id: number
-	sentUserTag: string
-	sentUserName?: string
-	sentUserImage: string
-	contentType: string
-	content: string
-	isPinned: boolean
-	sentAt: Date
-}
+import { DmSessionDetail, DmSessionList } from '@/src/types/api'
 
 interface DmSessionDataState {
-	allowedDmSessions: DmSessionType[]
-	notAllowedDmSessions: DmSessionType[]
-	dmMessages: {
-		messageId: string
-		chats: DmMessageType[]
-	}[]
+	allowedDmSessions: DmSessionList
+	notAllowedDmSessions: DmSessionList
+	dmDetails: Record<string, DmSessionDetail>
 }
 
 const initialState: DmSessionDataState = {
 	allowedDmSessions: [],
 	notAllowedDmSessions: [],
-	dmMessages: [],
+	dmDetails: {},
 }
 
 export const dmDataSlice = createSlice({
 	name: 'dmData',
 	initialState,
 	reducers: {
-		setAllowedDmSession: (state, action: PayloadAction<DmSessionType[]>) => {
+		setAllowedDmSession: (state, action: PayloadAction<DmSessionList>) => {
 			state.allowedDmSessions = action.payload
 		},
-		setNotAllowedDmSession: (state, action: PayloadAction<DmSessionType[]>) => {
+		setNotAllowedDmSession: (state, action: PayloadAction<DmSessionList>) => {
 			state.notAllowedDmSessions = action.payload
 		},
-		addDmMessage: (
-			state,
-			action: PayloadAction<{
-				messageId: string
-				chats: DmMessageType[]
-			}>
-		) => {
-			state.dmMessages.push(action.payload)
+		addDmDetail: (state, action: PayloadAction<DmSessionDetail>) => {
+			const key = action.payload.id
+			state.dmDetails[key] = action.payload
 		},
-		clearDmMessage: (state) => {
-			state.dmMessages = []
+		removeDmDetail: (state, action: PayloadAction<string>) => {
+			delete state.dmDetails[action.payload]
 		},
 	},
 })
@@ -63,37 +37,34 @@ export const dmDataSlice = createSlice({
 export const {
 	setAllowedDmSession,
 	setNotAllowedDmSession,
-	addDmMessage,
-	clearDmMessage,
+	addDmDetail,
+	removeDmDetail,
 } = dmDataSlice.actions
 
-export const getAllowedDmSession = (state: RootState, dmSessionId?: string) => {
+export const getAllowedDmSession = (
+	state: DmSessionDataState,
+	dmSessionId?: string
+) => {
 	if (dmSessionId) {
-		return state.dmData.allowedDmSessions.find(
+		return state.allowedDmSessions.find(
 			(allowedDmSession) => allowedDmSession.id === dmSessionId
 		)
 	} else {
-		return state.dmData.allowedDmSessions
+		return state.allowedDmSessions
 	}
 }
 
 export const getNotAllowedDmSession = (
-	state: RootState,
-	messageId?: string
+	state: DmSessionDataState,
+	dmSessionId?: string
 ) => {
-	if (messageId) {
-		return state.dmData.notAllowedDmSessions.find(
-			(notAllowedMessage) => notAllowedMessage.id === messageId
+	if (dmSessionId) {
+		return state.notAllowedDmSessions.find(
+			(notAllowedDmSession) => notAllowedDmSession.id === dmSessionId
 		)
 	} else {
-		return state.dmData.notAllowedDmSessions
+		return state.notAllowedDmSessions
 	}
-}
-
-export const getDmMessage = (state: RootState, messageId: string) => {
-	return state.dmData.dmMessages.find(
-		(dmMessage) => dmMessage.messageId === messageId
-	)
 }
 
 export default dmDataSlice.reducer
