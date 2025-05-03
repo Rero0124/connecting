@@ -31,28 +31,25 @@ export async function login(
 	const { email, password, profileId } = validatedFields.data
 
 	if (profileId > 0) {
-		const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			cache: 'force-cache',
-			body: JSON.stringify({
-				profileId,
-			}),
-		})
+		const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse =
+			await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				cache: 'force-cache',
+				body: JSON.stringify({
+					email,
+					password,
+					profileId,
+				}),
+			}).then((res) => res.json())
 
-		const data: {
-			result?: boolean
-			message: string
-		} = await res.json()
-
-		if (res.status === 200) {
+		if (sessionResponse.status === 'error') {
 			return {
 				data: {
 					email: formData.get('email')?.toString(),
 					password: formData.get('password')?.toString(),
 				},
-				message: data.message,
-				isLogin: true,
+				message: sessionResponse.message,
 			}
 		}
 
@@ -61,12 +58,13 @@ export async function login(
 				email: formData.get('email')?.toString(),
 				password: formData.get('password')?.toString(),
 			},
-			message: data.message,
+			message: sessionResponse.message,
+			isLogin: true,
 		}
 	}
 
-	const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse =
-		await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+	const authenticateResponse: SuccessResponse<ProfileList> | ErrorResponse =
+		await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authenticate`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			cache: 'force-cache',
@@ -76,31 +74,13 @@ export async function login(
 			}),
 		}).then((res) => res.json())
 
-	if (
-		sessionResponse.status === 'error' ||
-		sessionResponse.data?.authType === 'none'
-	) {
+	if (authenticateResponse.status === 'error') {
 		return {
 			data: {
 				email: formData.get('email')?.toString(),
 				password: formData.get('password')?.toString(),
 			},
-			message: sessionResponse.message,
-		}
-	}
-
-	const profilesResponse: SuccessResponse<ProfileList> | ErrorResponse =
-		await fetch(
-			`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionResponse.data?.userId}/profiles`
-		).then((res) => res.json())
-
-	if (profilesResponse.status === 'error') {
-		return {
-			data: {
-				email: formData.get('email')?.toString(),
-				password: formData.get('password')?.toString(),
-			},
-			message: profilesResponse.message,
+			message: authenticateResponse.message,
 		}
 	}
 
@@ -109,8 +89,8 @@ export async function login(
 			email: formData.get('email')?.toString(),
 			password: formData.get('password')?.toString(),
 		},
-		message: profilesResponse.message,
-		profiles: profilesResponse.data,
+		message: authenticateResponse.message,
+		profiles: authenticateResponse.data,
 	}
 }
 

@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
 	try {
 		const sessionCheck = await verifySession()
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
 		} = await request.json()
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',

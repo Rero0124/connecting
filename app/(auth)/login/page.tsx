@@ -25,11 +25,7 @@ export default function Login() {
 	}, [state])
 
 	const cancelLogin = () => {
-		fetch('/api/session', {
-			method: 'DELETE',
-		}).then(() => {
-			setSelectProfileModelOpen(false)
-		})
+		setSelectProfileModelOpen(false)
 	}
 
 	const selectProfile = (profileId: number) => {

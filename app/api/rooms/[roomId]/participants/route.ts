@@ -17,7 +17,7 @@ export async function GET(
 		const { roomId } = await params
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -92,7 +92,7 @@ export async function POST(
 		const { joinCode } = await request.json()
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',

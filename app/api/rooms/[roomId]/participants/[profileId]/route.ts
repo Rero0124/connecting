@@ -11,7 +11,7 @@ export async function DELETE(
 ) {
 	try {
 		const sessionCheck = await verifySession()
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',

@@ -26,7 +26,10 @@ export default function LoginProfileSelect({
 							height={0}
 							className="w-8 h-8 rounded-full"
 						/>
-						<span>{profile.userName ?? profile.userTag}</span>
+						<div className="text-sm">
+							<div>{profile.name ?? profile.tag}</div>
+							<div className="text-gray-400 text-xs">{profile.tag}</div>
+						</div>
 					</div>
 				))}
 			</div>

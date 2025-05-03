@@ -57,7 +57,7 @@ export default function ProfileEditModal({
 		try {
 			const session = await getSession()
 
-			if (session.isLogin && session.authType === 'profile') {
+			if (session.isAuth) {
 				const response = await fetch(
 					`/api/users/${session.userId}/profiles/${session.profileId}`,
 					{

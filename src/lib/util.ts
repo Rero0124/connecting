@@ -19,44 +19,26 @@ export function getCookieValue(name: string) {
 
 export type SessionType =
 	| {
-			isLogin: false
+			isAuth: false
 	  }
 	| {
-			isLogin: true
-			authType: 'user'
-			userId: number
-	  }
-	| {
-			isLogin: true
-			authType: 'profile'
+			isAuth: true
 			userId: number
 			profileId: number
 	  }
 
-export async function getSession(): Promise<SessionType> {
+export async function getSession(): Promise<VerifySessionType> {
 	const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse =
 		await fetch('/api/session').then((res) => res.json())
-	if (
-		sessionResponse.status === 'error' ||
-		sessionResponse.data.authType === 'none'
-	) {
+	if (sessionResponse.status === 'error' || !sessionResponse.data.isAuth) {
 		return {
-			isLogin: false,
+			isAuth: false,
 		}
 	} else {
-		if (sessionResponse.data.authType === 'user') {
-			return {
-				isLogin: true,
-				authType: 'user',
-				userId: sessionResponse.data.userId,
-			}
-		} else {
-			return {
-				isLogin: true,
-				authType: 'profile',
-				userId: sessionResponse.data.userId,
-				profileId: sessionResponse.data.profileId,
-			}
+		return {
+			isAuth: true,
+			userId: sessionResponse.data.userId,
+			profileId: sessionResponse.data.profileId,
 		}
 	}
 }

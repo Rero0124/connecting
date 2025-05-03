@@ -3,7 +3,7 @@ import { ProfileList } from '../types/api'
 
 export const LoginFormSchema = z.object({
 	profileId: z
-		.string()
+		.union([z.string(), z.number(), z.undefined()])
 		.transform((v) => (v === '' ? undefined : v))
 		.optional()
 		.refine((v) => v === undefined || !isNaN(Number(v)), {
@@ -69,7 +69,7 @@ export type JoinFormState =
 export type SessionPayload =
 	| {
 			userId: number
-			profileId?: number
+			profileId: number
 			expiresAt: Date
 	  }
 	| undefined

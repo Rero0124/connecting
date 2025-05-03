@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 	try {
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType === 'none') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -23,18 +23,6 @@ export async function GET(request: NextRequest) {
 					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
 				},
 				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
-			)
-		}
-
-		if (sessionCheck.authType === 'user') {
-			return NextResponse.json<SuccessResponse<VerifySessionType>>(
-				{
-					status: 'success',
-					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
-					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.message,
-					data: sessionCheck,
-				},
-				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
 			)
 		}
 
@@ -63,9 +51,12 @@ export async function POST(request: NextRequest) {
 	try {
 		const rawData = await request.json()
 		const validatedFields = LoginFormSchema.safeParse({
+			profileId: rawData.profileId,
 			email: rawData.email,
 			password: rawData.password,
 		})
+
+		console.log(validatedFields.success)
 
 		if (!validatedFields.success) {
 			return NextResponse.json<ErrorResponse>(
@@ -78,7 +69,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		const { email, password } = validatedFields.data
+		const { email, password, profileId } = validatedFields.data
 
 		const user = await prisma.user.findUnique({
 			where: { email },
@@ -106,11 +97,31 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		await createSession(user.id)
+		const profile = await prisma.profile.findFirst({
+			where: {
+				id: profileId,
+			},
+			select: {
+				id: true,
+			},
+		})
+
+		if (!profile) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '프로필이 존재하지 않습니다.',
+				},
+				{ status: 404 }
+			)
+		}
+
+		await createSession(user.id, profile.id)
 
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType === 'none') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -118,18 +129,6 @@ export async function POST(request: NextRequest) {
 					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
 				},
 				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
-			)
-		}
-
-		if (sessionCheck.authType === 'user') {
-			return NextResponse.json<SuccessResponse<VerifySessionType>>(
-				{
-					status: 'success',
-					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
-					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.message,
-					data: sessionCheck,
-				},
-				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
 			)
 		}
 
@@ -159,7 +158,7 @@ export async function PATCH(request: NextRequest) {
 		const { profileId } = await request.json()
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType === 'none') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',

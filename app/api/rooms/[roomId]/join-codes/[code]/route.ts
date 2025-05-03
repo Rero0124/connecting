@@ -12,7 +12,7 @@ export async function DELETE(
 		const { roomId, code } = await params
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',

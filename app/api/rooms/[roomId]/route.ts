@@ -12,7 +12,7 @@ export async function GET(
 	const { roomId } = await params
 	try {
 		const sessionCheck = await verifySession()
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -104,7 +104,7 @@ export async function PATCH(
 
 	try {
 		const sessionCheck = await verifySession()
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -242,7 +242,7 @@ export async function DELETE(
 	const { roomId } = await params
 	try {
 		const sessionCheck = await verifySession()
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',

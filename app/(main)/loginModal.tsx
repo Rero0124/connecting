@@ -62,46 +62,49 @@ export default function LoginModal({ open, onClose }: Props) {
 					×
 				</button>
 
-				{selectProfileMode ? (
+				{selectProfileMode && (
 					<LoginProfileSelect
 						profiles={state?.profiles || []}
 						onSelect={selectProfile}
 						onCancel={cancelProfileSelect}
 					/>
-				) : (
-					<form ref={formRef} action={action} className="flex flex-col gap-4">
-						<input ref={profileIdRef} name="profileId" type="hidden" />
-						<h2 className="text-2xl font-bold text-center mb-4">
-							다른 계정으로 로그인
-						</h2>
-						<input
-							type="email"
-							name="email"
-							placeholder="이메일"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-							className="p-2 border rounded"
-						/>
-						<input
-							type="password"
-							name="password"
-							placeholder="비밀번호"
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							className="p-2 border rounded"
-						/>
-						{state?.message && (
-							<p className="text-sm text-red-500">{state.message}</p>
-						)}
-						<button
-							type="submit"
-							className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-							disabled={pending}
-						>
-							로그인
-						</button>
-					</form>
 				)}
+				<form
+					ref={formRef}
+					action={action}
+					className={`flex flex-col gap-4 ${selectProfileMode ? 'hidden' : ''}`}
+				>
+					<input ref={profileIdRef} name="profileId" type="hidden" />
+					<h2 className="text-2xl font-bold text-center mb-4">
+						다른 계정으로 로그인
+					</h2>
+					<input
+						type="email"
+						name="email"
+						placeholder="이메일"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
+						className="p-2 border rounded"
+					/>
+					<input
+						type="password"
+						name="password"
+						placeholder="비밀번호"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						className="p-2 border rounded"
+					/>
+					{state?.message && (
+						<p className="text-sm text-red-500">{state.message}</p>
+					)}
+					<button
+						type="submit"
+						className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+						disabled={pending}
+					>
+						로그인
+					</button>
+				</form>
 			</div>
 		</div>
 	)

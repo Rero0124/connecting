@@ -15,7 +15,7 @@ export async function PATCH(
 		const requestIdNumber = Number(requestId)
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -145,7 +145,7 @@ export async function DELETE(
 		const requestIdNumber = Number(requestId)
 		const sessionCheck = await verifySession()
 
-		if (sessionCheck.authType !== 'profile') {
+		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',

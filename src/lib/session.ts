@@ -23,7 +23,7 @@ export async function decrypt(session: string | undefined = '') {
 	} catch (error) {}
 }
 
-export async function createSession(userId: number, profileId?: number) {
+export async function createSession(userId: number, profileId: number) {
 	const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 	const session = await encrypt({ userId, expiresAt, profileId })
 	const cookieStore = await cookies()
@@ -43,9 +43,8 @@ export async function deleteSession() {
 }
 
 export type VerifySessionType =
-	| { authType: 'none' }
-	| { authType: 'user'; userId: number }
-	| { authType: 'profile'; userId: number; profileId: number }
+	| { isAuth: false }
+	| { isAuth: true; userId: number; profileId: number }
 
 export async function verifySession(): Promise<VerifySessionType> {
 	const cookie = (await cookies()).get('session')?.value
@@ -53,20 +52,13 @@ export async function verifySession(): Promise<VerifySessionType> {
 
 	if (session && new Date(session.expiresAt) > new Date()) {
 		await createSession(session.userId, session.profileId)
-		if (session.profileId) {
-			return {
-				authType: 'profile',
-				userId: session.userId,
-				profileId: session.profileId,
-			}
-		} else {
-			return {
-				authType: 'user',
-				userId: session.userId,
-			}
+		return {
+			isAuth: true,
+			userId: session.userId,
+			profileId: session.profileId,
 		}
 	} else {
 		await deleteSession()
-		return { authType: 'none' }
+		return { isAuth: false }
 	}
 }

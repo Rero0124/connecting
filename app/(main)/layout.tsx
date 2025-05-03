@@ -47,7 +47,7 @@ export default function RootLayout({
 	const [session, setSession] = useState<SessionType>()
 
 	const updateProfile = async () => {
-		if (session && session.isLogin && session.authType === 'profile') {
+		if (session && session.isAuth) {
 			const profileResponse: SuccessResponse<ProfileDetail> | ErrorResponse =
 				await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles/${session.profileId}`,
@@ -64,7 +64,7 @@ export default function RootLayout({
 	}
 
 	const updateRooms = async () => {
-		if (session && session.isLogin && session.authType === 'profile') {
+		if (session && session.isAuth) {
 			const roomsResponse: SuccessResponse<RoomList> | ErrorResponse =
 				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
 					cache: 'no-store',
@@ -79,7 +79,7 @@ export default function RootLayout({
 	}
 
 	const updateDmSessions = async () => {
-		if (session && session.isLogin && session.authType === 'profile') {
+		if (session && session.isAuth) {
 			const dmSessionsResponse:
 				| SuccessResponse<{
 						allowedDmSessions: DmSessionList
@@ -104,7 +104,7 @@ export default function RootLayout({
 	}
 
 	const updateFriends = async () => {
-		if (session && session.isLogin && session.authType === 'profile') {
+		if (session && session.isAuth) {
 			const friendsResponse: SuccessResponse<FriendList> | ErrorResponse =
 				await fetch(`${process.env.NEXT_PUBLIC_API_URL}/friends`, {
 					cache: 'no-store',
@@ -119,7 +119,7 @@ export default function RootLayout({
 	}
 
 	const updateFriendRequests = async () => {
-		if (session && session.isLogin && session.authType === 'profile') {
+		if (session && session.isAuth) {
 			const friendRequestsResponse:
 				| SuccessResponse<{
 						receivedFriendRequests: FriendRequestList
@@ -152,7 +152,7 @@ export default function RootLayout({
 	const dispatch = useAppDispatch()
 
 	async function getSaveData() {
-		if (session && session.isLogin && session.authType === 'profile') {
+		if (session && session.isAuth) {
 			if (
 				(
 					await promiseAll([
@@ -170,7 +170,7 @@ export default function RootLayout({
 	}
 
 	async function changeProfile() {
-		if (session && session.isLogin) {
+		if (session?.isAuth) {
 			const profileResponse: SuccessResponse<ProfileList> | ErrorResponse =
 				await fetch(
 					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles`
@@ -209,7 +209,7 @@ export default function RootLayout({
 
 		if (!saveData.initLoad && session) {
 			getSaveData().then(async () => {
-				if (session.isLogin && session.authType === 'profile') {
+				if (session.isAuth) {
 					socket.emit('set_profileId', session.profileId)
 				}
 			})

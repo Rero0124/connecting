@@ -16,7 +16,7 @@ export async function verifyUserIdInSession(userId: any): Promise<{
 }> {
 	const userIdNumber = Number(userId)
 	const sessionCheck = await verifySession()
-	if (sessionCheck.authType === 'none') {
+	if (!sessionCheck.isAuth) {
 		return {
 			response: {
 				status: 'error',
@@ -110,7 +110,7 @@ export async function verifyProfileIdInSession(
 		}
 	}
 
-	if (sessionCheck.authType !== 'profile') {
+	if (!sessionCheck.isAuth) {
 		return {
 			response: {
 				status: 'error',
