@@ -9,7 +9,7 @@ import { DmMessageDetail, RoomMessageDetail } from './src/types/api'
 
 export interface ServerToClientEvents {
 	get_profileId: () => void
-	send_logout: () => void
+	loggedIn_sameProfile: () => void
 	update_profile: () => void
 	update_rooms: () => void
 	update_dmSessions: () => void
@@ -79,11 +79,11 @@ const io = new Server<
 	transports: ['polling', 'websocket'],
 })
 
+const socketMap = new Map<number, string>()
+
 io.engine.on('connection', (rawSocket) => {})
 
 io.on('connection', (socket) => {
-	const socketMap = new Map<number, string>()
-
 	const getSocketIdByProfileIds = (profileIds: number[]) => {
 		return profileIds
 			.map((profileId) => socketMap.get(profileId))
@@ -94,11 +94,17 @@ io.on('connection', (socket) => {
 
 	socket.on('set_profileId', (profileId) => {
 		socket.data.profileId = profileId
-		const oldSocket = socketMap.get(profileId)
-		if (oldSocket) {
-			socket.to(oldSocket).emit('send_logout')
+		const oldSocketId = socketMap.get(profileId)
+		if (oldSocketId && socket.id !== oldSocketId) {
+			const oldSocket = io.sockets.sockets.get(oldSocketId)
+			if (oldSocket) {
+				oldSocket.data.profileId = undefined
+				oldSocket.emit('loggedIn_sameProfile')
+			}
 		}
-		socketMap.set(profileId, socket.id)
+		if (socket.id) {
+			socketMap.set(profileId, socket.id)
+		}
 	})
 
 	socket.on('update_profile', (profileIds) => {

@@ -237,7 +237,7 @@ export default function RootLayout({
 				}
 			})
 
-			socket.on('send_logout', () => {
+			socket.on('loggedIn_sameProfile', () => {
 				fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
 					method: 'DELETE',
 				}).then(() => {
