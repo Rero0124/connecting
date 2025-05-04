@@ -1,6 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '@/src/lib/store'
-import { DmSessionDetail, DmSessionList } from '@/src/types/api'
+import {
+	DmMessageDetail,
+	DmSessionDetail,
+	DmSessionList,
+} from '@/src/types/api'
 
 interface DmSessionDataState {
 	allowedDmSessions: DmSessionList
@@ -24,12 +28,16 @@ export const dmDataSlice = createSlice({
 		setNotAllowedDmSession: (state, action: PayloadAction<DmSessionList>) => {
 			state.notAllowedDmSessions = action.payload
 		},
-		addDmDetail: (state, action: PayloadAction<DmSessionDetail>) => {
+		setDmDetail: (state, action: PayloadAction<DmSessionDetail>) => {
 			const key = action.payload.id
 			state.dmDetails[key] = action.payload
 		},
 		removeDmDetail: (state, action: PayloadAction<string>) => {
 			delete state.dmDetails[action.payload]
+		},
+		addDmMessage: (state, action: PayloadAction<DmMessageDetail>) => {
+			const key = action.payload.dmSessionId
+			state.dmDetails[key].message.push(action.payload)
 		},
 	},
 })
@@ -37,8 +45,9 @@ export const dmDataSlice = createSlice({
 export const {
 	setAllowedDmSession,
 	setNotAllowedDmSession,
-	addDmDetail,
+	setDmDetail,
 	removeDmDetail,
+	addDmMessage,
 } = dmDataSlice.actions
 
 export const getAllowedDmSession = (

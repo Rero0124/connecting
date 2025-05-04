@@ -66,21 +66,7 @@ export type DmSessionList = {
 }[]
 
 export type DmSessionDetail = {
-	message: {
-		profile: {
-			name: string | null
-			tag: string
-			image: string
-		}
-		id: number
-		profileId: number
-		dmSessionId: string
-		contentType: string
-		content: string
-		isPinned: boolean
-		sentAt: Date
-		updatedAt: Date | null
-	}[]
+	message: DmMessageDetail[]
 	id: string
 	name: string
 	iconType: string
@@ -96,6 +82,22 @@ export type DmSessionParticipantList = {
 	dmSessionId: string
 }[]
 
+export type DmMessageDetail = {
+	profile: {
+		name: string | null
+		tag: string
+		image: string
+	}
+	id: number
+	profileId: number
+	dmSessionId: string
+	contentType: string
+	content: string
+	isPinned: boolean
+	sentAt: Date
+	updatedAt: Date | null
+}
+
 export type RoomList = {
 	id: string
 	name: string
@@ -106,22 +108,7 @@ export type RoomList = {
 }[]
 
 export type RoomDetail = {
-	message: {
-		profile: {
-			name: string | null
-			tag: string
-			image: string
-		}
-		roomId: string
-		id: number
-		profileId: number
-		sentAt: Date
-		content: string
-		contentType: string
-		isPinned: boolean
-		updatedAt: Date | null
-		isEdited: boolean
-	}[]
+	message: RoomMessageDetail[]
 	id: string
 	name: string
 	masterProfileId: number
@@ -136,6 +123,23 @@ export type RoomParticipantList = {
 	profileId: number
 	roomId: string
 }[]
+
+export type RoomMessageDetail = {
+	profile: {
+		name: string | null
+		tag: string
+		image: string
+	}
+	roomId: string
+	id: number
+	profileId: number
+	sentAt: Date
+	content: string
+	contentType: string
+	isPinned: boolean
+	updatedAt: Date | null
+	isEdited: boolean
+}
 
 export type RoomJoinCodeList = {
 	id: number

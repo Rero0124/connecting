@@ -8,8 +8,12 @@ import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { socket } from '@/src/lib/socket'
 import { useEffect, useState } from 'react'
 import Nav from '@/app/(main)/Nav'
-import { setRooms } from '@/src/lib/features/roomData/roomDataSlice'
 import {
+	addRoomMessage,
+	setRooms,
+} from '@/src/lib/features/roomData/roomDataSlice'
+import {
+	addDmMessage,
 	setAllowedDmSession,
 	setNotAllowedDmSession,
 } from '@/src/lib/features/dmData/dmDataSlice'
@@ -253,6 +257,14 @@ export default function RootLayout({
 
 			socket.on('update_friendRequests', () => {
 				updateFriendRequests()
+			})
+
+			socket.on('received_dmMessage', (dmMessage) => {
+				dispatch(addDmMessage(dmMessage))
+			})
+
+			socket.on('received_roomMessage', (roomMessage) => {
+				dispatch(addRoomMessage(roomMessage))
 			})
 		}
 

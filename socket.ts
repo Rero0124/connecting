@@ -5,6 +5,7 @@ import http2 from 'http2'
 import { Server } from 'socket.io'
 import dotenv from 'dotenv'
 import prisma from './src/lib/prisma'
+import { DmMessageDetail, RoomMessageDetail } from './src/types/api'
 
 export interface ServerToClientEvents {
 	send_logout: () => void
@@ -13,8 +14,8 @@ export interface ServerToClientEvents {
 	update_dmSessions: () => void
 	update_friends: () => void
 	update_friendRequests: () => void
-	received_dmMessage: (dmSessionId: string, message: string) => void
-	received_roomMessage: (roomId: string, message: string) => void
+	received_dmMessage: (dmMessage: DmMessageDetail) => void
+	received_roomMessage: (roomMessage: RoomMessageDetail) => void
 }
 
 export interface ClientToServerEvents {
@@ -187,14 +188,23 @@ io.on('connection', (socket) => {
 			if (dmSession) {
 				const socketMessage = io.sockets.adapter.rooms.get(dmSession.id)
 				if (!socketMessage) socket.join(dmSession.id)
-				await prisma.dmMessage.create({
+				const dmMessage = await prisma.dmMessage.create({
 					data: {
 						content: message,
 						dmSessionId: dmSession.id,
 						profileId: socket.data.profileId,
 					},
+					include: {
+						profile: {
+							select: {
+								tag: true,
+								name: true,
+								image: true,
+							},
+						},
+					},
 				})
-				io.to(dmSession.id).emit('received_dmMessage', dmSessionId, message)
+				io.to(dmSession.id).emit('received_dmMessage', dmMessage)
 			}
 		}
 	})
@@ -215,14 +225,23 @@ io.on('connection', (socket) => {
 			if (room) {
 				const socketRoom = io.sockets.adapter.rooms.get(room.id)
 				if (!socketRoom) socket.join(room.id)
-				await prisma.roomMessage.create({
+				const roomMessage = await prisma.roomMessage.create({
 					data: {
 						content: message,
 						roomId: room.id,
 						profileId: socket.data.profileId,
 					},
+					include: {
+						profile: {
+							select: {
+								tag: true,
+								name: true,
+								image: true,
+							},
+						},
+					},
 				})
-				io.to(room.id).emit('received_roomMessage', roomId, message)
+				io.to(room.id).emit('received_roomMessage', roomMessage)
 			}
 		}
 	})
