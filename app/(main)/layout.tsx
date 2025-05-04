@@ -231,6 +231,12 @@ export default function RootLayout({
 				setTransport(transport.name)
 			})
 
+			socket.on('get_profileId', () => {
+				if (session?.isAuth) {
+					socket.emit('set_profileId', session.profileId)
+				}
+			})
+
 			socket.on('send_logout', () => {
 				fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
 					method: 'DELETE',

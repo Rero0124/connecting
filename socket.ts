@@ -8,6 +8,7 @@ import prisma from './src/lib/prisma'
 import { DmMessageDetail, RoomMessageDetail } from './src/types/api'
 
 export interface ServerToClientEvents {
+	get_profileId: () => void
 	send_logout: () => void
 	update_profile: () => void
 	update_rooms: () => void
@@ -25,8 +26,11 @@ export interface ClientToServerEvents {
 	update_dmSessions: (profileIds: number[]) => void
 	update_friends: (profileIds: number[]) => void
 	update_friendRequests: (profileIds: number[]) => void
-	send_dmMessage: (dmSessionId: string, message: string) => void
-	send_roomMessage: (roomId: string, message: string) => void
+	send_dmMessage: (dmMessage: DmMessageDetail, profileIds: number[]) => void
+	send_roomMessage: (
+		roomMessage: RoomMessageDetail,
+		profileIds: number[]
+	) => void
 }
 
 export interface SocketData {
@@ -70,180 +74,65 @@ const io = new Server<
 >(server, {
 	cors: {
 		origin: process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000',
+		methods: ['GET', 'POST'],
 	},
+	transports: ['polling', 'websocket'],
 })
-
-const socketMap = new Map<number, string>()
 
 io.engine.on('connection', (rawSocket) => {})
 
 io.on('connection', (socket) => {
+	const socketMap = new Map<number, string>()
+
+	const getSocketIdByProfileIds = (profileIds: number[]) => {
+		return profileIds
+			.map((profileId) => socketMap.get(profileId))
+			.filter((socketId) => socketId !== undefined)
+	}
+
+	socket.emit('get_profileId')
+
 	socket.on('set_profileId', (profileId) => {
-		if (typeof profileId === 'number' && profileId > 0) {
-			socket.data.profileId = profileId
-			const oldSocket = socketMap.get(profileId)
-			if (oldSocket) {
-				socket.to(oldSocket).emit('send_logout')
-			}
-			socketMap.set(profileId, socket.id)
+		socket.data.profileId = profileId
+		const oldSocket = socketMap.get(profileId)
+		if (oldSocket) {
+			socket.to(oldSocket).emit('send_logout')
 		}
+		socketMap.set(profileId, socket.id)
 	})
 
 	socket.on('update_profile', (profileIds) => {
-		if (
-			Array.isArray(profileIds) &&
-			profileIds.every(
-				(id) => typeof id === 'number' && Number.isInteger(id) && id >= 0
-			)
-		) {
-			profileIds.map((profileId) => {
-				const socketId = socketMap.get(profileId)
-				if (socketId) {
-					io.to(socketId).emit('update_profile')
-				}
-			})
-		}
+		io.to(getSocketIdByProfileIds(profileIds)).emit('update_profile')
 	})
 
 	socket.on('update_rooms', (profileIds) => {
-		if (
-			Array.isArray(profileIds) &&
-			profileIds.every(
-				(id) => typeof id === 'number' && Number.isInteger(id) && id >= 0
-			)
-		) {
-			profileIds.map((profileId) => {
-				const socketId = socketMap.get(profileId)
-				if (socketId) {
-					io.to(socketId).emit('update_rooms')
-				}
-			})
-		}
+		io.to(getSocketIdByProfileIds(profileIds)).emit('update_rooms')
 	})
 
 	socket.on('update_dmSessions', (profileIds) => {
-		if (
-			Array.isArray(profileIds) &&
-			profileIds.every(
-				(id) => typeof id === 'number' && Number.isInteger(id) && id >= 0
-			)
-		) {
-			profileIds.map((profileId) => {
-				const socketId = socketMap.get(profileId)
-				if (socketId) {
-					io.to(socketId).emit('update_dmSessions')
-				}
-			})
-		}
+		io.to(getSocketIdByProfileIds(profileIds)).emit('update_dmSessions')
 	})
 
 	socket.on('update_friends', (profileIds) => {
-		if (
-			Array.isArray(profileIds) &&
-			profileIds.every(
-				(id) => typeof id === 'number' && Number.isInteger(id) && id >= 0
-			)
-		) {
-			profileIds.map((profileId) => {
-				const socketId = socketMap.get(profileId)
-				if (socketId) {
-					io.to(socketId).emit('update_friends')
-				}
-			})
-		}
+		io.to(getSocketIdByProfileIds(profileIds)).emit('update_friends')
 	})
 
 	socket.on('update_friendRequests', (profileIds) => {
-		if (
-			Array.isArray(profileIds) &&
-			profileIds.every(
-				(id) => typeof id === 'number' && Number.isInteger(id) && id >= 0
-			)
-		) {
-			profileIds.map((profileId) => {
-				const socketId = socketMap.get(profileId)
-				if (socketId) {
-					io.to(socketId).emit('update_friendRequests')
-				}
-			})
-		}
+		io.to(getSocketIdByProfileIds(profileIds)).emit('update_friendRequests')
 	})
 
-	socket.on('send_dmMessage', async (dmSessionId, message) => {
-		if (socket.data.profileId) {
-			const dmSession = await prisma.dmSession.findUnique({
-				where: {
-					id: dmSessionId,
-					participant: {
-						some: {
-							profileId: socket.data.profileId,
-						},
-					},
-				},
-				select: {
-					id: true,
-				},
-			})
-
-			if (dmSession) {
-				const socketMessage = io.sockets.adapter.rooms.get(dmSession.id)
-				if (!socketMessage) socket.join(dmSession.id)
-				const dmMessage = await prisma.dmMessage.create({
-					data: {
-						content: message,
-						dmSessionId: dmSession.id,
-						profileId: socket.data.profileId,
-					},
-					include: {
-						profile: {
-							select: {
-								tag: true,
-								name: true,
-								image: true,
-							},
-						},
-					},
-				})
-				io.to(dmSession.id).emit('received_dmMessage', dmMessage)
-			}
-		}
+	socket.on('send_dmMessage', async (dmMesage, profileIds) => {
+		io.to(getSocketIdByProfileIds(profileIds)).emit(
+			'received_dmMessage',
+			dmMesage
+		)
 	})
 
-	socket.on('send_roomMessage', async (roomId, message) => {
-		if (socket.data.profileId) {
-			const room = await prisma.room.findUnique({
-				where: {
-					id: roomId,
-					participant: {
-						some: {
-							profileId: socket.data.profileId,
-						},
-					},
-				},
-			})
-
-			if (room) {
-				const socketRoom = io.sockets.adapter.rooms.get(room.id)
-				if (!socketRoom) socket.join(room.id)
-				const roomMessage = await prisma.roomMessage.create({
-					data: {
-						content: message,
-						roomId: room.id,
-						profileId: socket.data.profileId,
-					},
-					include: {
-						profile: {
-							select: {
-								tag: true,
-								name: true,
-								image: true,
-							},
-						},
-					},
-				})
-				io.to(room.id).emit('received_roomMessage', roomMessage)
-			}
-		}
+	socket.on('send_roomMessage', async (roomMessage, profileIds) => {
+		io.to(getSocketIdByProfileIds(profileIds)).emit(
+			'received_roomMessage',
+			roomMessage
+		)
 	})
 
 	socket.on('disconnect', (reason) => {

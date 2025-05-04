@@ -20,7 +20,13 @@ export default function Main() {
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()
-		socket.emit('send_dmMessage', id, pendingMessage)
+		fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}/messages`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ message: pendingMessage }),
+		}).then((res) => res.json())
 		setPendingMessage('')
 	}
 
@@ -44,7 +50,9 @@ export default function Main() {
 			<div className="flex flex-col">
 				{dmData.dmDetails[id] &&
 					dmData.dmDetails[id].message.map((message) => (
-						<div key={message.id}>{message.content}</div>
+						<div key={`DmMessage_${message.dmSessionId}_${message.id}`}>
+							{message.content}
+						</div>
 					))}
 			</div>
 			<div className="p-3">
