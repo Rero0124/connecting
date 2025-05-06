@@ -7,19 +7,40 @@ import {
 	AuthGetProfilesSuccessResponse,
 } from '@/src/lib/schemas/auth.schema'
 import { ErrorResponse } from '@/src/lib/schemas/api.schema'
+import {
+	RESPONSE_CODE,
+	RESPONSE_CODE_AUTH_GET_PROFILES_BODY_INVALID,
+} from '@/src/lib/constants/responseCode'
 
 export async function POST(request: NextRequest) {
 	try {
 		const bodyFields = AuthGetProfilesBodySchema.safeParse(await request.json())
 
 		if (!bodyFields.success) {
+			const errorShape = bodyFields.error.format()
+
+			const emailError = errorShape.email?._errors?.[0]
+			const passwordError = errorShape.password?._errors?.[0]
+
+			let message = '요청 파라미터 형식이 잘못되었습니다.'
+			let code: RESPONSE_CODE_AUTH_GET_PROFILES_BODY_INVALID =
+				RESPONSE_CODE.AUTH.GET_PROFILES_BODY_INVALID
+
+			if (emailError) {
+				message = 'email의 형식이 잘못되었습니다.'
+				code = RESPONSE_CODE.AUTH.GET_PROFILES_BODY_INVALID_EMAIL
+			} else if (passwordError) {
+				message = 'profileId의 형식이 잘못되었습니다.'
+				code = RESPONSE_CODE.AUTH.GET_PROFILES_BODY_INVALID_PASSWORD
+			}
+
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: ResponseDictionary.kr.RESPONSE_LOGIN_FAILED.code,
-					message: ResponseDictionary.kr.RESPONSE_LOGIN_FAILED.message,
+					code,
+					message,
 				},
-				{ status: ResponseDictionary.kr.RESPONSE_LOGIN_FAILED.status }
+				{ status: 400 }
 			)
 		}
 
@@ -33,7 +54,7 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: 0x0,
+					code: RESPONSE_CODE.AUTH.GET_PROFILES_UNMATCH_USER,
 					message: '이메일 또는 비밀번호가 일치하지 않습니다.',
 				},
 				{ status: 400 }
@@ -44,7 +65,7 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: 0x0,
+					code: RESPONSE_CODE.AUTH.GET_PROFILES_UNMATCH_USER,
 					message: '이메일 또는 비밀번호가 일치하지 않습니다.',
 				},
 				{ status: 400 }
@@ -65,7 +86,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json<AuthGetProfilesSuccessResponse>(
 			{
 				status: 'success',
-				code: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.code,
+				code: RESPONSE_CODE.AUTH.GET_PROFILES_SUCCESS,
 				message: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.message,
 				data: profiles,
 			},
@@ -75,7 +96,7 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json<ErrorResponse>(
 			{
 				status: 'error',
-				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
+				code: RESPONSE_CODE.INTERNAL_SERVER_ERROR,
 				message: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.message,
 			},
 			{ status: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.status }

@@ -1,3 +1,8 @@
+import {
+	RESPONSE_CODE,
+	RESPONSE_CODE_DM_CREATE_DM_MESSAGE_BODY_INVALID,
+	RESPONSE_CODE_DM_CREATE_DM_MESSAGE_PARAMS_INVALID,
+} from '@/src/lib/constants/responseCode'
 import prisma from '@/src/lib/prisma'
 import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 import {
@@ -20,7 +25,7 @@ export async function POST(
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
+					code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_SESSION_INVALID,
 					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
 				},
 				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
@@ -30,11 +35,24 @@ export async function POST(
 		const paramsFields = CreateDmMessageParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
+			const errorShape = paramsFields.error.format()
+
+			const dmSessionIdError = errorShape.dmSessionId?._errors?.[0]
+
+			let message = '요청 파라미터 형식이 잘못되었습니다.'
+			let code: RESPONSE_CODE_DM_CREATE_DM_MESSAGE_PARAMS_INVALID =
+				RESPONSE_CODE.DM.CREATE_DM_MESSAGE_PARAMS_INVALID
+
+			if (dmSessionIdError) {
+				message = 'dmSessionId 의 형식이 잘못되었습니다.'
+				code = RESPONSE_CODE.DM.CREATE_DM_MESSAGE_PARAMS_INVALID_DM_SESSION_ID
+			}
+
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: 0x0,
-					message: 'DM 아이디의 형식이 잘못되었습니다.',
+					code,
+					message,
 				},
 				{ status: 400 }
 			)
@@ -43,11 +61,24 @@ export async function POST(
 		const bodyFields = CreateDmMessageBodySchema.safeParse(await request.json())
 
 		if (!bodyFields.success) {
+			const errorShape = bodyFields.error.format()
+
+			const messageError = errorShape.message?._errors?.[0]
+
+			let message = '요청 파라미터 형식이 잘못되었습니다.'
+			let code: RESPONSE_CODE_DM_CREATE_DM_MESSAGE_BODY_INVALID =
+				RESPONSE_CODE.DM.CREATE_DM_MESSAGE_BODY_INVALID
+
+			if (messageError) {
+				message = 'message 의 형식이 잘못되었습니다.'
+				code = RESPONSE_CODE.DM.CREATE_DM_MESSAGE_BODY_INVALID_MESSAGE
+			}
+
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: 0x0,
-					message: '인자가 잘못되었습니다. message 를 다시 확인하세요',
+					code,
+					message,
 				},
 				{ status: 400 }
 			)
@@ -66,7 +97,7 @@ export async function POST(
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: 0x0,
+					code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_DM_SESSION_NOT_FOUND,
 					message: '존재하지 않는 DM입니다.',
 				},
 				{ status: 404 }
@@ -90,7 +121,7 @@ export async function POST(
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: 0x0,
+					code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_DM_SESSION_NOT_JOIN,
 					message: 'DM에 참여중이 아닙니다.',
 				},
 				{ status: 404 }
@@ -125,7 +156,7 @@ export async function POST(
 		return NextResponse.json<SuccessResponse>(
 			{
 				status: 'success',
-				code: 0x0,
+				code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_SUCCESS,
 				message: 'DM에 메세지를 전송하였습니다.',
 			},
 			{ status: 200 }
@@ -134,7 +165,7 @@ export async function POST(
 		return NextResponse.json<ErrorResponse>(
 			{
 				status: 'error',
-				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
+				code: RESPONSE_CODE.INTERNAL_SERVER_ERROR,
 				message: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.message,
 			},
 			{ status: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.status }

@@ -68,10 +68,10 @@ export default function Main() {
 										dmData.dmDetails[id].message[idx + 1].sentAt
 									).toLocaleString()
 								: false
-						return message.profileId === saveData.profile?.id ? (
+						return message.profileId !== saveData.profile?.id ? (
 							<div
 								key={`DmMessage_${message.dmSessionId}_${message.id}`}
-								className="flex justify-start h-16 px-1"
+								className="flex justify-start px-1"
 							>
 								{!pastMessageSameUser ? (
 									<>
