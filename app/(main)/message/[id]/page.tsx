@@ -38,12 +38,12 @@ export default function Main() {
 		if (!dmData.dmDetails[id]) {
 			fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}`, {
 				cache: 'no-store',
-				dataSchema: GetDmSessionResponseSchema
+				dataSchema: GetDmSessionResponseSchema,
 			}).then((data) => {
-					if (data.status === 'success') {
-						dispatch(setDmDetail(serializeDatesForRedux(data.data)))
-					}
-				})
+				if (data.status === 'success') {
+					dispatch(setDmDetail(serializeDatesForRedux(data.data)))
+				}
+			})
 		}
 	}, [dmData])
 

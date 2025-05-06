@@ -69,7 +69,7 @@ export default function ProfileEditModal({
 							information: information || undefined,
 							image: imageEncoded || undefined,
 						},
-						bodySchema: UpdateProfileByUserBodySchema
+						bodySchema: UpdateProfileByUserBodySchema,
 					}
 				)
 

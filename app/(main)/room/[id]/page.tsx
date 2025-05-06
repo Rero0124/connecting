@@ -30,12 +30,12 @@ export default function Main() {
 		if (!roomData.roomDetails[id]) {
 			fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
 				cache: 'no-store',
-				dataSchema: GetRoomResponseSchema
+				dataSchema: GetRoomResponseSchema,
 			}).then((data) => {
-					if (data.status === 'success') {
-						dispatch(setRoomDetail(serializeDatesForRedux(data.data)))
-					}
-				})
+				if (data.status === 'success') {
+					dispatch(setRoomDetail(serializeDatesForRedux(data.data)))
+				}
+			})
 		}
 	}, [roomData])
 

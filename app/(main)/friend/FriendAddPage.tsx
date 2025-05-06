@@ -1,7 +1,10 @@
 'use client'
 
 import { CreateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
-import { GetProfileResponseSchema, Profile } from '@/src/lib/schemas/profile.schema'
+import {
+	GetProfileResponseSchema,
+	Profile,
+} from '@/src/lib/schemas/profile.schema'
 import { fetchWithZod } from '@/src/lib/util'
 import { useEffect, useRef, useState } from 'react'
 
@@ -20,17 +23,14 @@ export default function FriendAddPage() {
 		setLoading(true)
 
 		try {
-			const response = await fetchWithZod(
-				'/api/friend-requests',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: { tag },
-					bodySchema: CreateFriendRequestBodySchema
-				}
-			)
+			const response = await fetchWithZod('/api/friend-requests', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: { tag },
+				bodySchema: CreateFriendRequestBodySchema,
+			})
 
 			if (response.status === 'success') {
 				setStatus('success')
@@ -64,9 +64,12 @@ export default function FriendAddPage() {
 		}
 		setProfileLoading(true)
 		try {
-			const response = await fetchWithZod(`/api/profiles/${encodeURIComponent(tag)}`, {
-				dataSchema: GetProfileResponseSchema
-			})
+			const response = await fetchWithZod(
+				`/api/profiles/${encodeURIComponent(tag)}`,
+				{
+					dataSchema: GetProfileResponseSchema,
+				}
+			)
 			if (response.status === 'success') {
 				setProfile(response.data)
 				setMessage(null)

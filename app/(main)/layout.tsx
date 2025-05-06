@@ -24,13 +24,26 @@ import {
 } from '@/src/lib/features/friendData/friendDataSlice'
 import ChangeProfileModal from './changeProfileModal'
 import LoginModal from './loginModal'
-import { fetchWithZod, getSession, promiseAll, serializeDatesForRedux } from '@/src/lib/util'
-import { GetProfileByUserResponseSchema, GetProfilesByUserResponseSchema, Profile, ProfileSchema } from '@/src/lib/schemas/profile.schema'
+import {
+	fetchWithZod,
+	getSession,
+	promiseAll,
+	serializeDatesForRedux,
+} from '@/src/lib/util'
+import {
+	GetProfileByUserResponseSchema,
+	GetProfilesByUserResponseSchema,
+	Profile,
+	ProfileSchema,
+} from '@/src/lib/schemas/profile.schema'
 import { VerifySession } from '@/src/lib/schemas/session.schema'
 import { AuthChangeProfileBodySchema } from '@/src/lib/schemas/auth.schema'
 import { GetRoomsResponseSchema } from '@/src/lib/schemas/room.schema'
 import { GetDmSessionsResponseSchema } from '@/src/lib/schemas/dm.schema'
-import { GetFriendRequestsResponseSchema, GetFriendsResponseSchema } from '@/src/lib/schemas/friend.schema'
+import {
+	GetFriendRequestsResponseSchema,
+	GetFriendsResponseSchema,
+} from '@/src/lib/schemas/friend.schema'
 
 export default function RootLayout({
 	children,
@@ -47,14 +60,13 @@ export default function RootLayout({
 
 	const updateProfile = async () => {
 		if (session && session.isAuth) {
-			const profileResponse =
-				await fetchWithZod(
-					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles/${session.profileId}`,
-					{
-						cache: 'no-store',
-						dataSchema: GetProfileByUserResponseSchema
-					}
-				)
+			const profileResponse = await fetchWithZod(
+				`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles/${session.profileId}`,
+				{
+					cache: 'no-store',
+					dataSchema: GetProfileByUserResponseSchema,
+				}
+			)
 			if (profileResponse.status === 'success') {
 				dispatch(setProfile(serializeDatesForRedux(profileResponse.data)))
 				return true
@@ -65,11 +77,13 @@ export default function RootLayout({
 
 	const updateRooms = async () => {
 		if (session && session.isAuth) {
-			const roomsResponse =
-				await fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
+			const roomsResponse = await fetchWithZod(
+				`${process.env.NEXT_PUBLIC_API_URL}/rooms`,
+				{
 					cache: 'no-store',
-					dataSchema: GetRoomsResponseSchema
-				})
+					dataSchema: GetRoomsResponseSchema,
+				}
+			)
 
 			if (roomsResponse.status === 'success') {
 				dispatch(setRooms(serializeDatesForRedux(roomsResponse.data)))
@@ -85,14 +99,20 @@ export default function RootLayout({
 				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`,
 				{
 					cache: 'no-store',
-					dataSchema: GetDmSessionsResponseSchema
+					dataSchema: GetDmSessionsResponseSchema,
 				}
 			)
 
 			if (dmSessionsResponse.status === 'success') {
-				dispatch(setAllowedDmSession(serializeDatesForRedux(dmSessionsResponse.data.allowedDmSessions)))
 				dispatch(
-					setNotAllowedDmSession(serializeDatesForRedux(dmSessionsResponse.data.notAllowedDmSessions))
+					setAllowedDmSession(
+						serializeDatesForRedux(dmSessionsResponse.data.allowedDmSessions)
+					)
+				)
+				dispatch(
+					setNotAllowedDmSession(
+						serializeDatesForRedux(dmSessionsResponse.data.notAllowedDmSessions)
+					)
 				)
 				return true
 			}
@@ -102,11 +122,13 @@ export default function RootLayout({
 
 	const updateFriends = async () => {
 		if (session && session.isAuth) {
-			const friendsResponse =
-				await fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/friends`, {
+			const friendsResponse = await fetchWithZod(
+				`${process.env.NEXT_PUBLIC_API_URL}/friends`,
+				{
 					cache: 'no-store',
-					dataSchema: GetFriendsResponseSchema
-				})
+					dataSchema: GetFriendsResponseSchema,
+				}
+			)
 
 			if (friendsResponse.status === 'success') {
 				dispatch(setFriends(serializeDatesForRedux(friendsResponse.data)))
@@ -122,7 +144,7 @@ export default function RootLayout({
 				`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
 				{
 					cache: 'no-store',
-					dataSchema: GetFriendRequestsResponseSchema
+					dataSchema: GetFriendRequestsResponseSchema,
 				}
 			)
 
@@ -130,12 +152,16 @@ export default function RootLayout({
 				dispatch(
 					setReceivedFriendRequests(
 						serializeDatesForRedux(
-						friendRequestsResponse.data.receivedFriendRequests
+							friendRequestsResponse.data.receivedFriendRequests
 						)
 					)
 				)
 				dispatch(
-					setSentFriendRequests(serializeDatesForRedux(friendRequestsResponse.data.sentFriendRequests))
+					setSentFriendRequests(
+						serializeDatesForRedux(
+							friendRequestsResponse.data.sentFriendRequests
+						)
+					)
 				)
 
 				return true
@@ -167,13 +193,12 @@ export default function RootLayout({
 
 	async function changeProfile() {
 		if (session?.isAuth) {
-			const profileResponse =
-				await fetchWithZod(
-					`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles`,
-					{
-						dataSchema: GetProfilesByUserResponseSchema
-					}
-				)
+			const profileResponse = await fetchWithZod(
+				`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles`,
+				{
+					dataSchema: GetProfilesByUserResponseSchema,
+				}
+			)
 
 			if (profileResponse.status === 'success') {
 				setOpenChangeProfileModal(true)
@@ -183,13 +208,16 @@ export default function RootLayout({
 	}
 
 	async function selectProfile(profileId: number) {
-		const sessionResponse = await fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			cache: 'no-store',
-			body: { profileId },
-			bodySchema: AuthChangeProfileBodySchema
-		})
+		const sessionResponse = await fetchWithZod(
+			`${process.env.NEXT_PUBLIC_API_URL}/session`,
+			{
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				cache: 'no-store',
+				body: { profileId },
+				bodySchema: AuthChangeProfileBodySchema,
+			}
+		)
 
 		if (sessionResponse.status === 'success') {
 			location.reload()
