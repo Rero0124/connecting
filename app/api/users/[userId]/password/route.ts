@@ -1,19 +1,33 @@
 import prisma from '@/src/lib/prisma'
 import bcryptjs from 'bcryptjs'
 import { NextResponse, type NextRequest } from 'next/server'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { verifyUserIdInSession } from '@/src/lib/serverUtil'
+import {
+	UpdateUserPasswordBodySchema,
+	UpdateUserPasswordParamsSchema,
+} from '@/src/lib/schemas/user.schema'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 
 export async function PATCH(
 	request: NextRequest,
 	{ params }: { params: Promise<{ userId: string }> }
 ) {
-	const userId = (await params).userId
 	try {
-		const { password } = await request.json()
+		const paramsFields = UpdateUserPasswordParamsSchema.safeParse(await params)
 
-		const data = await verifyUserIdInSession(userId)
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '유저 아이디의 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
+
+		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
 			return NextResponse.json<ErrorResponse>(
@@ -24,7 +38,11 @@ export async function PATCH(
 			)
 		}
 
-		if (typeof password !== 'string') {
+		const bodyFields = UpdateUserPasswordBodySchema.safeParse(
+			await request.json()
+		)
+
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -35,11 +53,11 @@ export async function PATCH(
 			)
 		}
 
-		const hashedPassword = await bcryptjs.hash(password, 10)
+		const hashedPassword = await bcryptjs.hash(bodyFields.data.password, 10)
 
 		await prisma.user.update({
 			where: {
-				id: data.response.data?.userId,
+				id: data.response.data.userId,
 			},
 			data: {
 				password: hashedPassword,

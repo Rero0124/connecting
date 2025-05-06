@@ -1,11 +1,11 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import {
+	CreateDmMessageBodySchema,
+	CreateDmMessageParamsSchema,
+} from '@/src/lib/schemas/dm.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import {
-	DmMessageDetail,
-	ErrorResponse,
-	SuccessResponse,
-} from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,8 +14,6 @@ export async function POST(
 	{ params }: { params: Promise<{ dmSessionId: string }> }
 ) {
 	try {
-		const { dmSessionId } = await params
-		const { message } = await request.json()
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -29,7 +27,22 @@ export async function POST(
 			)
 		}
 
-		if (typeof message !== 'string') {
+		const paramsFields = CreateDmMessageParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: 'DM 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
+		const bodyFields = CreateDmMessageBodySchema.safeParse(await request.json())
+
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -42,7 +55,7 @@ export async function POST(
 
 		const dmSession = await prisma.dmSession.findFirst({
 			where: {
-				id: dmSessionId,
+				id: paramsFields.data.dmSessionId,
 			},
 			select: {
 				id: true,
@@ -86,7 +99,7 @@ export async function POST(
 
 		const dmMessage = await prisma.dmMessage.create({
 			data: {
-				content: message,
+				content: bodyFields.data.message,
 				dmSessionId: dmSession.id,
 				profileId: sessionCheck.profileId,
 			},
@@ -115,7 +128,7 @@ export async function POST(
 				code: 0x0,
 				message: 'DM에 메세지를 전송하였습니다.',
 			},
-			{ status: 201 }
+			{ status: 200 }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(

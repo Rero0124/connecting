@@ -1,6 +1,7 @@
 'use client'
 import { useAppSelector } from '@/src/lib/hooks'
-import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
+import { GetProfilesResponseSchema, Profile } from '@/src/lib/schemas/profile.schema'
+import { fetchWithZod } from '@/src/lib/util'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -27,7 +28,7 @@ export default function NewMessageModal({
 		}[]
 	>([])
 	const [searchText, setSearchText] = useState<string>('')
-	const [searchedUsers, setSearchedUsers] = useState<ProfileList>([])
+	const [searchedUsers, setSearchedUsers] = useState<Profile[]>([])
 
 	const handleRecipientsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const selectedOptions = Array.from(e.target.selectedOptions, (option) => ({
@@ -85,10 +86,13 @@ export default function NewMessageModal({
 		e.preventDefault()
 		setSearchText(e.currentTarget.value)
 		if (e.currentTarget.value !== '') {
-			const profilesResponse: SuccessResponse<ProfileList> | ErrorResponse =
-				await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL}/profiles?tag=${e.currentTarget.value}`
-				).then((res) => res.json())
+			const profilesResponse =
+				await fetchWithZod(
+					`${process.env.NEXT_PUBLIC_API_URL}/profiles?tag=${e.currentTarget.value}`,
+					{
+						dataSchema: GetProfilesResponseSchema
+					}
+				)
 			if (profilesResponse.status === 'success') {
 				setSearchedUsers(
 					profilesResponse.data.filter(

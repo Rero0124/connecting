@@ -1,11 +1,12 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import {
+	CreateDmParticipantBodySchema,
+	GetDmParticipantsParamsSchema,
+	GetDmParticipantsSuccessResponse,
+} from '@/src/lib/schemas/dm.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import {
-	DmSessionParticipantList,
-	ErrorResponse,
-	SuccessResponse,
-} from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,7 +15,6 @@ export async function GET(
 	{ params }: { params: Promise<{ dmSessionId: string }> }
 ) {
 	try {
-		const { dmSessionId } = await params
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -28,9 +28,22 @@ export async function GET(
 			)
 		}
 
+		const paramsFields = GetDmParticipantsParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: 'DM 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
 		const dmSession = await prisma.dmSession.findFirst({
 			where: {
-				id: dmSessionId,
+				id: paramsFields.data.dmSessionId,
 				participant: {
 					some: {
 						profile: {
@@ -62,7 +75,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<DmSessionParticipantList>>(
+		return NextResponse.json<GetDmParticipantsSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -88,7 +101,6 @@ export async function POST(
 	{ params }: { params: Promise<{ dmSessionId: string }> }
 ) {
 	try {
-		const { dmSessionId } = await params
 		const { profileId } = await request.json()
 		const sessionCheck = await verifySession()
 
@@ -103,12 +115,29 @@ export async function POST(
 			)
 		}
 
-		if (typeof profileId !== 'number') {
+		const paramsFields = GetDmParticipantsParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
-					message: '인자가 잘못되었습니다. joinCode 를 다시 확인하세요',
+					message: 'DM 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
+		const bodyFields = CreateDmParticipantBodySchema.safeParse(
+			await request.json()
+		)
+
+		if (!bodyFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '인자가 잘못되었습니다. profileId 를 다시 확인하세요',
 				},
 				{ status: 400 }
 			)
@@ -116,7 +145,7 @@ export async function POST(
 
 		const dmSession = await prisma.dmSession.findFirst({
 			where: {
-				id: dmSessionId,
+				id: paramsFields.data.dmSessionId,
 			},
 			select: {
 				id: true,
@@ -201,7 +230,7 @@ export async function POST(
 				code: 0x0,
 				message: 'DM에 참여하였습니다.',
 			},
-			{ status: 201 }
+			{ status: 200 }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(

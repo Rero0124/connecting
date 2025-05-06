@@ -1,5 +1,6 @@
 import prisma from '@/src/lib/prisma'
-import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse } from '@/src/lib/schemas/api.schema'
+import { GetProfilesSuccessResponse } from '@/src/lib/schemas/profile.schema'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<ProfileList>>(
+		return NextResponse.json<GetProfilesSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,

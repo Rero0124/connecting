@@ -1,7 +1,13 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import {
+	DeleteRoomParamsSchema,
+	GetRoomParamsSchema,
+	GetRoomSuccessResponse,
+	UpdateRoomBodySchema,
+} from '@/src/lib/schemas/room.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import { ErrorResponse, RoomDetail, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -9,7 +15,6 @@ export async function GET(
 	request: NextRequest,
 	{ params }: { params: Promise<{ roomId: string }> }
 ) {
-	const { roomId } = await params
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
@@ -23,9 +28,22 @@ export async function GET(
 			)
 		}
 
+		const paramsFields = GetRoomParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '방 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
 		const room = await prisma.room.findFirst({
 			where: {
-				id: roomId,
+				id: paramsFields.data.roomId,
 				participant: {
 					some: {
 						profile: {
@@ -66,7 +84,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<SuccessResponse<RoomDetail>>(
+		return NextResponse.json<GetRoomSuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
@@ -92,15 +110,6 @@ export async function PATCH(
 	{ params }: { params: Promise<{ roomId: string }> }
 ) {
 	const { roomId } = await params
-	const {
-		name,
-		iconType,
-		iconData,
-	}: {
-		name?: string
-		iconType?: 'text' | 'image'
-		iconData?: string
-	} = await request.json()
 
 	try {
 		const sessionCheck = await verifySession()
@@ -115,37 +124,46 @@ export async function PATCH(
 			)
 		}
 
-		if (name && typeof name !== 'string') {
+		const paramsFields = GetRoomParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
-					message: '인자가 잘못되었습니다. name 을 다시 확인하세요',
+					message: '방 아이디의 형식이 잘못되었습니다.',
 				},
 				{ status: 400 }
 			)
 		}
 
-		if (iconType && iconType !== 'text' && iconType !== 'image') {
-			return NextResponse.json<ErrorResponse>(
-				{
-					status: 'error',
-					code: 0x0,
-					message: '인자가 잘못되었습니다. iconType 을 다시 확인하세요',
-				},
-				{ status: 400 }
-			)
-		}
+		const bodyFields = UpdateRoomBodySchema.safeParse(await params)
 
-		if (iconData && typeof iconData !== 'string') {
-			return NextResponse.json<ErrorResponse>(
-				{
+		if (!bodyFields.success) {
+			const errorShape = bodyFields.error.format()
+
+			const nameError = errorShape.name?._errors?.[0]
+			const iconTypeError = errorShape.iconType?._errors?.[0]
+			const iconDataError = errorShape.iconData?._errors?.[0]
+
+			let message = '요청 파라미터 형식이 잘못되었습니다.'
+
+			if (nameError) {
+				message = 'name 의 형식이 잘못되었습니다.'
+			} else if (iconTypeError) {
+				message = 'iconType 의 형식이 잘못되었습니다.'
+			} else if (iconDataError) {
+				message = 'iconData 의 형식이 잘못되었습니다.'
+			}
+
+			return {
+				response: {
 					status: 'error',
 					code: 0x0,
-					message: '인자가 잘못되었습니다. iconData 을 다시 확인하세요',
+					message,
 				},
-				{ status: 400 }
-			)
+				status: 400,
+			}
 		}
 
 		const oldRoom = await prisma.room.findFirst({
@@ -193,9 +211,7 @@ export async function PATCH(
 				id: oldRoom.id,
 			},
 			data: {
-				name,
-				iconType,
-				iconData,
+				...bodyFields.data,
 			},
 		})
 
@@ -239,7 +255,6 @@ export async function DELETE(
 	request: NextRequest,
 	{ params }: { params: Promise<{ roomId: string }> }
 ) {
-	const { roomId } = await params
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
@@ -253,13 +268,26 @@ export async function DELETE(
 			)
 		}
 
+		const paramsFields = DeleteRoomParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '방 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
 		const room = await prisma.room.findFirst({
 			select: {
 				id: true,
 				masterProfileId: true,
 			},
 			where: {
-				id: roomId,
+				id: paramsFields.data.roomId,
 				participant: {
 					some: {
 						profile: {

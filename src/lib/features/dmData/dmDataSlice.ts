@@ -1,15 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from '@/src/lib/store'
-import {
-	DmMessageDetail,
-	DmSessionDetail,
-	DmSessionList,
-} from '@/src/types/api'
+import { DmMessage, DmSession } from '../../schemas/dm.schema'
+import { SerializeDatesForRedux } from '../../util'
 
 interface DmSessionDataState {
-	allowedDmSessions: DmSessionList
-	notAllowedDmSessions: DmSessionList
-	dmDetails: Record<string, DmSessionDetail>
+	allowedDmSessions: DmSessionState[]
+	notAllowedDmSessions: DmSessionState[]
+	dmDetails: Record<
+		string,
+		DmSessionState & {
+			message: DmMessageState[]
+		}
+	>
 }
 
 const initialState: DmSessionDataState = {
@@ -22,20 +23,30 @@ export const dmDataSlice = createSlice({
 	name: 'dmData',
 	initialState,
 	reducers: {
-		setAllowedDmSession: (state, action: PayloadAction<DmSessionList>) => {
+		setAllowedDmSession: (state, action: PayloadAction<DmSessionState[]>) => {
 			state.allowedDmSessions = action.payload
 		},
-		setNotAllowedDmSession: (state, action: PayloadAction<DmSessionList>) => {
+		setNotAllowedDmSession: (
+			state,
+			action: PayloadAction<DmSessionState[]>
+		) => {
 			state.notAllowedDmSessions = action.payload
 		},
-		setDmDetail: (state, action: PayloadAction<DmSessionDetail>) => {
+		setDmDetail: (
+			state,
+			action: PayloadAction<
+				DmSessionState & {
+					message: DmMessageState[]
+				}
+			>
+		) => {
 			const key = action.payload.id
 			state.dmDetails[key] = action.payload
 		},
 		removeDmDetail: (state, action: PayloadAction<string>) => {
 			delete state.dmDetails[action.payload]
 		},
-		addDmMessage: (state, action: PayloadAction<DmMessageDetail>) => {
+		addDmMessage: (state, action: PayloadAction<DmMessageState>) => {
 			const key = action.payload.dmSessionId
 			state.dmDetails[key].message.push(action.payload)
 		},
@@ -75,5 +86,8 @@ export const getNotAllowedDmSession = (
 		return state.notAllowedDmSessions
 	}
 }
+
+export type DmSessionState = SerializeDatesForRedux<DmSession>
+export type DmMessageState = SerializeDatesForRedux<DmMessage>
 
 export default dmDataSlice.reducer

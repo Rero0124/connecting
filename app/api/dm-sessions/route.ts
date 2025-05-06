@@ -1,7 +1,11 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import {
+	CreateDmSessionBodySchema,
+	GetDmSessionsSuccessResponse,
+} from '@/src/lib/schemas/dm.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import { DmSessionList, ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -47,12 +51,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<
-			SuccessResponse<{
-				allowedDmSessions: DmSessionList
-				notAllowedDmSessions: DmSessionList
-			}>
-		>(
+		return NextResponse.json<GetDmSessionsSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -78,17 +77,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const {
-			name,
-			iconType,
-			iconData,
-			participants,
-		}: {
-			name?: string
-			iconType?: 'text' | 'image'
-			iconData?: string
-			participants?: number[]
-		} = await request.json()
+		const bodyFields = CreateDmSessionBodySchema.safeParse(await request.json())
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -102,15 +91,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		if (
-			typeof name !== 'string' ||
-			!(iconType === 'text' || iconType === 'image') ||
-			typeof iconData !== 'string' ||
-			!Array.isArray(participants) ||
-			!participants.every(
-				(id) => typeof id === 'number' && Number.isInteger(id) && id >= 0
-			)
-		) {
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -124,11 +105,11 @@ export async function POST(request: NextRequest) {
 
 		const validProfiles = await prisma.profile.findMany({
 			where: {
-				id: { in: participants },
+				id: { in: bodyFields.data.participants },
 			},
 			select: { id: true },
 		})
-		if (validProfiles.length !== participants.length) {
+		if (validProfiles.length !== bodyFields.data.participants.length) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -141,16 +122,16 @@ export async function POST(request: NextRequest) {
 
 		await prisma.dmSession.create({
 			data: {
-				name: name,
-				iconType: iconType,
-				iconData: iconData,
+				name: bodyFields.data.name,
+				iconType: bodyFields.data.iconType,
+				iconData: bodyFields.data.iconData,
 				participant: {
 					createMany: {
 						data: [
 							{
 								profileId: sessionCheck.profileId,
 							},
-							...participants.map((id) => ({
+							...bodyFields.data.participants.map((id) => ({
 								profileId: id,
 							})),
 						],

@@ -1,10 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '@/src/lib/store'
-import { RoomDetail, RoomList, RoomMessageDetail } from '@/src/types/api'
+import { Room, RoomMessage } from '../../schemas/room.schema'
+import { SerializeDatesForRedux } from '../../util'
 
 interface RoomDataState {
-	rooms: RoomList
-	roomDetails: Record<string, RoomDetail>
+	rooms: RoomState[]
+	roomDetails: Record<
+		string,
+		RoomState & {
+			message: RoomMesssageState[]
+		}
+	>
 }
 
 const initialState: RoomDataState = {
@@ -16,17 +22,24 @@ export const roomDataSlice = createSlice({
 	name: 'roomData',
 	initialState,
 	reducers: {
-		setRooms: (state, action: PayloadAction<RoomList>) => {
+		setRooms: (state, action: PayloadAction<RoomState[]>) => {
 			state.rooms = action.payload
 		},
-		setRoomDetail: (state, action: PayloadAction<RoomDetail>) => {
+		setRoomDetail: (
+			state,
+			action: PayloadAction<
+				RoomState & {
+					message: RoomMesssageState[]
+				}
+			>
+		) => {
 			const key = action.payload.id
 			state.roomDetails[key] = action.payload
 		},
 		removeRoomDetail: (state, action: PayloadAction<string>) => {
 			delete state.roomDetails[action.payload]
 		},
-		addRoomMessage: (state, action: PayloadAction<RoomMessageDetail>) => {
+		addRoomMessage: (state, action: PayloadAction<RoomMesssageState>) => {
 			const key = action.payload.roomId
 			state.roomDetails[key].message.push(action.payload)
 		},
@@ -43,5 +56,8 @@ export const getRooms = (state: RootState, roomId?: string) => {
 		return state.roomDate.rooms
 	}
 }
+
+export type RoomState = SerializeDatesForRedux<Room>
+export type RoomMesssageState = SerializeDatesForRedux<RoomMessage>
 
 export default roomDataSlice.reducer

@@ -1,7 +1,8 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import { DeleteRoomParticipantParamsSchema } from '@/src/lib/schemas/room.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -22,18 +23,32 @@ export async function DELETE(
 			)
 		}
 
-		const { roomId, profileId } = await params
-		const numberProfileId = Number(profileId)
+		const paramsFields = DeleteRoomParticipantParamsSchema.safeParse(
+			await params
+		)
 
-		if (isNaN(numberProfileId)) {
-			return NextResponse.json<ErrorResponse>(
-				{
+		if (!paramsFields.success) {
+			const errorShape = paramsFields.error.format()
+
+			const romIdError = errorShape.roomId?._errors?.[0]
+			const profileIdError = errorShape.profileId?._errors?.[0]
+
+			let message = '요청 파라미터 형식이 잘못되었습니다.'
+
+			if (romIdError) {
+				message = 'romIdE의  형식이 잘못되었습니다.'
+			} else if (profileIdError) {
+				message = 'profileId의 형식이 잘못되었습니다.'
+			}
+
+			return {
+				response: {
 					status: 'error',
 					code: 0x0,
-					message: '프로필 아이디의 형식이 잘못되었습니다.',
+					message,
 				},
-				{ status: 400 }
-			)
+				status: 400,
+			}
 		}
 
 		const room = await prisma.room.findFirst({
@@ -42,7 +57,7 @@ export async function DELETE(
 				masterProfileId: true,
 			},
 			where: {
-				id: roomId,
+				id: paramsFields.data.roomId,
 				participant: {
 					some: {
 						profile: {
@@ -67,7 +82,7 @@ export async function DELETE(
 
 		if (
 			room.masterProfileId === sessionCheck.profileId &&
-			numberProfileId !== sessionCheck.profileId
+			paramsFields.data.profileId !== sessionCheck.profileId
 		) {
 			return NextResponse.json<ErrorResponse>(
 				{
@@ -82,7 +97,7 @@ export async function DELETE(
 		const roomParticipant = await prisma.roomParticipant.findFirst({
 			where: {
 				roomId: room.id,
-				profileId: numberProfileId,
+				profileId: paramsFields.data.profileId,
 			},
 			select: {
 				id: true,
@@ -106,7 +121,7 @@ export async function DELETE(
 			},
 		})
 
-		socket.emit('update_rooms', [numberProfileId])
+		socket.emit('update_rooms', [paramsFields.data.profileId])
 
 		return NextResponse.json<SuccessResponse>(
 			{

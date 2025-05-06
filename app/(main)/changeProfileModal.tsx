@@ -1,11 +1,11 @@
 'use client'
 
-import { ProfileList } from '@/src/types/api'
+import { Profile } from '@/src/lib/schemas/profile.schema'
 import Image from 'next/image'
 
 interface Props {
 	open: boolean
-	profiles?: ProfileList
+	profiles?: Profile[]
 	onClose: () => void
 	onSelect: (profileId: number) => void
 	onLoginAnotherAccount?: () => void

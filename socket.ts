@@ -4,8 +4,9 @@ import https from 'https'
 import http2 from 'http2'
 import { Server } from 'socket.io'
 import dotenv from 'dotenv'
-import prisma from './src/lib/prisma'
-import { DmMessageDetail, RoomMessageDetail } from './src/types/api'
+import { DmMessage, DmMessageSchema } from './src/lib/schemas/dm.schema'
+import { RoomMessage, RoomMessageSchema } from './src/lib/schemas/room.schema'
+import { z } from 'zod'
 
 export interface ServerToClientEvents {
 	get_profileId: () => void
@@ -15,8 +16,8 @@ export interface ServerToClientEvents {
 	update_dmSessions: () => void
 	update_friends: () => void
 	update_friendRequests: () => void
-	received_dmMessage: (dmMessage: DmMessageDetail) => void
-	received_roomMessage: (roomMessage: RoomMessageDetail) => void
+	received_dmMessage: (dmMessage: DmMessage) => void
+	received_roomMessage: (roomMessage: RoomMessage) => void
 }
 
 export interface ClientToServerEvents {
@@ -26,11 +27,8 @@ export interface ClientToServerEvents {
 	update_dmSessions: (profileIds: number[]) => void
 	update_friends: (profileIds: number[]) => void
 	update_friendRequests: (profileIds: number[]) => void
-	send_dmMessage: (dmMessage: DmMessageDetail, profileIds: number[]) => void
-	send_roomMessage: (
-		roomMessage: RoomMessageDetail,
-		profileIds: number[]
-	) => void
+	send_dmMessage: (dmMessage: DmMessage, profileIds: number[]) => void
+	send_roomMessage: (roomMessage: RoomMessage, profileIds: number[]) => void
 }
 
 export interface SocketData {
@@ -81,6 +79,17 @@ const io = new Server<
 
 const socketMap = new Map<number, string>()
 
+const ClientToServerSchemas = {
+	set_profileId: z.tuple([z.number()]),
+	update_profile: z.tuple([z.array(z.number())]),
+	update_rooms: z.tuple([z.array(z.number())]),
+	update_dmSessions: z.tuple([z.array(z.number())]),
+	update_friends: z.tuple([z.array(z.number())]),
+	update_friendRequests: z.tuple([z.array(z.number())]),
+	send_dmMessage: z.tuple([DmMessageSchema, z.array(z.number())]),
+	send_roomMessage: z.tuple([RoomMessageSchema, z.array(z.number())]),
+}
+
 io.engine.on('connection', (rawSocket) => {})
 
 io.on('connection', (socket) => {
@@ -89,6 +98,20 @@ io.on('connection', (socket) => {
 			.map((profileId) => socketMap.get(profileId))
 			.filter((socketId) => socketId !== undefined)
 	}
+
+	socket.use(([event, ...args], next) => {
+		const schema =
+			ClientToServerSchemas[event as keyof typeof ClientToServerSchemas]
+		if (!schema) return next()
+
+		const result = schema.safeParse(args)
+		if (!result.success) {
+			console.warn(`Invalid payload for event "${event}"`, result.error)
+			return next(new Error('Invalid socket payload'))
+		}
+
+		next()
+	})
 
 	socket.emit('get_profileId')
 

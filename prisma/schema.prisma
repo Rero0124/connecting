@@ -13,6 +13,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum StatusType {
+  common
+  custom
+}
+
+enum FilterType {
+  block
+  hidden
+}
+
+enum IconType {
+  text
+  image
+}
+
+enum ContentType {
+  text
+  calling
+}
+
 model User {
   id Int @id @default(autoincrement())
   email String @db.VarChar(255) @unique
@@ -26,7 +46,7 @@ model User {
 model Profile {
   id Int @id @default(autoincrement())
   userId Int @map("user_id")
-  statusType String @db.Char(6)
+  statusType StatusType @map("status_type")
   statusId Int @map("status_id")
   tag String @unique @map("user_tag")
   name String? @db.VarChar(100) @map("user_name")
@@ -57,6 +77,7 @@ model Profile {
 model DeletedProfile {
   id Int @id
   userId Int @map("user_id")
+  statusType StatusType @map("status_type")
   statusId Int @map("status_id")
   tag String @unique @map("user_tag")
   name String? @db.VarChar(100) @map("user_name")
@@ -87,7 +108,7 @@ model ProfileFilter {
   id Int @id @default(autoincrement())
   profileId Int @map("profile_id")
   filterProfileId Int @map("filter_profile_id")
-  filterType String @map("filter_type")
+  filterType FilterType @map("filter_type")
   byProfile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, name: "filter_by_profile")
   profile Profile @relation(fields: [filterProfileId], references: [id], onDelete: Cascade, name: "filter_profile")
   @@unique([profileId, filterProfileId, filterType])
@@ -124,7 +145,7 @@ model FriendRequest {
 model DmSession {
   id String @db.VarChar(25) @id @default(cuid())
   name String @db.VarChar(100)
-  iconType String @map("icon_type")
+  iconType IconType @map("icon_type")
   iconData String @map("icon_data")
   createdAt DateTime @default(now()) @map("created_at")
   participant DmParticipant[]
@@ -150,7 +171,7 @@ model DmMessage {
   id Int @id @default(autoincrement())
   dmSessionId String @db.VarChar(25) @map("dm_session_id") 
   profileId Int @map("profile_id")
-  contentType String @default("text") @map("content_type")
+  contentType ContentType @default(text) @map("content_type")
   content String
   isPinned Boolean @default(false) @map("is_pinned")
   sentAt DateTime @default(now()) @map("sent_at")
@@ -168,7 +189,7 @@ model Room {
   id String @db.VarChar(25) @id @default(cuid())
   name String @db.VarChar(100)
   masterProfileId Int @map("master_profile_id")
-  iconType String @map("icon_type")
+  iconType IconType @map("icon_type")
   iconData String @map("icon_data")
   createdAt DateTime @default(now()) @map("created_at")
   masterProfile Profile @relation(fields: [masterProfileId], references: [id], onDelete: Cascade)
@@ -209,12 +230,11 @@ model RoomMessage {
   id Int @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
   profileId Int @map("profile_id")
-  contentType String @default("text") @map("content_type")
+  contentType ContentType @default(text) @map("content_type")
   content String
   isPinned Boolean @default(false) @map("is_pinned")
   sentAt DateTime @default(now()) @map("sent_at")
   updatedAt DateTime? @map("updated_at")
-  isEdited Boolean @default(false) @map("is_edited")
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
   profile Profile @relation(fields: [profileId], references: [id])
   @@index([roomId, isPinned])

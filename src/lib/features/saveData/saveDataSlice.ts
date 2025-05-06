@@ -1,7 +1,7 @@
 import { createSlice, Middleware, PayloadAction } from '@reduxjs/toolkit'
-import { getCookieValue } from '@/src/lib/util'
+import { getCookieValue, SerializeDatesForRedux } from '@/src/lib/util'
 import { RootState } from '@/src/lib/store'
-import { ProfileDetail } from '@/src/types/api'
+import { Profile } from '../../schemas/profile.schema'
 
 interface SaveDataState {
 	initLoad: boolean
@@ -9,7 +9,7 @@ interface SaveDataState {
 	selectedFriendSubMenu?: string
 	selectedMessageMenu?: string
 	title: string
-	profile?: ProfileDetail
+	profile?: ProfileState
 	navSize: number
 }
 
@@ -53,7 +53,10 @@ export const saveDataSlice = createSlice({
 		setInitLoadEnd: (state) => {
 			state.initLoad = true
 		},
-		setProfile: (state, action: PayloadAction<ProfileDetail>) => {
+		setProfile: (
+			state,
+			action: PayloadAction<SerializeDatesForRedux<Profile>>
+		) => {
 			state.profile = action.payload
 		},
 		setTitle: (state, action: PayloadAction<string>) => {
@@ -99,5 +102,7 @@ export const getSelectedFriendSubMenu = (state: RootState) =>
 	state.saveData.selectedFriendSubMenu
 export const getSelectedMessageMenu = (state: RootState) =>
 	state.saveData.selectedMessageMenu
+
+export type ProfileState = SerializeDatesForRedux<Profile>
 
 export default saveDataSlice.reducer

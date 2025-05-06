@@ -1,11 +1,12 @@
 import prisma from '@/src/lib/prisma'
-import { verifyUserIdInSession } from '@/src/lib/serverUtil'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 import {
-	ErrorResponse,
-	ProfileDetail,
-	ProfileList,
-	SuccessResponse,
-} from '@/src/types/api'
+	CreateProfileByUserBodySchema,
+	CreateProfileByUserParamsSchema,
+	GetProfilesByUserParamsSchema,
+	GetProfilesByUserSuccessResponse,
+} from '@/src/lib/schemas/profile.schema'
+import { verifyUserIdInSession } from '@/src/lib/serverUtil'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -14,8 +15,20 @@ export async function GET(
 	{ params }: { params: Promise<{ userId: string }> }
 ) {
 	try {
-		const { userId } = await params
-		const data = await verifyUserIdInSession(userId)
+		const paramsFields = GetProfilesByUserParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '유저 아이디의 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
+
+		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
 			return NextResponse.json<ErrorResponse>(
@@ -35,7 +48,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<ProfileList>>(
+		return NextResponse.json<GetProfilesByUserSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -61,23 +74,20 @@ export async function POST(
 	{ params }: { params: Promise<{ userId: string }> }
 ) {
 	try {
-		const { userId } = await params
-		const {
-			name,
-			tag,
-			image,
-			information,
-			statusType,
-			statusId,
-		}: {
-			name?: string
-			tag?: string
-			image?: string
-			information?: string
-			statusType?: 'common' | 'custom'
-			statusId?: number
-		} = await request.json()
-		const data = await verifyUserIdInSession(userId)
+		const paramsFields = CreateProfileByUserParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '유저 아이디의 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
+
+		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
 			return NextResponse.json<ErrorResponse>(
@@ -88,16 +98,11 @@ export async function POST(
 			)
 		}
 
-		if (
-			typeof name !== 'string' ||
-			typeof tag !== 'string' ||
-			typeof image !== 'string' ||
-			typeof information !== 'string' ||
-			typeof statusType !== 'string' ||
-			statusType === 'common' ||
-			statusType === 'custom' ||
-			typeof statusId !== 'number'
-		) {
+		const bodyFields = CreateProfileByUserBodySchema.safeParse(
+			await request.json()
+		)
+
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -109,26 +114,20 @@ export async function POST(
 			)
 		}
 
-		const profile = await prisma.profile.create({
+		await prisma.profile.create({
 			data: {
-				userId: data.response.data!.userId,
-				name: name,
-				tag: tag,
-				image: image,
-				information: information,
-				statusType: statusType,
-				statusId: statusId,
+				userId: data.response.data.userId,
+				...bodyFields.data,
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<ProfileDetail>>(
+		return NextResponse.json<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
 				message: '해당 유저의 프로필을 생성하였습니다.',
-				data: profile,
 			},
-			{ status: 200 }
+			{ status: 201 }
 		)
 	} catch {
 		return NextResponse.json<ErrorResponse>(

@@ -1,6 +1,5 @@
 'use client'
 import { join } from '@/app/actions/auth'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { useActionState, useEffect, useRef, useState } from 'react'

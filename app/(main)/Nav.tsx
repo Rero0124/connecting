@@ -116,8 +116,8 @@ export default function Nav() {
 					open={showProfileModal}
 					onClose={() => setShowProfileModal(false)}
 					initialData={{
-						userTag: profile.userTag,
-						userName: profile.userName ?? '',
+						userTag: profile.tag,
+						userName: profile.name ?? '',
 						image: profile.image ?? '/default-profile.png',
 					}}
 				/>

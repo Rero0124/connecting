@@ -1,7 +1,11 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import {
+	CreateRoomBodySchema,
+	GetRoomsSuccessResponse,
+} from '@/src/lib/schemas/room.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import { ErrorResponse, RoomList, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<RoomList>>(
+		return NextResponse.json<GetRoomsSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -55,15 +59,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const {
-			name,
-			iconType,
-			iconData,
-		}: {
-			name?: string
-			iconType?: 'text' | 'image'
-			iconData?: string
-		} = await request.json()
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -77,11 +72,9 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		if (
-			typeof name !== 'string' ||
-			!(iconType === 'text' || iconType === 'image') ||
-			typeof iconData !== 'string'
-		) {
+		const bodyFields = CreateRoomBodySchema.safeParse(await request.json())
+
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -95,9 +88,9 @@ export async function POST(request: NextRequest) {
 
 		await prisma.room.create({
 			data: {
-				name: name,
-				iconType: iconType,
-				iconData: iconData,
+				name: bodyFields.data.name,
+				iconType: bodyFields.data.iconType,
+				iconData: bodyFields.data.iconData,
 				masterProfileId: sessionCheck.profileId,
 				participant: {
 					create: {

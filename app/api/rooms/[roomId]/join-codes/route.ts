@@ -1,11 +1,13 @@
 import prisma from '@/src/lib/prisma'
-import { verifySession } from '@/src/lib/session'
+import { ErrorResponse } from '@/src/lib/schemas/api.schema'
 import {
-	ErrorResponse,
-	RoomJoinCodeDetail,
-	RoomJoinCodeList,
-	SuccessResponse,
-} from '@/src/types/api'
+	CreateRoomJoinCodeBodySchema,
+	CreateRoomJoinCodeParamsSchema,
+	CreateRoomJoinCodeSuccessResponse,
+	GetRoomJoinCodesParamsSchema,
+	GetRoomJoinCodesSuccessResponse,
+} from '@/src/lib/schemas/room.schema'
+import { verifySession } from '@/src/lib/session'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,7 +16,6 @@ export async function GET(
 	{ params }: { params: Promise<{ roomId: string }> }
 ) {
 	try {
-		const { roomId } = await params
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -28,9 +29,22 @@ export async function GET(
 			)
 		}
 
+		const paramsFields = GetRoomJoinCodesParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '방 아이디의 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
+
 		const room = await prisma.room.findFirst({
 			where: {
-				id: roomId,
+				id: paramsFields.data.roomId,
 			},
 			select: {
 				id: true,
@@ -66,7 +80,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<RoomJoinCodeList>>(
+		return NextResponse.json<GetRoomJoinCodesSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -92,8 +106,6 @@ export async function POST(
 	{ params }: { params: Promise<{ roomId: string }> }
 ) {
 	try {
-		const { roomId } = await params
-		const { expiresAt } = await request.json()
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -107,26 +119,43 @@ export async function POST(
 			)
 		}
 
+		const paramsFields = CreateRoomJoinCodeParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '방 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
+		const bodyFields = CreateRoomJoinCodeBodySchema.safeParse(
+			await request.json()
+		)
+
+		if (!bodyFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '인자가 잘못되었습니다. expiresAt 를 다시 확인하세요',
+				},
+				{ status: 400 }
+			)
+		}
+
 		const room = await prisma.room.findFirst({
 			where: {
-				id: roomId,
+				id: paramsFields.data.roomId,
 			},
 			select: {
 				id: true,
 				masterProfileId: true,
 			},
 		})
-
-		if (!(expiresAt instanceof Date)) {
-			return NextResponse.json<ErrorResponse>(
-				{
-					status: 'error',
-					code: 0x0,
-					message: '인자가 잘못되었습니다. expiresAt 를 다시 확인하세요.',
-				},
-				{ status: 400 }
-			)
-		}
 
 		if (!room) {
 			return NextResponse.json<ErrorResponse>(
@@ -154,11 +183,11 @@ export async function POST(
 			data: {
 				roomId: room.id,
 				authorProfileId: sessionCheck.profileId,
-				expiresAt: expiresAt,
+				expiresAt: bodyFields.data.expiresAt,
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<RoomJoinCodeDetail>>(
+		return NextResponse.json<CreateRoomJoinCodeSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,

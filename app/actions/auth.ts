@@ -1,47 +1,57 @@
+import { JoinFormState, LoginFormState } from '@/src/lib/form/auth'
 import {
-	JoinFormState,
-	LoginFormState,
-	JoinFormSchema,
-	LoginFormSchema,
-} from '@/src/lib/definitions'
-import { VerifySessionType } from '@/src/lib/session'
-import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
-import { redirect } from 'next/navigation'
+	AuthGetProfilesBodySchema,
+	AuthGetProfilesInputSchema,
+	AuthGetProfilesResponseSchema,
+	AuthJoinBodySchema,
+	AuthJoinInputSchema,
+	AuthLoginBodySchema,
+	AuthLoginInputSchema,
+} from '@/src/lib/schemas/auth.schema'
+import { fetchWithZod } from '@/src/lib/util'
 
 export async function login(
 	state: LoginFormState,
 	formData: FormData
 ): Promise<LoginFormState> {
-	const validatedFields = LoginFormSchema.safeParse({
+	const getProfilesFields = AuthGetProfilesInputSchema.safeParse({
+		email: formData.get('email'),
+		password: formData.get('password'),
+	})
+
+	const loginFields = AuthLoginInputSchema.safeParse({
 		profileId: formData.get('profileId'),
 		email: formData.get('email'),
 		password: formData.get('password'),
 	})
 
-	if (!validatedFields.success) {
+	if (!getProfilesFields.success) {
 		return {
 			data: {
 				email: formData.get('email')?.toString(),
 				password: formData.get('password')?.toString(),
 			},
-			errors: validatedFields.error.flatten().fieldErrors,
+			errors: getProfilesFields.error.flatten().fieldErrors,
 		}
 	}
 
-	const { email, password, profileId } = validatedFields.data
+	if (loginFields.success) {
+		const { email, password, profileId } = loginFields.data
 
-	if (profileId > 0) {
-		const sessionResponse: SuccessResponse<VerifySessionType> | ErrorResponse =
-			await fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+		const sessionResponse = await fetchWithZod(
+			`${process.env.NEXT_PUBLIC_API_URL}/session`,
+			{
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				cache: 'force-cache',
-				body: JSON.stringify({
+				body: {
 					email,
 					password,
 					profileId,
-				}),
-			}).then((res) => res.json())
+				},
+				bodySchema: AuthLoginBodySchema,
+			}
+		)
 
 		if (sessionResponse.status === 'error') {
 			return {
@@ -61,36 +71,42 @@ export async function login(
 			message: sessionResponse.message,
 			isLogin: true,
 		}
-	}
+	} else {
+		const { email, password } = getProfilesFields.data
 
-	const authenticateResponse: SuccessResponse<ProfileList> | ErrorResponse =
-		await fetch(`${process.env.NEXT_PUBLIC_API_URL}/authenticate`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			cache: 'force-cache',
-			body: JSON.stringify({
-				email,
-				password,
-			}),
-		}).then((res) => res.json())
+		const authenticateResponse = await fetchWithZod(
+			`${process.env.NEXT_PUBLIC_API_URL}/authenticate`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				cache: 'force-cache',
+				body: {
+					email,
+					password,
+				},
+				dataSchema: AuthGetProfilesResponseSchema,
+				bodySchema: AuthGetProfilesBodySchema,
+			}
+		)
 
-	if (authenticateResponse.status === 'error') {
+		if (authenticateResponse.status === 'error') {
+			return {
+				data: {
+					email: formData.get('email')?.toString(),
+					password: formData.get('password')?.toString(),
+				},
+				message: authenticateResponse.message,
+			}
+		}
+
 		return {
 			data: {
 				email: formData.get('email')?.toString(),
 				password: formData.get('password')?.toString(),
 			},
 			message: authenticateResponse.message,
+			profiles: authenticateResponse.data,
 		}
-	}
-
-	return {
-		data: {
-			email: formData.get('email')?.toString(),
-			password: formData.get('password')?.toString(),
-		},
-		message: authenticateResponse.message,
-		profiles: authenticateResponse.data,
 	}
 }
 
@@ -98,14 +114,14 @@ export async function join(
 	state: JoinFormState,
 	formData: FormData
 ): Promise<JoinFormState> {
-	const validatedFields = JoinFormSchema.safeParse({
+	const joinFields = AuthJoinInputSchema.safeParse({
 		tag: formData.get('tag'),
 		name: formData.get('name'),
 		email: formData.get('email'),
 		password: formData.get('password'),
 	})
 
-	if (!validatedFields.success) {
+	if (!joinFields.success) {
 		return {
 			data: {
 				tag: formData.get('tag')?.toString(),
@@ -113,34 +129,35 @@ export async function join(
 				email: formData.get('email')?.toString(),
 				password: formData.get('password')?.toString(),
 			},
-			errors: validatedFields.error.flatten().fieldErrors,
+			errors: joinFields.error.flatten().fieldErrors,
 		}
 	}
 
-	const { tag, name, email, password } = validatedFields.data
+	const { tag, name, email, password } = joinFields.data
 
-	const userResponse: SuccessResponse | ErrorResponse = await fetch(
+	const joinResponse = await fetchWithZod(
 		`${process.env.NEXT_PUBLIC_API_URL}/users`,
 		{
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			cache: 'no-cache',
-			body: JSON.stringify({
+			body: {
 				tag,
 				name,
 				email,
 				password,
-			}),
+			},
+			bodySchema: AuthJoinBodySchema,
 		}
-	).then((res) => res.json())
+	)
 
-	if (userResponse.status === 'error') {
+	if (joinResponse.status === 'error') {
 		return {
 			data: {
 				email: formData.get('email')?.toString(),
 				password: formData.get('password')?.toString(),
 			},
-			message: userResponse.message,
+			message: joinResponse.message,
 		}
 	}
 
@@ -149,7 +166,7 @@ export async function join(
 			email: formData.get('email')?.toString(),
 			password: formData.get('password')?.toString(),
 		},
-		message: userResponse.message,
+		message: joinResponse.message,
 		isJoin: true,
 	}
 }

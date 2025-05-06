@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient, Prisma, StatusType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -22,7 +22,7 @@ const getUserProfileData = (userIds: number[]): Prisma.ProfileCreateInput[] => [
 		},
 		tag: 'rero0124',
 		information: '',
-		statusType: 'common',
+		statusType: StatusType.common,
 		statusId: 0,
 	},
 	{
@@ -33,7 +33,7 @@ const getUserProfileData = (userIds: number[]): Prisma.ProfileCreateInput[] => [
 		},
 		tag: 'rero01211',
 		information: '',
-		statusType: 'common',
+		statusType: StatusType.common,
 		statusId: 0,
 	},
 	{
@@ -44,7 +44,7 @@ const getUserProfileData = (userIds: number[]): Prisma.ProfileCreateInput[] => [
 		},
 		tag: '테스트',
 		information: '테스트 입니다.',
-		statusType: 'common',
+		statusType: StatusType.common,
 		statusId: 0,
 	},
 	{
@@ -55,7 +55,7 @@ const getUserProfileData = (userIds: number[]): Prisma.ProfileCreateInput[] => [
 		},
 		tag: '테스트1',
 		information: '',
-		statusType: 'custom',
+		statusType: StatusType.custom,
 		statusId: 0,
 	},
 ]

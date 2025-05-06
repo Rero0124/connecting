@@ -1,17 +1,35 @@
 import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
-import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { deleteSession, verifySession } from '@/src/lib/session'
+import { deleteSession } from '@/src/lib/session'
 import { verifyUserIdInSession } from '@/src/lib/serverUtil'
+import {
+	GetUserParamsSchema,
+	GetUserSuccessResponse,
+	UpdateUserBodySchema,
+	UpdateUserParamsSchema,
+} from '@/src/lib/schemas/user.schema'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 
 export async function GET(
 	request: NextRequest,
 	{ params }: { params: Promise<{ userId: string }> }
 ) {
 	try {
-		const { userId } = await params
-		const data = await verifyUserIdInSession(userId)
+		const paramsFields = GetUserParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '유저 아이디의 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
+
+		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
 			return NextResponse.json<ErrorResponse>(
@@ -22,18 +40,12 @@ export async function GET(
 			)
 		}
 
-		const profiles = await prisma.profile.findMany({
-			where: {
-				userId: data.response.data.userId,
-			},
-		})
-
-		return NextResponse.json<SuccessResponse<ProfileList>>(
+		return NextResponse.json<GetUserSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
-				message: '사용자의 프로필들을 조회하였습니다.',
-				data: profiles,
+				message: '사용자의 상세정보를 조회하였습니다.',
+				data: data.response.data,
 			},
 			{ status: 200 }
 		)
@@ -54,9 +66,20 @@ export async function PATCH(
 	{ params }: { params: Promise<{ userId: string }> }
 ) {
 	try {
-		const { userId } = await params
-		const { email }: { email?: string } = await request.json()
-		const data = await verifyUserIdInSession(userId)
+		const paramsFields = UpdateUserParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '유저 아이디의 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
+
+		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
 			return NextResponse.json<ErrorResponse>(
@@ -67,7 +90,9 @@ export async function PATCH(
 			)
 		}
 
-		if (typeof email !== 'string') {
+		const bodyFields = UpdateUserBodySchema.safeParse(await request.json())
+
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -80,10 +105,10 @@ export async function PATCH(
 
 		await prisma.user.update({
 			where: {
-				id: data.response.data?.userId,
+				id: data.response.data.userId,
 			},
 			data: {
-				email: email,
+				email: bodyFields.data.email,
 			},
 		})
 
@@ -112,8 +137,20 @@ export async function DELETE(
 	{ params }: { params: Promise<{ userId: string }> }
 ) {
 	try {
-		const { userId } = await params
-		const data = await verifyUserIdInSession(userId)
+		const paramsFields = GetUserParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '유저 아이디의 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
+
+		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
 			return NextResponse.json<ErrorResponse>(
@@ -126,7 +163,7 @@ export async function DELETE(
 
 		await prisma.user.delete({
 			where: {
-				id: data.response.data?.userId,
+				id: data.response.data.userId,
 			},
 		})
 

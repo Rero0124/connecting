@@ -17,6 +17,7 @@ export default function Login() {
 		if (state?.isLogin) {
 			redirect('/')
 		}
+		console.log(state?.profiles)
 		if (state?.profiles) {
 			setSelectProfileModelOpen(true)
 		} else {

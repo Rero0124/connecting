@@ -1,11 +1,12 @@
 import prisma from '@/src/lib/prisma'
-import { verifySession } from '@/src/lib/session'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 import {
-	ErrorResponse,
-	ProfileFilterList,
-	SuccessResponse,
-} from '@/src/types/api'
+	CreateProfileFilterBodySchema,
+	GetProfileFiltersSuccessResponse,
+} from '@/src/lib/schemas/profile.schema'
+import { verifySession } from '@/src/lib/session'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
+import { FilterType } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<ProfileFilterList>>(
+		return NextResponse.json<GetProfileFiltersSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -61,7 +62,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const body = await request.json()
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -75,11 +75,11 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		if (
-			!body ||
-			!(body.profileId && typeof body.profileId === 'number') ||
-			!(body.filterType && typeof body.filterType === 'string')
-		) {
+		const bodyFields = CreateProfileFilterBodySchema.safeParse(
+			await request.json()
+		)
+
+		if (!bodyFields.success) {
 			return NextResponse.json<SuccessResponse>(
 				{
 					status: 'success',
@@ -91,19 +91,11 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		const {
-			profileId,
-			filterType,
-		}: {
-			profileId: number
-			filterType: string
-		} = body
-
 		await prisma.profileFilter.create({
 			data: {
 				profileId: sessionCheck.profileId,
-				filterProfileId: profileId,
-				filterType: filterType,
+				filterProfileId: bodyFields.data.profileId,
+				filterType: bodyFields.data.filterType,
 			},
 		})
 

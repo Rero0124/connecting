@@ -1,20 +1,15 @@
 import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
-import { JoinFormSchema } from '@/src/lib/definitions'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
+import { AuthJoinBodySchema } from '@/src/lib/schemas/auth.schema'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 
 export async function POST(request: NextRequest) {
 	let user
 	try {
-		const rawData = await request.json()
-		const validatedFields = JoinFormSchema.safeParse({
-			tag: rawData.tag,
-			name: rawData.name,
-			email: rawData.email,
-			password: rawData.password,
-		})
+		const body = await request.json()
+		const validatedFields = AuthJoinBodySchema.safeParse({ body })
 
 		if (!validatedFields.success) {
 			return NextResponse.json<ErrorResponse>(
@@ -28,7 +23,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		const { tag, name, email, password } = validatedFields.data!
+		const { tag, name, email, password } = validatedFields.data
 
 		const hashedPassword = await bcryptjs.hash(password, 10)
 

@@ -29,10 +29,35 @@ const eslintConfig = [
 	},
 	...compat.config({
 		extends: ['next', 'plugin:prettier/recommended'],
+		plugins: {
+			'simple-import-sort': simpleImportSort,
+		},
 		rules: {
 			'react/no-unescaped-entities': 'off',
 			'@next/next/no-page-custom-font': 'off',
 			'react-hooks/exhaustive-deps': 'off',
+			'simple-import-sort/imports': [
+				'error',
+				{
+					groups: [
+						// 1. Node.js built-ins
+						['^node:'],
+						// 2. External packages
+						['^@?\\w'],
+						// 3. Aliased paths (src alias)
+						['^@/'],
+						// 4. Parent imports
+						['^\\.\\.(?!/?$)', '^\\.\\./?$'],
+						// 5. Relative imports
+						['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
+						// 6. Side effect imports
+						['^\\u0000'],
+						// 7. Style imports
+						['\\.css$', '\\.scss$', '\\.tailwind$'],
+					],
+				},
+			],
+		'simple-import-sort/exports': 'error',
 		},
 	}),
 ]

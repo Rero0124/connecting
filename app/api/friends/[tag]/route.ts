@@ -1,7 +1,8 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import { DeleteFriendParamsSchema } from '@/src/lib/schemas/friend.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -10,7 +11,8 @@ export async function DELETE(
 	{ params }: { params: Promise<{ tag: string }> }
 ) {
 	try {
-		const { tag } = await params
+		const paramsFields = DeleteFriendParamsSchema.safeParse(await params)
+
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
 			return NextResponse.json<ErrorResponse>(
@@ -20,6 +22,17 @@ export async function DELETE(
 					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
 				},
 				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
+			)
+		}
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: 'tag의 형식이 잘못되었습니다.',
+				},
+				{ status: 404 }
 			)
 		}
 
@@ -35,7 +48,7 @@ export async function DELETE(
 					userId: sessionCheck.userId,
 				},
 				friendProfile: {
-					tag: tag,
+					tag: paramsFields.data.tag,
 				},
 			},
 		})

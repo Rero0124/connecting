@@ -1,11 +1,11 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import {
+	CreateRoomMessageBodySchema,
+	CreateRoomMessageParamsSchema,
+} from '@/src/lib/schemas/room.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import {
-	DmMessageDetail,
-	ErrorResponse,
-	SuccessResponse,
-} from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,8 +14,6 @@ export async function POST(
 	{ params }: { params: Promise<{ roomId: string }> }
 ) {
 	try {
-		const { roomId } = await params
-		const { message } = await request.json()
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -29,7 +27,24 @@ export async function POST(
 			)
 		}
 
-		if (typeof message !== 'string') {
+		const paramsFields = CreateRoomMessageParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '방 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
+		const bodyFields = CreateRoomMessageBodySchema.safeParse(
+			await request.json()
+		)
+
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -42,7 +57,7 @@ export async function POST(
 
 		const room = await prisma.room.findFirst({
 			where: {
-				id: roomId,
+				id: paramsFields.data.roomId,
 			},
 			select: {
 				id: true,
@@ -86,7 +101,7 @@ export async function POST(
 
 		const roomMessage = await prisma.roomMessage.create({
 			data: {
-				content: message,
+				content: bodyFields.data.message,
 				roomId: room.id,
 				profileId: sessionCheck.profileId,
 			},

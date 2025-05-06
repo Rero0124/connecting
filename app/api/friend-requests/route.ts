@@ -1,11 +1,11 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import {
+	CreateFriendRequestBodySchema,
+	GetFriendRequestsSuccessResponse,
+} from '@/src/lib/schemas/friend.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
-import {
-	ErrorResponse,
-	FriendRequestList,
-	SuccessResponse,
-} from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -71,12 +71,7 @@ export async function GET(request: NextRequest) {
 			profile: friendRequest.byProfile,
 		}))
 
-		return NextResponse.json<
-			SuccessResponse<{
-				receivedFriendRequests: FriendRequestList
-				sentFriendRequests: FriendRequestList
-			}>
-		>(
+		return NextResponse.json<GetFriendRequestsSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -102,7 +97,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const { tag } = await request.json()
+		const bodyFields = CreateFriendRequestBodySchema.safeParse(
+			await request.json()
+		)
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -116,7 +113,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		if (typeof tag !== 'string') {
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -129,7 +126,7 @@ export async function POST(request: NextRequest) {
 
 		const profile = await prisma.profile.findUnique({
 			where: {
-				tag: tag,
+				tag: bodyFields.data.tag,
 			},
 			select: {
 				id: true,

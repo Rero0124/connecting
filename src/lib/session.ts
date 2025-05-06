@@ -1,12 +1,12 @@
 import 'server-only'
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
-import { SessionPayload } from '@/src/lib/definitions'
+import { Session, VerifySession } from './schemas/session.schema'
 
 const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)
 
-export async function encrypt(payload: SessionPayload) {
+export async function encrypt(payload: Session) {
 	return new SignJWT(payload)
 		.setProtectedHeader({ alg: 'HS256' })
 		.setIssuedAt()
@@ -16,7 +16,7 @@ export async function encrypt(payload: SessionPayload) {
 
 export async function decrypt(session: string | undefined = '') {
 	try {
-		const { payload } = await jwtVerify<SessionPayload>(session, encodedKey, {
+		const { payload } = await jwtVerify<Session>(session, encodedKey, {
 			algorithms: ['HS256'],
 		})
 		return payload
@@ -42,11 +42,7 @@ export async function deleteSession() {
 	cookieStore.delete('session')
 }
 
-export type VerifySessionType =
-	| { isAuth: false }
-	| { isAuth: true; userId: number; profileId: number }
-
-export async function verifySession(): Promise<VerifySessionType> {
+export async function verifySession(): Promise<VerifySession> {
 	const cookie = (await cookies()).get('session')?.value
 	const session = await decrypt(cookie)
 

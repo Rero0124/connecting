@@ -1,6 +1,8 @@
 'use client'
 
-import { ErrorResponse, ProfileDetail, SuccessResponse } from '@/src/types/api'
+import { CreateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
+import { GetProfileResponseSchema, Profile } from '@/src/lib/schemas/profile.schema'
+import { fetchWithZod } from '@/src/lib/util'
 import { useEffect, useRef, useState } from 'react'
 
 export default function FriendAddPage() {
@@ -8,7 +10,7 @@ export default function FriendAddPage() {
 	const [message, setMessage] = useState<string | null>(null)
 	const [status, setStatus] = useState<'success' | 'error' | null>(null)
 	const [loading, setLoading] = useState(false)
-	const [profile, setProfile] = useState<ProfileDetail | null>(null)
+	const [profile, setProfile] = useState<Profile | null>(null)
 	const [profileLoading, setProfileLoading] = useState(false)
 
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -18,16 +20,17 @@ export default function FriendAddPage() {
 		setLoading(true)
 
 		try {
-			const response: SuccessResponse | ErrorResponse = await fetch(
+			const response = await fetchWithZod(
 				'/api/friend-requests',
 				{
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ tag }),
+					body: { tag },
+					bodySchema: CreateFriendRequestBodySchema
 				}
-			).then((res) => res.json())
+			)
 
 			if (response.status === 'success') {
 				setStatus('success')
@@ -61,14 +64,9 @@ export default function FriendAddPage() {
 		}
 		setProfileLoading(true)
 		try {
-			const res = await fetch(`/api/profiles/${encodeURIComponent(tag)}`)
-			if (res.status === 404) {
-				setProfile(null)
-				setMessage('해당 사용자를 찾을 수 없습니다.')
-				setStatus('error')
-				return
-			}
-			const response: SuccessResponse<ProfileDetail> = await res.json()
+			const response = await fetchWithZod(`/api/profiles/${encodeURIComponent(tag)}`, {
+				dataSchema: GetProfileResponseSchema
+			})
 			if (response.status === 'success') {
 				setProfile(response.data)
 				setMessage(null)

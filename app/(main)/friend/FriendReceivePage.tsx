@@ -3,7 +3,8 @@
 import { useAppSelector } from '@/src/lib/hooks'
 import FriendDetailModal from './FriendDetailModal'
 import { useState } from 'react'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { fetchWithZod } from '@/src/lib/util'
+import { UpdateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
 
 export default function FriendReceivePage() {
 	const initialRequests = useAppSelector(
@@ -16,16 +17,17 @@ export default function FriendReceivePage() {
 
 	const handleFriendRequestAccept = async (friendRequestId: number) => {
 		try {
-			const response: SuccessResponse | ErrorResponse = await fetch(
+			const response = await fetchWithZod(
 				`/api/friend-requests/${friendRequestId}`,
 				{
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ type: 'accept' }),
+					body: { type: 'accept' },
+					bodySchema: UpdateFriendRequestBodySchema,
 				}
-			).then((res) => res.json())
+			)
 
 			alert(response.message)
 
@@ -42,12 +44,12 @@ export default function FriendReceivePage() {
 
 	const handleFriendRequestReject = async (friendRequestId: number) => {
 		try {
-			const response: SuccessResponse | ErrorResponse = await fetch(
+			const response = await fetchWithZod(
 				`/api/friend-requests/${friendRequestId}`,
 				{
 					method: 'DELETE',
 				}
-			).then((res) => res.json())
+			)
 
 			alert(response.message)
 

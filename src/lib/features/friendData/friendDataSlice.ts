@@ -1,16 +1,13 @@
-import { RootState } from '@/src/lib/store'
-import {
-	ProfileFilterList,
-	FriendList,
-	FriendRequestList,
-} from '@/src/types/api'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { Friend, FriendRequest } from '../../schemas/friend.schema'
+import { ProfileFilter } from '../../schemas/profile.schema'
+import { SerializeDatesForRedux } from '../../util'
 
 interface FriendDataState {
-	friends: FriendList
-	sentFriendRequests: FriendRequestList
-	receivedFriendRequests: FriendRequestList
-	filterFriends: ProfileFilterList
+	friends: FriendState[]
+	sentFriendRequests: FriendRequestState[]
+	receivedFriendRequests: FriendRequestState[]
+	filterFriends: ProfileFilterState[]
 }
 
 const initialState: FriendDataState = {
@@ -24,22 +21,22 @@ export const friendDataSlice = createSlice({
 	name: 'savedata',
 	initialState,
 	reducers: {
-		setFriends: (state, action: PayloadAction<FriendList>) => {
+		setFriends: (state, action: PayloadAction<FriendState[]>) => {
 			state.friends = action.payload
 		},
 		setSentFriendRequests: (
 			state,
-			action: PayloadAction<FriendRequestList>
+			action: PayloadAction<FriendRequestState[]>
 		) => {
 			state.sentFriendRequests = action.payload
 		},
 		setReceivedFriendRequests: (
 			state,
-			action: PayloadAction<FriendRequestList>
+			action: PayloadAction<FriendRequestState[]>
 		) => {
 			state.receivedFriendRequests = action.payload
 		},
-		setFilterFriends: (state, action: PayloadAction<ProfileFilterList>) => {
+		setFilterFriends: (state, action: PayloadAction<ProfileFilterState[]>) => {
 			state.filterFriends = action.payload
 		},
 	},
@@ -102,5 +99,9 @@ export const getFilterFriends = (state: FriendDataState, tag?: string) => {
 		return state.filterFriends
 	}
 }
+
+export type FriendState = SerializeDatesForRedux<Friend>
+export type FriendRequestState = SerializeDatesForRedux<FriendRequest>
+export type ProfileFilterState = SerializeDatesForRedux<ProfileFilter>
 
 export default friendDataSlice.reducer

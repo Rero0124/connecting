@@ -1,8 +1,7 @@
 'use client'
 
-import { VerifySessionType } from '@/src/lib/session'
-import { getSession } from '@/src/lib/util'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { UpdateProfileByUserBodySchema } from '@/src/lib/schemas/profile.schema'
+import { fetchWithZod, getSession } from '@/src/lib/util'
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -58,24 +57,23 @@ export default function ProfileEditModal({
 			const session = await getSession()
 
 			if (session.isAuth) {
-				const response = await fetch(
+				const profileResponse = await fetchWithZod(
 					`/api/users/${session.userId}/profiles/${session.profileId}`,
 					{
 						method: 'PATCH',
 						headers: {
 							'Content-Type': 'application/json',
 						},
-						body: JSON.stringify({
-							userName: userName || undefined,
-							statusName: statusName || undefined,
+						body: {
+							name: userName || undefined,
 							information: information || undefined,
 							image: imageEncoded || undefined,
-						}),
+						},
+						bodySchema: UpdateProfileByUserBodySchema
 					}
 				)
 
-				const result = await response.json()
-				if (response.ok && result.result) {
+				if (profileResponse.status === 'success') {
 					onClose()
 				} else {
 					alert('프로필 업데이트에 실패했습니다.')

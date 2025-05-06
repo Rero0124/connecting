@@ -1,20 +1,15 @@
 'use server'
-import { NextResponse } from 'next/server'
-import { ErrorResponse, SuccessResponse } from '../types/api'
 import { deleteSession, verifySession } from './session'
 import { ResponseDictionary } from '../types/dictionaries/res/dict'
 import prisma from './prisma'
+import { ErrorResponse, SuccessResponse } from './schemas/api.schema'
+import { SessionUserSuccessResponse } from './schemas/user.schema'
+import { SessionProfileSuccessResponse } from './schemas/profile.schema'
 
-export async function verifyUserIdInSession(userId: any): Promise<{
-	response:
-		| SuccessResponse<{
-				userId: number
-				email: string
-		  }>
-		| ErrorResponse
+export async function verifyUserIdInSession(userId: number): Promise<{
+	response: SessionUserSuccessResponse | ErrorResponse
 	status: number
 }> {
-	const userIdNumber = Number(userId)
 	const sessionCheck = await verifySession()
 	if (!sessionCheck.isAuth) {
 		return {
@@ -27,18 +22,7 @@ export async function verifyUserIdInSession(userId: any): Promise<{
 		}
 	}
 
-	if (isNaN(userIdNumber)) {
-		return {
-			response: {
-				status: 'error',
-				code: 0x0,
-				message: '유저 아이디의 형식이 잘못되었습니다.',
-			},
-			status: 400,
-		}
-	}
-
-	if (sessionCheck.userId !== userIdNumber) {
+	if (sessionCheck.userId !== userId) {
 		return {
 			response: {
 				status: 'error',
@@ -90,13 +74,7 @@ export async function verifyProfileIdInSession(
 	userId: any,
 	profileId: any
 ): Promise<{
-	response:
-		| SuccessResponse<{
-				userId: number
-				profileId: number
-				tag: string
-		  }>
-		| ErrorResponse
+	response: SessionProfileSuccessResponse | ErrorResponse
 	status: number
 }> {
 	const profileIdNumber = Number(profileId)

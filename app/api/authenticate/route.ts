@@ -1,19 +1,18 @@
 import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
-import { LoginFormSchema } from '@/src/lib/definitions'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { ErrorResponse, ProfileList, SuccessResponse } from '@/src/types/api'
+import {
+	AuthGetProfilesBodySchema,
+	AuthGetProfilesSuccessResponse,
+} from '@/src/lib/schemas/auth.schema'
+import { ErrorResponse } from '@/src/lib/schemas/api.schema'
 
 export async function POST(request: NextRequest) {
 	try {
-		const rawData = await request.json()
-		const validatedFields = LoginFormSchema.safeParse({
-			email: rawData.email,
-			password: rawData.password,
-		})
+		const bodyFields = AuthGetProfilesBodySchema.safeParse(await request.json())
 
-		if (!validatedFields.success) {
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -24,7 +23,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		const { email, password } = validatedFields.data
+		const { email, password } = bodyFields.data
 
 		const user = await prisma.user.findUnique({
 			where: { email },
@@ -63,7 +62,7 @@ export async function POST(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<SuccessResponse<ProfileList>>(
+		return NextResponse.json<AuthGetProfilesSuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.code,

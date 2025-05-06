@@ -1,15 +1,17 @@
 import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
-import { LoginFormSchema } from '@/src/lib/definitions'
-import {
-	createSession,
-	deleteSession,
-	verifySession,
-	VerifySessionType,
-} from '@/src/lib/session'
+import { createSession, deleteSession, verifySession } from '@/src/lib/session'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import {
+	GetSessionSuccessResponse,
+	VerifySessionSuccessResponse,
+} from '@/src/lib/schemas/session.schema'
+import {
+	AuthChangeProfileBodySchema,
+	AuthLoginBodySchema,
+} from '@/src/lib/schemas/auth.schema'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 
 export async function GET(request: NextRequest) {
 	try {
@@ -26,7 +28,7 @@ export async function GET(request: NextRequest) {
 			)
 		}
 
-		return NextResponse.json<SuccessResponse<VerifySessionType>>(
+		return NextResponse.json<GetSessionSuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
@@ -49,16 +51,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
 	try {
-		const rawData = await request.json()
-		const validatedFields = LoginFormSchema.safeParse({
-			profileId: rawData.profileId,
-			email: rawData.email,
-			password: rawData.password,
-		})
+		const loginFields = AuthLoginBodySchema.safeParse(await request.json())
 
-		console.log(validatedFields.success)
-
-		if (!validatedFields.success) {
+		if (!loginFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -69,7 +64,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		const { email, password, profileId } = validatedFields.data
+		const { email, password, profileId } = loginFields.data
 
 		const user = await prisma.user.findUnique({
 			where: { email },
@@ -132,7 +127,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		return NextResponse.json<SuccessResponse<VerifySessionType>>(
+		return NextResponse.json<VerifySessionSuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.code,
@@ -155,7 +150,9 @@ export async function POST(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
 	try {
-		const { profileId } = await request.json()
+		const bodyFields = AuthChangeProfileBodySchema.safeParse(
+			await request.json()
+		)
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -169,24 +166,20 @@ export async function PATCH(request: NextRequest) {
 			)
 		}
 
-		if (typeof profileId !== 'number') {
+		if (!bodyFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: ResponseDictionary.kr.RESPONSE_AUTH_USER_PROFILE_FAILED.code,
-					message:
-						ResponseDictionary.kr.RESPONSE_AUTH_USER_PROFILE_FAILED.message,
+					code: 0x0,
+					message: '인자가 잘못되었습니다. profileId 를 다시 확인하세요',
 				},
-				{
-					status:
-						ResponseDictionary.kr.RESPONSE_AUTH_USER_PROFILE_FAILED.status,
-				}
+				{ status: 400 }
 			)
 		}
 
 		const userProfile = await prisma.profile.findFirst({
 			where: {
-				id: profileId,
+				id: bodyFields.data.profileId,
 				userId: sessionCheck.userId,
 			},
 		})

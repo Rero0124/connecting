@@ -1,10 +1,10 @@
 import prisma from '@/src/lib/prisma'
-import { verifySession } from '@/src/lib/session'
+import { ErrorResponse } from '@/src/lib/schemas/api.schema'
 import {
-	DmSessionDetail,
-	ErrorResponse,
-	SuccessResponse,
-} from '@/src/types/api'
+	GetDmSessionParamsSchema,
+	GetDmSessionSuccessResponse,
+} from '@/src/lib/schemas/dm.schema'
+import { verifySession } from '@/src/lib/session'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -12,7 +12,6 @@ export async function GET(
 	request: NextRequest,
 	{ params }: { params: Promise<{ dmSessionId: string }> }
 ) {
-	const { dmSessionId } = await params
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
@@ -26,9 +25,22 @@ export async function GET(
 			)
 		}
 
+		const paramsFields = GetDmSessionParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return NextResponse.json<ErrorResponse>(
+				{
+					status: 'error',
+					code: 0x0,
+					message: '세션 아이디의 형식이 잘못되었습니다.',
+				},
+				{ status: 400 }
+			)
+		}
+
 		const dmSession = await prisma.dmSession.findFirst({
 			where: {
-				id: dmSessionId,
+				id: paramsFields.data.dmSessionId,
 				participant: {
 					some: {
 						profile: {
@@ -69,7 +81,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<SuccessResponse<DmSessionDetail>>(
+		return NextResponse.json<GetDmSessionSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,

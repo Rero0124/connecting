@@ -1,6 +1,7 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import { DeleteRoomJoinCodeParamsSchema } from '@/src/lib/schemas/room.schema'
 import { verifySession } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -21,6 +22,32 @@ export async function DELETE(
 				},
 				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
 			)
+		}
+
+		const paramsFields = DeleteRoomJoinCodeParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			const errorShape = paramsFields.error.format()
+
+			const roomIdError = errorShape.roomId?._errors?.[0]
+			const codeError = errorShape.code?._errors?.[0]
+
+			let message = '요청 파라미터 형식이 잘못되었습니다.'
+
+			if (roomIdError) {
+				message = 'roomId의 형식이 잘못되었습니다.'
+			} else if (codeError) {
+				message = 'code의 형식이 잘못되었습니다.'
+			}
+
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message,
+				},
+				status: 400,
+			}
 		}
 
 		const room = await prisma.room.findFirst({

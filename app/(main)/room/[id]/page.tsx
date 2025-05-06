@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
-import { ErrorResponse, RoomDetail, SuccessResponse } from '@/src/types/api'
 import { useParams } from 'next/navigation'
 import { setRoomDetail } from '@/src/lib/features/roomData/roomDataSlice'
+import { fetchWithZod, serializeDatesForRedux } from '@/src/lib/util'
+import { GetRoomResponseSchema } from '@/src/lib/schemas/room.schema'
 
 export default function Main() {
 	const [pendingMessage, setPendingMessage] = useState<string>('')
@@ -27,13 +28,12 @@ export default function Main() {
 
 	useEffect(() => {
 		if (!roomData.roomDetails[id]) {
-			fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
+			fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
 				cache: 'no-store',
-			})
-				.then((res) => res.json())
-				.then((data: SuccessResponse<RoomDetail> | ErrorResponse) => {
+				dataSchema: GetRoomResponseSchema
+			}).then((data) => {
 					if (data.status === 'success') {
-						dispatch(setRoomDetail(data.data))
+						dispatch(setRoomDetail(serializeDatesForRedux(data.data)))
 					}
 				})
 		}

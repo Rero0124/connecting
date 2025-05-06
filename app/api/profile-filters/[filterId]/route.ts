@@ -1,6 +1,7 @@
 import prisma from '@/src/lib/prisma'
+import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import { DeleteProfileFilterParamsSchema } from '@/src/lib/schemas/profile.schema'
 import { verifySession } from '@/src/lib/session'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -9,8 +10,6 @@ export async function DELETE(
 	{ params }: { params: Promise<{ filterId: string }> }
 ) {
 	try {
-		const { filterId } = await params
-		const filterIdNumber = Number(filterId)
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
@@ -24,7 +23,9 @@ export async function DELETE(
 			)
 		}
 
-		if (isNaN(filterIdNumber)) {
+		const paramsFields = DeleteProfileFilterParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
@@ -37,7 +38,7 @@ export async function DELETE(
 
 		const filter = await prisma.profileFilter.findUnique({
 			where: {
-				id: filterIdNumber,
+				id: paramsFields.data.filterId,
 			},
 		})
 

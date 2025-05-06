@@ -1,5 +1,9 @@
 import prisma from '@/src/lib/prisma'
-import { ErrorResponse, ProfileDetail, SuccessResponse } from '@/src/types/api'
+import { ErrorResponse } from '@/src/lib/schemas/api.schema'
+import {
+	GetProfileParamsSchema,
+	GetProfileSuccessResponse,
+} from '@/src/lib/schemas/profile.schema'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -8,14 +12,25 @@ export async function GET(
 	{ params }: { params: Promise<{ tag: string }> }
 ) {
 	try {
-		const { tag } = await params
+		const paramsFields = GetProfileParamsSchema.safeParse(await params)
+
+		if (!paramsFields.success) {
+			return {
+				response: {
+					status: 'error',
+					code: 0x0,
+					message: '태그 형식이 잘못되었습니다.',
+				},
+				status: 400,
+			}
+		}
 
 		const profile = await prisma.profile.findFirst({
 			omit: {
 				userId: true,
 			},
 			where: {
-				tag: tag,
+				tag: paramsFields.data.tag,
 			},
 		})
 
@@ -30,7 +45,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<SuccessResponse<ProfileDetail>>(
+		return NextResponse.json<GetProfileSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,

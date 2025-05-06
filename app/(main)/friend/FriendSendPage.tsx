@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react'
 import FriendDetailModal from './FriendDetailModal'
 import { useAppSelector } from '@/src/lib/hooks'
-import { ErrorResponse, SuccessResponse } from '@/src/types/api'
+import { fetchWithZod } from '@/src/lib/util'
+import { UpdateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
 
 export default function FriendSendPage() {
 	const friendsData = useAppSelector((state) => state.friendsData)
@@ -16,16 +17,17 @@ export default function FriendSendPage() {
 
 	const handleFriendRequestCancel = async (friendRequestId: number) => {
 		try {
-			const response: SuccessResponse | ErrorResponse = await fetch(
+			const response = await fetchWithZod(
 				`/api/friend-requests/${friendRequestId}`,
 				{
 					method: 'PATCH',
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ type: 'cancel' }),
+					body: { type: 'cancel' },
+					bodySchema: UpdateFriendRequestBodySchema,
 				}
-			).then((res) => res.json())
+			)
 
 			alert(response.message)
 		} catch (err) {
