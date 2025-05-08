@@ -2,6 +2,7 @@
 
 import { setDmDetail } from '@/src/lib/features/dmData/dmDataSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
+import { useVoiceCall } from '@/src/lib/hooks/useVoiceCall'
 import { GetDmSessionResponseSchema } from '@/src/lib/schemas/dm.schema'
 import { fetchWithZod, serializeDatesForRedux } from '@/src/lib/util'
 import Image from 'next/image'
@@ -12,6 +13,16 @@ export default function Main() {
 	const dmData = useAppSelector((state) => state.dmData)
 	const saveData = useAppSelector((state) => state.saveData)
 	const dispatch = useAppDispatch()
+	const {
+		startCalling,
+		stopCalling,
+		toggleMic,
+		isMicOn,
+		toggleCamera,
+		isCameraOn,
+		toggleScreen,
+		isScreenOn,
+	} = useVoiceCall()
 	const [pendingMessage, setPendingMessage] = useState<string>('')
 	const [isCalling, setIsCalling] = useState(false)
 	let pastMessageProfileId = -1
@@ -32,6 +43,24 @@ export default function Main() {
 
 	const handleCallingStart = () => {
 		setIsCalling(true)
+		startCalling(id)
+	}
+
+	const handleCallingStop = () => {
+		setIsCalling(false)
+		stopCalling()
+	}
+
+	const handleCallingMute = () => {
+		toggleMic()
+	}
+
+	const handleCamera = () => {
+		toggleCamera()
+	}
+
+	const handleScreenShare = () => {
+		toggleScreen()
 	}
 
 	useEffect(() => {
@@ -55,6 +84,19 @@ export default function Main() {
 					<div onClick={handleCallingStart}>통화</div>
 				</div>
 			</div>
+			{isCalling && (
+				<div className="flex grow">
+					<span>통화중</span>
+					<div onClick={handleCallingStop}>전화끊기</div>
+					<div onClick={handleCallingMute}>
+						마이크{isMicOn ? '끄기' : '켜기'}
+					</div>
+					<div onClick={handleCamera}>카메라{isCameraOn ? '끄기' : '켜기'}</div>
+					<div onClick={handleScreenShare}>
+						화면공유{isScreenOn ? '끄기' : '켜기'}
+					</div>
+				</div>
+			)}
 			<div className="flex flex-col grow overflow-y-auto h-0">
 				{dmData.dmDetails[id] &&
 					dmData.dmDetails[id].message.map((message, idx) => {

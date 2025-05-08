@@ -35,7 +35,7 @@ export async function login(
 		}
 	}
 
-	if (loginFields.success) {
+	if (loginFields.success && loginFields.data.profileId > 0) {
 		const { email, password, profileId } = loginFields.data
 
 		const sessionResponse = await fetchWithZod(
