@@ -85,16 +85,21 @@ export default function Main() {
 				</div>
 			</div>
 			{isCalling && (
-				<div className="flex grow">
-					<span>통화중</span>
-					<div onClick={handleCallingStop}>전화끊기</div>
-					<div onClick={handleCallingMute}>
-						마이크{isMicOn ? '끄기' : '켜기'}
+				<div className="flex grow flex-col">
+					<div className="flex">
+						<span>통화중</span>
+						<div onClick={handleCallingStop}>전화끊기</div>
+						<div onClick={handleCallingMute}>
+							마이크{isMicOn ? '끄기' : '켜기'}
+						</div>
+						<div onClick={handleCamera}>
+							카메라{isCameraOn ? '끄기' : '켜기'}
+						</div>
+						<div onClick={handleScreenShare}>
+							화면공유{isScreenOn ? '끄기' : '켜기'}
+						</div>
 					</div>
-					<div onClick={handleCamera}>카메라{isCameraOn ? '끄기' : '켜기'}</div>
-					<div onClick={handleScreenShare}>
-						화면공유{isScreenOn ? '끄기' : '켜기'}
-					</div>
+					<div id="videoContainer"></div>
 				</div>
 			)}
 			<div className="flex flex-col grow overflow-y-auto h-0">

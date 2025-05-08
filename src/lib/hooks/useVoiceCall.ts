@@ -123,6 +123,7 @@ export function useVoiceCall(
 			video.playsInline = true
 			video.muted = true // 본인 카메라 미리보기 시 무조건 muted 필요
 
+			// 여기 바꿔
 			document.body.appendChild(video)
 			videoElementsRef.current.push(video)
 
@@ -164,6 +165,7 @@ export function useVoiceCall(
 			video.playsInline = true
 			video.muted = true // 본인 카메라 미리보기 시 무조건 muted 필요
 
+			// 여기 바꿔
 			document.body.appendChild(video)
 			videoElementsRef.current.push(video)
 
@@ -320,7 +322,8 @@ export function useVoiceCall(
 						video.autoplay = true
 						video.playsInline = true
 						video.controls = true
-						document.body.appendChild(video)
+						// 여기 바꿔
+						document.getElementById('videoContainer')?.appendChild(video)
 
 						videoElementsRef.current.push(video)
 					} else if (consumer.kind === 'audio') {
@@ -329,6 +332,7 @@ export function useVoiceCall(
 						audio.autoplay = true
 						audio.controls = true
 						audio.hidden = true
+						// 여기 바꿔
 						document.body.appendChild(audio)
 						audioElementsRef.current.push(audio)
 					}
