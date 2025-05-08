@@ -78,7 +78,6 @@ export function useVoiceCall(
 			)
 
 			await device.load({ routerRtpCapabilities })
-			console.log('Device RTP Capabilities:', device.rtpCapabilities)
 		}
 
 		deviceRef.current = device
