@@ -1,7 +1,10 @@
 'use client'
 
 import { socket } from '@/src/lib/socket'
-import { PeerState, VoiceTransportOptions } from '@/src/server/socket/types'
+import {
+	PeerState,
+	VoiceTransportOptions,
+} from '@/src/server/socket/schemas/call.schema'
 import * as mediasoupClient from 'mediasoup-client'
 import { RtpCapabilities } from 'mediasoup/types'
 import { useEffect, useRef, useState } from 'react'

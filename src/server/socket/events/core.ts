@@ -8,7 +8,7 @@ export function registerCoreEvents(
 	socket: SocketSocekt,
 	globalData: SocektGlobalData
 ) {
-	const ClientToServerSchemas = {
+	const ClientToServerCoreSchemas = {
 		set_profileId: z.tuple([z.number()]),
 		update_profile: z.tuple([z.array(z.number())]),
 		update_rooms: z.tuple([z.array(z.number())]),
@@ -27,7 +27,7 @@ export function registerCoreEvents(
 
 	socket.use(([event, ...args], next) => {
 		const schema =
-			ClientToServerSchemas[event as keyof typeof ClientToServerSchemas]
+			ClientToServerCoreSchemas[event as keyof typeof ClientToServerCoreSchemas]
 		if (!schema) return next()
 
 		const result = schema.safeParse(args)

@@ -1,15 +1,95 @@
+import { z } from 'zod'
+import { SocektGlobalData, SocketServer, SocketSocekt } from '../types'
 import {
+	DtlsParametersSchema,
 	PeerState,
-	SocektGlobalData,
-	SocketServer,
-	SocketSocekt,
-} from '../types'
+	PeerStateSchema,
+	RtpCapabilitiesSchema,
+	TransportTypeSchema,
+	VoiceConsumeRequestSchema,
+	VoiceConsumeResponseSchema,
+	VoiceProduceOptionsSchema,
+	VoiceTransportOptionsSchema,
+} from '../schemas/call.schema'
 
 export function registerCallEvents(
 	io: SocketServer,
 	socket: SocketSocekt,
 	globalData: SocektGlobalData
 ) {
+	const ClientToServerCoreSchemas = {
+		call_createTransport: z.tuple([
+			TransportTypeSchema,
+			z
+				.function()
+				.args(
+					z.union([
+						VoiceTransportOptionsSchema,
+						z.object({ error: z.string() }),
+					])
+				)
+				.returns(z.void()),
+		]),
+		call_connectTransport: z.tuple([
+			z.object({
+				dtlsParameters: DtlsParametersSchema,
+				type: TransportTypeSchema,
+			}),
+		]),
+		call_produce: z.tuple([
+			VoiceProduceOptionsSchema.extend({
+				callId: z.string(),
+			}),
+			z
+				.function()
+				.args(
+					z.object({
+						id: z.string(),
+					})
+				)
+				.returns(z.void()),
+		]),
+		call_getRouterRtpCapabilities: z.tuple([
+			z.function().args(RtpCapabilitiesSchema).returns(z.void()),
+		]),
+		call_consume: z.tuple([
+			VoiceConsumeRequestSchema,
+			z.function().args(VoiceConsumeResponseSchema).returns(z.void()),
+		]),
+		call_updatePeerState: z.tuple([
+			PeerStateSchema.partial(),
+			z.function().args().returns(z.void()),
+		]),
+		call_getPeerStates: z.tuple([
+			z.string(),
+			z
+				.function()
+				.args(
+					z.union([
+						z.array(PeerStateSchema),
+						z.object({
+							error: z.string(),
+						}),
+					])
+				)
+				.returns(z.void()),
+		]),
+	}
+
+	socket.use(([event, ...args], next) => {
+		const schema =
+			ClientToServerCoreSchemas[event as keyof typeof ClientToServerCoreSchemas]
+		if (!schema) return next()
+
+		const result = schema.safeParse(args)
+		if (!result.success) {
+			console.warn(`Invalid payload for event "${event}"`, result.error)
+			return next(new Error('Invalid socket payload'))
+		}
+
+		next()
+	})
+
 	socket.on('call_createTransport', async (type, callback) => {
 		if (!globalData.router) return callback({ error: 'Router not ready' })
 

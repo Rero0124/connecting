@@ -1,15 +1,18 @@
 import { types as mediasoupTypes } from 'mediasoup'
-import { RtpCapabilities } from 'mediasoup/types'
-import {
-	DtlsParameters,
-	IceCandidate,
-	IceParameters,
-	MediaKind,
-	RtpParameters,
-} from 'mediasoup-client/types'
 import { DmMessage } from '../../lib/schemas/dm.schema'
 import { RoomMessage } from '@prisma/client'
 import { Server, Socket } from 'socket.io'
+import {
+	DtlsParameters,
+	MediaKind,
+	PeerState,
+	RtpCapabilities,
+	TransportType,
+	VoiceConsumeRequest,
+	VoiceConsumeResponse,
+	VoiceProduceOptions,
+	VoiceTransportOptions,
+} from './schemas/call.schema'
 
 export type SocketServer = Server<
 	ClientToServerEvents,
@@ -34,41 +37,6 @@ export interface SocektGlobalData {
 	producers: Record<string, mediasoupTypes.Producer[]>
 	peerStates: Record<string, PeerState>
 }
-
-export interface VoiceTransportOptions {
-	id: string
-	iceParameters: IceParameters
-	iceCandidates: IceCandidate[]
-	dtlsParameters: DtlsParameters
-}
-
-interface VoiceProduceOptions {
-	kind: 'audio' | 'video'
-	rtpParameters: any
-}
-
-interface VoiceConsumeRequest {
-	producerId: string
-	callId: string
-	kind: MediaKind
-	rtpCapabilities: RtpCapabilities
-}
-
-export interface PeerState {
-	profileId: number
-	isMicOn: boolean
-	isCameraOn: boolean
-	isScreenOn: boolean
-}
-
-type VoiceConsumeResponse =
-	| {
-			id: string
-			producerId: string
-			kind: MediaKind
-			rtpParameters: RtpParameters
-	  }
-	| { error: string }
 
 export interface ServerToClientEvents {
 	get_profileId: () => void
@@ -99,12 +67,12 @@ export interface ClientToServerEvents {
 	send_dmMessage: (dmMessage: DmMessage, profileIds: number[]) => void
 	send_roomMessage: (roomMessage: RoomMessage, profileIds: number[]) => void
 	call_createTransport: (
-		type: 'send' | 'recv',
+		type: TransportType,
 		callback: (params: VoiceTransportOptions | { error: string }) => void
 	) => void
 	call_connectTransport: (data: {
 		dtlsParameters: DtlsParameters
-		type: 'send' | 'recv'
+		type: TransportType
 	}) => void
 	call_produce: (
 		data: VoiceProduceOptions & { callId: string },
