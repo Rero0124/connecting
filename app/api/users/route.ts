@@ -8,8 +8,7 @@ import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 export async function POST(request: NextRequest) {
 	let user
 	try {
-		const body = await request.json()
-		const validatedFields = AuthJoinBodySchema.safeParse({ body })
+		const validatedFields = AuthJoinBodySchema.safeParse(await request.json())
 
 		if (!validatedFields.success) {
 			return NextResponse.json<ErrorResponse>(
