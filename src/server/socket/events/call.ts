@@ -94,7 +94,12 @@ export function registerCallEvents(
 		if (!globalData.router) return callback({ error: 'Router not ready' })
 
 		const transport = await globalData.router.createWebRtcTransport({
-			listenIps: [{ ip: '0.0.0.0', announcedIp: '221.141.191.225' }],
+			listenIps: [
+				{
+					ip: '0.0.0.0',
+					announcedIp: `${process.env.NEXT_PUBLIC_MEDIASOUP_URL ?? '127.0.0.1'}`,
+				},
+			],
 			enableUdp: true,
 			enableTcp: true,
 		})

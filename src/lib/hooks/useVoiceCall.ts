@@ -19,26 +19,83 @@ type VoiceControl = { toggleMic: () => void; isMicOn: boolean }
 type CameraControl = { toggleCamera: () => Promise<void>; isCameraOn: boolean }
 type ScreenControl = { toggleScreen: () => Promise<void>; isScreenOn: boolean }
 
-export function useVoiceCall(): CallControll &
-	VoiceControl &
-	CameraControl &
-	ScreenControl
-export function useVoiceCall(
-	callType: 'only-voice'
-): CallControll & VoiceControl
-export function useVoiceCall(
-	callType: 'only-camera'
-): CallControll & CameraControl
-export function useVoiceCall(
-	callType: 'only-screen'
-): CallControll & ScreenControl
-export function useVoiceCall(
-	callType?: CallType
-):
-	| (CallControll & VoiceControl & CameraControl & ScreenControl)
-	| (CallControll & VoiceControl)
-	| (CallControll & CameraControl)
-	| (CallControll & ScreenControl)
+function createFixedDisplay(): HTMLElement {
+	let container = document.getElementById('video-display')
+	if (!container) {
+		container = document.createElement('div')
+		container.id = 'video-display'
+		Object.assign(container.style, {
+			position: 'fixed',
+			bottom: '16px',
+			right: '16px',
+			width: '320px',
+			height: '240px',
+			borderRadius: '12px',
+			overflow: 'hidden',
+			zIndex: '9999',
+			background: 'black',
+			cursor: 'pointer',
+			display: 'none',
+			alignItems: 'center',
+			justifyContent: 'center',
+		})
+
+		let isDragging = false
+		let offsetX = 0
+		let offsetY = 0
+
+		container.addEventListener('mousedown', (e) => {
+			isDragging = true
+			offsetX = e.clientX - container.getBoundingClientRect().left
+			offsetY = e.clientY - container.getBoundingClientRect().top
+			container.style.cursor = 'grabbing'
+		})
+		document.addEventListener('mousemove', (e) => {
+			if (!isDragging) return
+			container.style.left = `${e.clientX - offsetX}px`
+			container.style.top = `${e.clientY - offsetY}px`
+			container.style.bottom = 'auto'
+			container.style.right = 'auto'
+		})
+		document.addEventListener('mouseup', () => {
+			isDragging = false
+			container.style.cursor = 'pointer'
+		})
+
+		document.body.appendChild(container)
+	}
+	return container
+}
+
+function appendVideoElement(video: HTMLVideoElement) {
+	const container = createFixedDisplay()
+	container.style.display = 'flex' // 보여줌
+
+	video.autoplay = true
+	video.playsInline = true
+	video.muted = true
+	video.style.width = '100%'
+	video.style.height = '100%'
+	video.style.objectFit = 'cover'
+	video.style.display = 'none'
+
+	container.appendChild(video)
+}
+
+function updateDisplayedVideo(
+	videoElements: HTMLVideoElement[],
+	activeIndex: number
+) {
+	const container = createFixedDisplay()
+	if (videoElements.length === 0) {
+		container.style.display = 'none'
+		return
+	}
+	videoElements.forEach((video, i) => {
+		video.style.display = i === activeIndex ? 'block' : 'none'
+	})
+	container.style.display = 'flex'
+}
 
 export function useVoiceCall(
 	callType?: CallType
@@ -48,7 +105,6 @@ export function useVoiceCall(
 	| (CallControll & CameraControl)
 	| (CallControll & ScreenControl) {
 	const [callId, setCallId] = useState<string | null>(null)
-
 	const [isMicOn, setIsMicOn] = useState(true)
 	const [isCameraOn, setIsCameraOn] = useState(false)
 	const [isScreenOn, setIsScreenOn] = useState(false)
@@ -69,41 +125,37 @@ export function useVoiceCall(
 	const consumersRef = useRef<mediasoupClient.types.Consumer[]>([])
 	const audioElementsRef = useRef<HTMLAudioElement[]>([])
 	const videoElementsRef = useRef<HTMLVideoElement[]>([])
-
-	async function initDevice() {
-		let device = deviceRef.current ?? new mediasoupClient.Device()
-
-		if (!device.loaded) {
-			const routerRtpCapabilities = await new Promise<RtpCapabilities>(
-				(resolve) => {
-					socket.emit('call_getRouterRtpCapabilities', (res) => resolve(res))
-				}
-			)
-
-			await device.load({ routerRtpCapabilities })
-		}
-
-		deviceRef.current = device
-	}
+	const videoIndexRef = useRef<number>(0)
 
 	useEffect(() => {
 		initDevice()
 	}, [])
 
-	function toggleMic() {
-		if (!voiceProducer) {
-			console.warn('⚠️ producer가 아직 생성되지 않았습니다.')
-			return
+	useEffect(() => {
+		const container = createFixedDisplay()
+		container.onclick = () => {
+			if (videoElementsRef.current.length === 0) return
+			videoIndexRef.current =
+				(videoIndexRef.current + 1) % videoElementsRef.current.length
+			updateDisplayedVideo(videoElementsRef.current, videoIndexRef.current)
 		}
+	}, [])
 
+	async function initDevice() {
+		const device = deviceRef.current ?? new mediasoupClient.Device()
+		if (!device.loaded) {
+			const routerRtpCapabilities = await new Promise<RtpCapabilities>(
+				(resolve) => socket.emit('call_getRouterRtpCapabilities', resolve)
+			)
+			await device.load({ routerRtpCapabilities })
+		}
+		deviceRef.current = device
+	}
+
+	function toggleMic() {
+		if (!voiceProducer) return
 		setIsMicOn((prev) => {
-			if (prev) {
-				voiceProducer.pause()
-				console.log('🔇 마이크 음소거됨')
-			} else {
-				voiceProducer.resume()
-				console.log('🎙️ 마이크 음소거 해제됨')
-			}
+			prev ? voiceProducer.pause() : voiceProducer.resume()
 			return !prev
 		})
 	}
@@ -112,37 +164,21 @@ export function useVoiceCall(
 		if (!cameraProducer) {
 			const stream = await navigator.mediaDevices.getUserMedia({ video: true })
 			const track = stream.getVideoTracks()[0]
-
-			if (!sendTransport) {
-				console.log('먼저 방에 입장해주세요')
-				return
-			}
-
+			if (!sendTransport) return
 			const newCameraProducer = await sendTransport.produce({ track })
 
 			const video = document.createElement('video')
 			video.srcObject = new MediaStream([track])
-			video.autoplay = true
-			video.playsInline = true
-			video.muted = true // 본인 카메라 미리보기 시 무조건 muted 필요
+			appendVideoElement(video)
 
-			// 여기 바꿔
-			document.body.appendChild(video)
 			videoElementsRef.current.push(video)
+			updateDisplayedVideo(videoElementsRef.current, videoIndexRef.current)
 
 			setCameraProducer(newCameraProducer)
 			setIsCameraOn(true)
-
-			console.log('📷 카메라 켜짐')
 		} else {
 			setIsCameraOn((prev) => {
-				if (prev) {
-					cameraProducer.pause()
-					console.log('📷 카메라 꺼짐')
-				} else {
-					cameraProducer.resume()
-					console.log('📷 카메라 다시 켜짐')
-				}
+				prev ? cameraProducer.pause() : cameraProducer.resume()
 				return !prev
 			})
 		}
@@ -154,23 +190,15 @@ export function useVoiceCall(
 				video: true,
 			})
 			const track = stream.getVideoTracks()[0]
-
-			if (!sendTransport) {
-				console.log('먼저 방에 입장해주세요')
-				return
-			}
-
+			if (!sendTransport) return
 			const newScreenProducer = await sendTransport.produce({ track })
 
 			const video = document.createElement('video')
 			video.srcObject = new MediaStream([track])
-			video.autoplay = true
-			video.playsInline = true
-			video.muted = true // 본인 카메라 미리보기 시 무조건 muted 필요
+			appendVideoElement(video)
 
-			// 여기 바꿔
-			document.body.appendChild(video)
 			videoElementsRef.current.push(video)
+			updateDisplayedVideo(videoElementsRef.current, videoIndexRef.current)
 
 			track.onended = () => {
 				setIsScreenOn(false)
@@ -179,57 +207,32 @@ export function useVoiceCall(
 			}
 
 			setScreenProducer(newScreenProducer)
-			setIsCameraOn(true)
-			console.log('📷 화면공유 켜짐')
+			setIsScreenOn(true)
 		} else {
 			setIsScreenOn((prev) => {
-				if (prev) {
-					screenProducer.pause()
-					console.log('📷 화면공유 꺼짐')
-				} else {
-					screenProducer.resume()
-					console.log('📷 화면공유 다시 켜짐')
-				}
+				prev ? screenProducer.pause() : screenProducer.resume()
 				return !prev
 			})
 		}
 	}
 
 	async function startCalling(callId: string) {
-		if (!deviceRef.current || !deviceRef.current.loaded) {
+		if (!deviceRef.current?.loaded) {
 			await initDevice()
 			return
 		}
-		// [3] 서버에 송신용 transport 요청
+
 		const transportInfo = await new Promise<
-			| VoiceTransportOptions
-			| {
-					error: string
-			  }
-		>((resolve) => {
-			socket.emit('call_createTransport', 'send', (res) => resolve(res))
-		})
+			VoiceTransportOptions | { error: string }
+		>((resolve) => socket.emit('call_createTransport', 'send', resolve))
+		if ('error' in transportInfo) return
 
-		if ('error' in transportInfo) {
-			console.error('❌ Transport 생성 실패:', transportInfo.error)
-			return
-		}
-
-		// [4] 클라이언트 측 sendTransport 생성
-		const newSendTransport = deviceRef.current.createSendTransport({
-			id: transportInfo.id,
-			iceParameters: transportInfo.iceParameters,
-			iceCandidates: transportInfo.iceCandidates,
-			dtlsParameters: transportInfo.dtlsParameters,
-		})
-
-		// [5] DTLS 연결 완료 시 서버에 연결 요청
+		const newSendTransport =
+			deviceRef.current.createSendTransport(transportInfo)
 		newSendTransport.on('connect', ({ dtlsParameters }, callback) => {
 			socket.emit('call_connectTransport', { dtlsParameters, type: 'send' })
 			callback()
 		})
-
-		// [6] produce 이벤트 발생 시 서버에 음성 producer 생성 요청
 		newSendTransport.on(
 			'produce',
 			async ({ kind, rtpParameters }, callback) => {
@@ -243,54 +246,26 @@ export function useVoiceCall(
 			}
 		)
 
-		// [7] 사용자의 마이크에서 오디오 track 가져오기
 		const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
 		const track = stream.getAudioTracks()[0]
-
-		// [8] 오디오 트랙을 sendTransport에 연결하여 전송 시작
 		const newVoiceProducer = await newSendTransport.produce({ track })
+		isMicOn ? newVoiceProducer.resume() : newVoiceProducer.pause()
 
-		if (isMicOn) {
-			await newVoiceProducer.resume()
-		} else {
-			await newVoiceProducer.pause()
-		}
-
-		// [9] 서버에 수신용 transport도 별도로 요청
 		const recvTransportInfo = await new Promise<
-			| VoiceTransportOptions
-			| {
-					error: string
-			  }
-		>((resolve) => {
-			socket.emit('call_createTransport', 'recv', (res) => resolve(res))
-		})
+			VoiceTransportOptions | { error: string }
+		>((resolve) => socket.emit('call_createTransport', 'recv', resolve))
+		if ('error' in recvTransportInfo) return
 
-		if ('error' in recvTransportInfo) {
-			console.error('❌ Transport 생성 실패:', recvTransportInfo.error)
-			return
-		}
-
-		// [10] 클라이언트 측 recvTransport 생성
-		const newRecvTransport: mediasoupClient.types.Transport =
-			deviceRef.current.createRecvTransport({
-				id: recvTransportInfo.id,
-				iceParameters: recvTransportInfo.iceParameters,
-				iceCandidates: recvTransportInfo.iceCandidates,
-				dtlsParameters: recvTransportInfo.dtlsParameters,
-			})
-
-		// [11] 수신용 transport 연결 시 서버에 알림
+		const newRecvTransport =
+			deviceRef.current.createRecvTransport(recvTransportInfo)
 		newRecvTransport.on('connect', ({ dtlsParameters }, callback) => {
 			socket.emit('call_connectTransport', { dtlsParameters, type: 'recv' })
 			callback()
 		})
 
-		// [12] 상대방이 새로운 producer를 생성했을 때 수신 처리
 		socket.off('call_newProducer')
 		socket.on('call_newProducer', ({ producerId, kind }) => {
-			// [13] 서버에 해당 producer를 consume 요청
-			if (!deviceRef.current || !deviceRef.current.loaded) return
+			if (!deviceRef.current?.loaded) return
 			socket.emit(
 				'call_consume',
 				{
@@ -300,42 +275,30 @@ export function useVoiceCall(
 					rtpCapabilities: deviceRef.current.rtpCapabilities,
 				},
 				async (consumerParams) => {
-					// [14] consumer 객체 생성
-					if ('error' in consumerParams) {
-						console.error('오디오 수신 실패:', consumerParams.error)
-						return
-					}
-					const consumer = await newRecvTransport.consume({
-						id: consumerParams.id,
-						producerId: consumerParams.producerId,
-						kind: consumerParams.kind,
-						rtpParameters: consumerParams.rtpParameters,
-					})
-
+					if ('error' in consumerParams) return
+					const consumer = await newRecvTransport.consume(consumerParams)
 					await consumer.resume()
 					consumersRef.current.push(consumer)
 
-					// [15] 스트림에 트랙 연결
 					const newLocalStream = new MediaStream()
 					newLocalStream.addTrack(consumer.track)
 
 					if (consumer.kind === 'video') {
 						const video = document.createElement('video')
 						video.srcObject = newLocalStream
-						video.autoplay = true
-						video.playsInline = true
-						video.controls = true
-						// 여기 바꿔
-						document.getElementById('videoContainer')?.appendChild(video)
+						appendVideoElement(video)
 
 						videoElementsRef.current.push(video)
+						updateDisplayedVideo(
+							videoElementsRef.current,
+							videoIndexRef.current
+						)
 					} else if (consumer.kind === 'audio') {
 						const audio = document.createElement('audio')
 						audio.srcObject = newLocalStream
 						audio.autoplay = true
 						audio.controls = true
 						audio.hidden = true
-						// 여기 바꿔
 						document.body.appendChild(audio)
 						audioElementsRef.current.push(audio)
 					}
@@ -345,8 +308,6 @@ export function useVoiceCall(
 			)
 		})
 
-		socket.on('call_peerLeft', (peer) => {})
-
 		setSendTransport(newSendTransport)
 		setRecvTransport(newRecvTransport)
 		setVoiceProducer(newVoiceProducer)
@@ -354,85 +315,52 @@ export function useVoiceCall(
 	}
 
 	function stopCalling() {
-		console.log('🔴 통화 종료 시작')
+		sendTransport?.close()
+		recvTransport?.close()
+		voiceProducer?.close()
+		cameraProducer?.close()
+		screenProducer?.close()
+		consumersRef.current.forEach((c) => c.close())
+		audioElementsRef.current.forEach((el) => {
+			el.pause()
+			el.srcObject = null
+			el.remove()
+		})
+		videoElementsRef.current.forEach((el) => {
+			el.pause()
+			el.srcObject = null
+			el.remove()
+		})
+		document.getElementById('video-display')?.remove()
 
-		try {
-			sendTransport?.close()
-			recvTransport?.close()
-			voiceProducer?.close()
-			consumersRef.current.forEach((c) => c.close())
-			audioElementsRef.current.forEach((el) => {
-				el.pause()
-				el.srcObject = null
-				el.remove()
-			})
-			videoElementsRef.current.forEach((el) => {
-				el.pause()
-				el.srcObject = null
-				el.remove()
-			})
+		setSendTransport(null)
+		setRecvTransport(null)
+		setVoiceProducer(null)
+		setCameraProducer(null)
+		setScreenProducer(null)
+		consumersRef.current.length = 0
+		audioElementsRef.current.length = 0
+		videoElementsRef.current.length = 0
+		socket.off('call_newProducer')
 
-			// 리셋
-			setSendTransport(null)
-			setRecvTransport(null)
-			setVoiceProducer(null)
-			setCameraProducer(null)
-			setScreenProducer(null)
-			consumersRef.current.length = 0
-			audioElementsRef.current.length = 0
-
-			socket.off('call_newProducer') // 핸들러가 함수형이라 제거 가능
-			console.log('✅ 통화 종료 완료')
-			if (localStream) {
-				localStream.getTracks().forEach((t) => t.stop())
-				setLocalStream(null)
-			}
-		} catch (e) {
-			console.error('통화 종료 중 오류', e)
-		}
+		localStream?.getTracks().forEach((t) => t.stop())
+		setLocalStream(null)
 	}
 
 	async function getJoinList() {
-		if (callId) {
-			const profiles = await new Promise<PeerState[] | { error: string }>(
-				(resolve) =>
-					socket.emit('call_getPeerStates', callId, (peers) => resolve(peers))
-			)
-
-			if ('error' in profiles) {
-				return []
-			}
-
-			return profiles
-		}
-
-		return []
+		if (!callId) return []
+		const result = await new Promise<PeerState[] | { error: string }>(
+			(resolve) => socket.emit('call_getPeerStates', callId, resolve)
+		)
+		return 'error' in result ? [] : result
 	}
 
 	if (callType === 'only-voice') {
-		return {
-			startCalling,
-			stopCalling,
-			getJoinList,
-			toggleMic,
-			isMicOn,
-		}
+		return { startCalling, stopCalling, getJoinList, toggleMic, isMicOn }
 	} else if (callType === 'only-camera') {
-		return {
-			startCalling,
-			stopCalling,
-			getJoinList,
-			toggleCamera,
-			isCameraOn,
-		}
+		return { startCalling, stopCalling, getJoinList, toggleCamera, isCameraOn }
 	} else if (callType === 'only-screen') {
-		return {
-			startCalling,
-			stopCalling,
-			getJoinList,
-			toggleScreen,
-			isScreenOn,
-		}
+		return { startCalling, stopCalling, getJoinList, toggleScreen, isScreenOn }
 	} else {
 		return {
 			startCalling,
