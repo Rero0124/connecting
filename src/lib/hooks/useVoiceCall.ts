@@ -268,7 +268,13 @@ export function useVoiceCall(
 			}
 		)
 
-		const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+		const stream = await navigator.mediaDevices.getUserMedia({
+			audio: {
+				echoCancellation: true,
+				noiseSuppression: true,
+				autoGainControl: true,
+			},
+		})
 		const track = stream.getAudioTracks()[0]
 		const newVoiceProducer = await newSendTransport.produce({ track })
 		isMicOn ? newVoiceProducer.resume() : newVoiceProducer.pause()
