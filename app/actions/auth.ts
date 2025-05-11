@@ -8,7 +8,7 @@ import {
 	AuthLoginBodySchema,
 	AuthLoginInputSchema,
 } from '@/src/lib/schemas/auth.schema'
-import { fetchWithZod } from '@/src/lib/util'
+import { fetchWithValidation } from '@/src/lib/util'
 
 export async function login(
 	state: LoginFormState,
@@ -38,7 +38,7 @@ export async function login(
 	if (loginFields.success && loginFields.data.profileId > 0) {
 		const { email, password, profileId } = loginFields.data
 
-		const sessionResponse = await fetchWithZod(
+		const sessionResponse = await fetchWithValidation(
 			`${process.env.NEXT_PUBLIC_API_URL}/session`,
 			{
 				method: 'POST',
@@ -74,7 +74,7 @@ export async function login(
 	} else {
 		const { email, password } = getProfilesFields.data
 
-		const authenticateResponse = await fetchWithZod(
+		const authenticateResponse = await fetchWithValidation(
 			`${process.env.NEXT_PUBLIC_API_URL}/authenticate`,
 			{
 				method: 'POST',
@@ -135,7 +135,7 @@ export async function join(
 
 	const { tag, name, email, password } = joinFields.data
 
-	const joinResponse = await fetchWithZod(
+	const joinResponse = await fetchWithValidation(
 		`${process.env.NEXT_PUBLIC_API_URL}/users`,
 		{
 			method: 'POST',

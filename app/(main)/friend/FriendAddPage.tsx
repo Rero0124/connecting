@@ -5,7 +5,7 @@ import {
 	GetProfileResponseSchema,
 	Profile,
 } from '@/src/lib/schemas/profile.schema'
-import { fetchWithZod } from '@/src/lib/util'
+import { fetchWithValidation } from '@/src/lib/util'
 import { useEffect, useRef, useState } from 'react'
 
 export default function FriendAddPage() {
@@ -23,7 +23,7 @@ export default function FriendAddPage() {
 		setLoading(true)
 
 		try {
-			const response = await fetchWithZod('/api/friend-requests', {
+			const response = await fetchWithValidation('/api/friend-requests', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ export default function FriendAddPage() {
 		}
 		setProfileLoading(true)
 		try {
-			const response = await fetchWithZod(
+			const response = await fetchWithValidation(
 				`/api/profiles/${encodeURIComponent(tag)}`,
 				{
 					dataSchema: GetProfileResponseSchema,

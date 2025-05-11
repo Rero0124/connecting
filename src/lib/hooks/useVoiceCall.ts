@@ -45,19 +45,21 @@ function createFixedDisplay(): HTMLElement {
 		let offsetY = 0
 
 		container.addEventListener('mousedown', (e) => {
+			if (!container) return
 			isDragging = true
 			offsetX = e.clientX - container.getBoundingClientRect().left
 			offsetY = e.clientY - container.getBoundingClientRect().top
 			container.style.cursor = 'grabbing'
 		})
 		document.addEventListener('mousemove', (e) => {
-			if (!isDragging) return
+			if (!isDragging || !container) return
 			container.style.left = `${e.clientX - offsetX}px`
 			container.style.top = `${e.clientY - offsetY}px`
 			container.style.bottom = 'auto'
 			container.style.right = 'auto'
 		})
 		document.addEventListener('mouseup', () => {
+			if (!container) return
 			isDragging = false
 			container.style.cursor = 'pointer'
 		})
@@ -97,6 +99,26 @@ function updateDisplayedVideo(
 	container.style.display = 'flex'
 }
 
+export function useVoiceCall(): CallControll &
+	VoiceControl &
+	CameraControl &
+	ScreenControl
+export function useVoiceCall(
+	callType: 'only-voice'
+): CallControll & VoiceControl
+export function useVoiceCall(
+	callType: 'only-camera'
+): CallControll & CameraControl
+export function useVoiceCall(
+	callType: 'only-screen'
+): CallControll & ScreenControl
+export function useVoiceCall(
+	callType?: CallType
+):
+	| (CallControll & VoiceControl & CameraControl & ScreenControl)
+	| (CallControll & VoiceControl)
+	| (CallControll & CameraControl)
+	| (CallControll & ScreenControl)
 export function useVoiceCall(
 	callType?: CallType
 ):

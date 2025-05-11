@@ -1,7 +1,7 @@
 'use client'
 
 import { UpdateProfileByUserBodySchema } from '@/src/lib/schemas/profile.schema'
-import { fetchWithZod, getSession } from '@/src/lib/util'
+import { fetchWithValidation, getSession } from '@/src/lib/util'
 import Image from 'next/image'
 import { useState } from 'react'
 
@@ -57,7 +57,7 @@ export default function ProfileEditModal({
 			const session = await getSession()
 
 			if (session.isAuth) {
-				const profileResponse = await fetchWithZod(
+				const profileResponse = await fetchWithValidation(
 					`/api/users/${session.userId}/profiles/${session.profileId}`,
 					{
 						method: 'PATCH',

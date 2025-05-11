@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import FriendDetailModal from './FriendDetailModal'
 import { useAppSelector } from '@/src/lib/hooks'
-import { fetchWithZod } from '@/src/lib/util'
+import { fetchWithValidation } from '@/src/lib/util'
 import { UpdateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
 
 export default function FriendSendPage() {
@@ -17,7 +17,7 @@ export default function FriendSendPage() {
 
 	const handleFriendRequestCancel = async (friendRequestId: number) => {
 		try {
-			const response = await fetchWithZod(
+			const response = await fetchWithValidation(
 				`/api/friend-requests/${friendRequestId}`,
 				{
 					method: 'PATCH',

@@ -25,7 +25,7 @@ import {
 import ChangeProfileModal from './changeProfileModal'
 import LoginModal from './loginModal'
 import {
-	fetchWithZod,
+	fetchWithValidation,
 	getSession,
 	promiseAll,
 	serializeDatesForRedux,
@@ -60,7 +60,7 @@ export default function RootLayout({
 
 	const updateProfile = async () => {
 		if (session && session.isAuth) {
-			const profileResponse = await fetchWithZod(
+			const profileResponse = await fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles/${session.profileId}`,
 				{
 					cache: 'no-store',
@@ -77,7 +77,7 @@ export default function RootLayout({
 
 	const updateRooms = async () => {
 		if (session && session.isAuth) {
-			const roomsResponse = await fetchWithZod(
+			const roomsResponse = await fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/rooms`,
 				{
 					cache: 'no-store',
@@ -95,7 +95,7 @@ export default function RootLayout({
 
 	const updateDmSessions = async () => {
 		if (session && session.isAuth) {
-			const dmSessionsResponse = await fetchWithZod(
+			const dmSessionsResponse = await fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`,
 				{
 					cache: 'no-store',
@@ -122,7 +122,7 @@ export default function RootLayout({
 
 	const updateFriends = async () => {
 		if (session && session.isAuth) {
-			const friendsResponse = await fetchWithZod(
+			const friendsResponse = await fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/friends`,
 				{
 					cache: 'no-store',
@@ -140,7 +140,7 @@ export default function RootLayout({
 
 	const updateFriendRequests = async () => {
 		if (session && session.isAuth) {
-			const friendRequestsResponse = await fetchWithZod(
+			const friendRequestsResponse = await fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
 				{
 					cache: 'no-store',
@@ -193,7 +193,7 @@ export default function RootLayout({
 
 	async function changeProfile() {
 		if (session?.isAuth) {
-			const profileResponse = await fetchWithZod(
+			const profileResponse = await fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/users/${session.userId}/profiles`,
 				{
 					dataSchema: GetProfilesByUserResponseSchema,
@@ -208,7 +208,7 @@ export default function RootLayout({
 	}
 
 	async function selectProfile(profileId: number) {
-		const sessionResponse = await fetchWithZod(
+		const sessionResponse = await fetchWithValidation(
 			`${process.env.NEXT_PUBLIC_API_URL}/session`,
 			{
 				method: 'PATCH',

@@ -3,8 +3,11 @@
 import { setDmDetail } from '@/src/lib/features/dmData/dmDataSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useVoiceCall } from '@/src/lib/hooks/useVoiceCall'
-import { GetDmSessionResponseSchema } from '@/src/lib/schemas/dm.schema'
-import { fetchWithZod, serializeDatesForRedux } from '@/src/lib/util'
+import {
+	CreateDmMessageBodySchema,
+	GetDmSessionResponseSchema,
+} from '@/src/lib/schemas/dm.schema'
+import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -31,13 +34,17 @@ export default function Main() {
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()
-		fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}/messages`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ message: pendingMessage }),
-		}).then((res) => res.json())
+		fetchWithValidation(
+			`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}/messages`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				bodySchema: CreateDmMessageBodySchema,
+				body: { message: pendingMessage },
+			}
+		)
 		setPendingMessage('')
 	}
 
@@ -65,10 +72,13 @@ export default function Main() {
 
 	useEffect(() => {
 		if (!dmData.dmDetails[id]) {
-			fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}`, {
-				cache: 'no-store',
-				dataSchema: GetDmSessionResponseSchema,
-			}).then((data) => {
+			fetchWithValidation(
+				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}`,
+				{
+					cache: 'no-store',
+					dataSchema: GetDmSessionResponseSchema,
+				}
+			).then((data) => {
 				if (data.status === 'success') {
 					dispatch(setDmDetail(serializeDatesForRedux(data.data)))
 				}
@@ -85,17 +95,31 @@ export default function Main() {
 				</div>
 			</div>
 			{isCalling && (
-				<div className="flex grow flex-col">
-					<div className="flex">
+				<div className="flex grow flex-col text-center">
+					<div className="flex items-center h-14 px-4 py-2">
 						<span>통화중</span>
-						<div onClick={handleCallingStop}>전화끊기</div>
-						<div onClick={handleCallingMute}>
+						<div
+							className="leading-10 border rounded-lg mx-4 px-4 py-0.5"
+							onClick={handleCallingStop}
+						>
+							전화끊기
+						</div>
+						<div
+							className="leading-10 border rounded-lg mx-4 px-4 py-0.5"
+							onClick={handleCallingMute}
+						>
 							마이크{isMicOn ? '끄기' : '켜기'}
 						</div>
-						<div onClick={handleCamera}>
+						<div
+							className="leading-10 border rounded-lg mx-4 px-4 py-0.5"
+							onClick={handleCamera}
+						>
 							카메라{isCameraOn ? '끄기' : '켜기'}
 						</div>
-						<div onClick={handleScreenShare}>
+						<div
+							className="leading-10 border rounded-lg mx-4 px-4 py-0.5"
+							onClick={handleScreenShare}
+						>
 							화면공유{isScreenOn ? '끄기' : '켜기'}
 						</div>
 					</div>

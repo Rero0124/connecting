@@ -46,7 +46,7 @@ export function deserializeDatesFromRedux<T>(
 	)
 }
 
-export async function fetchWithZod<
+export async function fetchWithValidation<
 	T extends z.ZodTypeAny | undefined = undefined,
 	Body extends z.ZodTypeAny | undefined = undefined,
 >(
@@ -115,7 +115,7 @@ export function getCookieValue(name: string) {
 }
 
 export async function getSession(): Promise<VerifySession> {
-	const sessionResponse = await fetchWithZod('/api/session', {
+	const sessionResponse = await fetchWithValidation('/api/session', {
 		dataSchema: VerifySessionSchema,
 	})
 	if (sessionResponse.status === 'error') {

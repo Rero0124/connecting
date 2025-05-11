@@ -4,7 +4,7 @@ import {
 	GetProfilesResponseSchema,
 	Profile,
 } from '@/src/lib/schemas/profile.schema'
-import { fetchWithZod } from '@/src/lib/util'
+import { fetchWithValidation } from '@/src/lib/util'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -89,7 +89,7 @@ export default function NewMessageModal({
 		e.preventDefault()
 		setSearchText(e.currentTarget.value)
 		if (e.currentTarget.value !== '') {
-			const profilesResponse = await fetchWithZod(
+			const profilesResponse = await fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/profiles?tag=${e.currentTarget.value}`,
 				{
 					dataSchema: GetProfilesResponseSchema,

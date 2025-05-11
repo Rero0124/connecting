@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useParams } from 'next/navigation'
 import { setRoomDetail } from '@/src/lib/features/roomData/roomDataSlice'
-import { fetchWithZod, serializeDatesForRedux } from '@/src/lib/util'
-import { GetRoomResponseSchema } from '@/src/lib/schemas/room.schema'
+import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
+import {
+	CreateRoomMessageBodySchema,
+	GetRoomResponseSchema,
+} from '@/src/lib/schemas/room.schema'
 
 export default function Main() {
 	const [pendingMessage, setPendingMessage] = useState<string>('')
@@ -16,19 +19,20 @@ export default function Main() {
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()
-		fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}/messages`, {
+		fetchWithValidation(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}/messages`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ message: pendingMessage }),
-		}).then((res) => res.json())
+			bodySchema: CreateRoomMessageBodySchema,
+			body: { message: pendingMessage },
+		})
 		setPendingMessage('')
 	}
 
 	useEffect(() => {
 		if (!roomData.roomDetails[id]) {
-			fetchWithZod(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
+			fetchWithValidation(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
 				cache: 'no-store',
 				dataSchema: GetRoomResponseSchema,
 			}).then((data) => {
