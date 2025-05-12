@@ -1,19 +1,17 @@
 'use client'
 
-import { setTitle } from '@/src/lib/features/saveData/saveDataSlice'
-import { useAppDispatch } from '@/src/lib/hooks'
+import { useAppSelector } from '@/src/lib/hooks'
+import { redirect } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function Main() {
-	const dispatch = useAppDispatch()
-
+	const roomData = useAppSelector((state) => state.roomDate)
 	useEffect(() => {
-		dispatch(setTitle('room'))
-	}, [])
-
-	return (
-		<div className="">
-			<main className=""></main>
-		</div>
-	)
+		if (roomData.rooms.length === 0) {
+			redirect('/message')
+		} else {
+			redirect(`/room/${roomData.rooms[0].id}`)
+		}
+	}, [roomData])
+	return <></>
 }

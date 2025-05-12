@@ -19,14 +19,17 @@ export default function Main() {
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()
-		fetchWithValidation(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}/messages`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			bodySchema: CreateRoomMessageBodySchema,
-			body: { message: pendingMessage },
-		})
+		fetchWithValidation(
+			`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}/messages`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				bodySchema: CreateRoomMessageBodySchema,
+				body: { message: pendingMessage },
+			}
+		)
 		setPendingMessage('')
 	}
 
