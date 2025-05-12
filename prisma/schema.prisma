@@ -33,6 +33,11 @@ enum ContentType {
   calling
 }
 
+enum ChannelType {
+  text
+  voice
+}
+
 model User {
   id Int @id @default(autoincrement())
   email String @db.VarChar(255) @unique
@@ -194,6 +199,7 @@ model Room {
   createdAt DateTime @default(now()) @map("created_at")
   masterProfile Profile @relation(fields: [masterProfileId], references: [id], onDelete: Cascade)
   participant RoomParticipant[]
+  channel RoomChannel[]
   message RoomMessage[]
   joinCode RoomJoinCode[]
   @@index([name])
@@ -226,9 +232,23 @@ model RoomParticipant {
   @@map("room_participant")
 }
 
+model RoomChannel {
+  id Int @id @default(autoincrement())
+  roomId String @db.VarChar(25) @map("room_id") 
+  name String @db.VarChar(100)
+  type ChannelType @map("type")
+  createdAt DateTime @default(now()) @map("created_at")
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  message RoomMessage[]
+  @@index([roomId])
+  @@index([name])
+  @@map("room_channel")
+}
+
 model RoomMessage {
   id Int @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
+  roomChannelId Int @map("room_channel_id")
   profileId Int @map("profile_id")
   contentType ContentType @default(text) @map("content_type")
   content String
@@ -236,8 +256,10 @@ model RoomMessage {
   sentAt DateTime @default(now()) @map("sent_at")
   updatedAt DateTime? @map("updated_at")
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomChannel RoomChannel @relation(fields: [roomChannelId], references: [id], onDelete: Cascade)
   profile Profile @relation(fields: [profileId], references: [id])
-  @@index([roomId, isPinned])
+  @@index([roomId, roomChannelId, isPinned])
+  @@index([roomId, roomChannelId])
   @@index([roomId])
   @@index([sentAt])
   @@map("room_message")

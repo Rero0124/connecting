@@ -1,114 +1,20 @@
 import prisma from '@/src/lib/prisma'
 import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 import {
-	DeleteRoomParamsSchema,
-	GetRoomParamsSchema,
-	GetRoomSuccessResponse,
-	UpdateRoomBodySchema,
+	DeleteRoomChannelParamsSchema,
+	UpdateRoomChannelBodySchema,
+	UpdateRoomParamsSchema,
 } from '@/src/lib/schemas/room.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(
-	request: NextRequest,
-	{ params }: { params: Promise<{ roomId: string }> }
-) {
-	try {
-		const sessionCheck = await verifySession()
-		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
-				{
-					status: 'error',
-					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
-					message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.message,
-				},
-				{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.status }
-			)
-		}
-
-		const paramsFields = GetRoomParamsSchema.safeParse(await params)
-
-		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
-				{
-					status: 'error',
-					code: 0x0,
-					message: '방 아이디의 형식이 잘못되었습니다.',
-				},
-				{ status: 400 }
-			)
-		}
-
-		const room = await prisma.room.findFirst({
-			where: {
-				id: paramsFields.data.roomId,
-				participant: {
-					some: {
-						profile: {
-							id: sessionCheck.profileId,
-							userId: sessionCheck.userId,
-						},
-					},
-				},
-			},
-			include: {
-				message: {
-					where: {
-						sentAt: {
-							gte: new Date(new Date().setDate(new Date().getDate() - 7)),
-						},
-					},
-					include: {
-						profile: {
-							select: {
-								tag: true,
-								name: true,
-								image: true,
-							},
-						},
-					},
-				},
-				channel: true,
-			},
-		})
-
-		if (!room) {
-			return NextResponse.json<ErrorResponse>(
-				{
-					status: 'error',
-					code: 0x0,
-					message: '존재하지 않는 방입니다.',
-				},
-				{ status: 404 }
-			)
-		}
-
-		return NextResponse.json<GetRoomSuccessResponse>(
-			{
-				status: 'success',
-				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
-				message: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.message,
-				data: room,
-			},
-			{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
-		)
-	} catch {
-		return NextResponse.json<ErrorResponse>(
-			{
-				status: 'error',
-				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
-				message: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.message,
-			},
-			{ status: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.status }
-		)
-	}
-}
-
 export async function PATCH(
 	request: NextRequest,
-	{ params }: { params: Promise<{ roomId: string }> }
+	{
+		params,
+	}: { params: Promise<{ roomId: string; channelId: StringConstructor }> }
 ) {
 	const { roomId } = await params
 
@@ -125,7 +31,7 @@ export async function PATCH(
 			)
 		}
 
-		const paramsFields = GetRoomParamsSchema.safeParse(await params)
+		const paramsFields = UpdateRoomParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
 			return NextResponse.json<ErrorResponse>(
@@ -138,23 +44,17 @@ export async function PATCH(
 			)
 		}
 
-		const bodyFields = UpdateRoomBodySchema.safeParse(await params)
+		const bodyFields = UpdateRoomChannelBodySchema.safeParse(await params)
 
 		if (!bodyFields.success) {
 			const errorShape = bodyFields.error.format()
 
 			const nameError = errorShape.name?._errors?.[0]
-			const iconTypeError = errorShape.iconType?._errors?.[0]
-			const iconDataError = errorShape.iconData?._errors?.[0]
 
 			let message = '요청 파라미터 형식이 잘못되었습니다.'
 
 			if (nameError) {
 				message = 'name 의 형식이 잘못되었습니다.'
-			} else if (iconTypeError) {
-				message = 'iconType 의 형식이 잘못되었습니다.'
-			} else if (iconDataError) {
-				message = 'iconData 의 형식이 잘못되었습니다.'
 			}
 
 			return {
@@ -269,7 +169,7 @@ export async function DELETE(
 			)
 		}
 
-		const paramsFields = DeleteRoomParamsSchema.safeParse(await params)
+		const paramsFields = DeleteRoomChannelParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
 			return NextResponse.json<ErrorResponse>(
@@ -331,9 +231,10 @@ export async function DELETE(
 			},
 		})
 
-		await prisma.room.delete({
+		await prisma.roomChannel.delete({
 			where: {
-				id: room.id,
+				id: paramsFields.data.channelId,
+				roomId: room.id,
 			},
 		})
 

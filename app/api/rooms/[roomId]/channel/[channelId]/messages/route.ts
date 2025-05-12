@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
 	request: NextRequest,
-	{ params }: { params: Promise<{ roomId: string }> }
+	{ params }: { params: Promise<{ roomId: string; channelId: string }> }
 ) {
 	try {
 		const sessionCheck = await verifySession()
@@ -103,6 +103,7 @@ export async function POST(
 			data: {
 				content: bodyFields.data.message,
 				roomId: room.id,
+				roomChannelId: paramsFields.data.channelId,
 				profileId: sessionCheck.profileId,
 			},
 			include: {
