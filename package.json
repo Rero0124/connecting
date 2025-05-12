@@ -9,8 +9,8 @@
     "start": "next start",
     "lint": "next lint --dir .",
     "lint:fix": "next lint --fix --dir .",
-    "socket": "nodemon --watch socket.ts --watch src/server --ext ts --exec node -r @swc-node/register ./socket.ts",
-    "electron": "nodemon --watch electron.js --exec electron ./electron.js"
+    "socket": "nodemon --watch socket.ts --watch src/server/socket --ext ts --exec node -r @swc-node/register ./socket.ts",
+    "electron": "nodemon --watch electron.js --watch src/server/electron --exec electron ./electron.js"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

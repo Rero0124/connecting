@@ -206,11 +206,37 @@ export function useVoiceCall(
 		}
 	}
 
-	async function toggleScreen() {
-		if (!screenProducer) {
-			const stream = await navigator.mediaDevices.getDisplayMedia({
+	async function getScreenStream() {
+		if (!window.isElectron || !window.screenShare)
+			return await navigator.mediaDevices.getDisplayMedia({
 				video: true,
 			})
+
+		const sources = await window.screenShare.getSource()
+		if (
+			sources.screenSources.length === 0 &&
+			sources.windowSources.length === 0
+		)
+			return await navigator.mediaDevices.getDisplayMedia({
+				video: true,
+			})
+
+		const source = sources.screenSources[0]
+		return await navigator.mediaDevices.getUserMedia({
+			audio: false,
+			video: {
+				mandatory: {
+					chromeMediaSource: 'desktop',
+					chromeMediaSourceId: source.id,
+				},
+			} as any,
+		})
+	}
+
+	async function toggleScreen() {
+		if (!screenProducer) {
+			const stream = await getScreenStream()
+			console.log(stream)
 			const track = stream.getVideoTracks()[0]
 			if (!sendTransport) return
 			const newScreenProducer = await sendTransport.produce({ track })
