@@ -8,28 +8,40 @@ import {
 } from './schemas/api.schema'
 import { VerifySession, VerifySessionSchema } from './schemas/session.schema'
 
-export type SerializeDatesForRedux<T> = {
-	[K in keyof T]: K extends `${string}At`
-		? T[K] extends Date
-			? string
-			: T[K]
+export type SerializeDatesForRedux<T extends object> = {
+	[K in keyof T]: T[K] extends Date
+		? string
 		: T[K] extends object
 			? SerializeDatesForRedux<T[K]>
 			: T[K]
 }
 
-export function serializeDatesForRedux<T>(obj: T): SerializeDatesForRedux<T> {
-	return JSON.parse(
-		JSON.stringify(obj, (key, value) => {
-			if (key.endsWith('At') && value instanceof Date) {
-				return value.toISOString()
-			}
-			return value
-		})
-	)
+export function serializeDatesForRedux<T extends object>(
+	obj: T
+): SerializeDatesForRedux<T>
+export function serializeDatesForRedux<T extends object>(
+	obj: T[]
+): SerializeDatesForRedux<T>[]
+export function serializeDatesForRedux<T extends object>(
+	obj: T
+): SerializeDatesForRedux<T> | SerializeDatesForRedux<T>[] {
+	const replacer = (item: T) =>
+		JSON.parse(
+			JSON.stringify(item, (key, value) => {
+				if (value instanceof Date) {
+					return value.toISOString()
+				}
+				return value
+			})
+		)
+	if (Array.isArray(obj)) {
+		return obj.map((item) => replacer(item))
+	}
+
+	return replacer(obj)
 }
 
-export function deserializeDatesFromRedux<T>(
+export function deserializeDatesFromRedux<T extends object>(
 	obj: SerializeDatesForRedux<T>
 ): T {
 	return JSON.parse(

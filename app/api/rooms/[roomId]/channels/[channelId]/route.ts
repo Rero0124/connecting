@@ -239,10 +239,11 @@ export async function DELETE(
 		})
 
 		socket.emit(
-			'update_rooms',
+			'update_roomChannels',
 			participantProfileIds.map(
 				(participantProfileId) => participantProfileId.profileId
-			)
+			),
+			paramsFields.data.roomId
 		)
 
 		return NextResponse.json<SuccessResponse>(

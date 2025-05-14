@@ -41,6 +41,12 @@ export const roomDataSlice = createSlice({
 			const key = action.payload.id
 			state.roomDetails[key] = action.payload
 		},
+		setRoomChannels: (state, action: PayloadAction<RoomChannelState[]>) => {
+			const key = action.payload[0].roomId
+			if (state.roomDetails[key]) {
+				state.roomDetails[key].channel = action.payload
+			}
+		},
 		removeRoomDetail: (state, action: PayloadAction<string>) => {
 			delete state.roomDetails[action.payload]
 		},
@@ -51,8 +57,13 @@ export const roomDataSlice = createSlice({
 	},
 })
 
-export const { setRooms, setRoomDetail, removeRoomDetail, addRoomMessage } =
-	roomDataSlice.actions
+export const {
+	setRooms,
+	setRoomDetail,
+	setRoomChannels,
+	removeRoomDetail,
+	addRoomMessage,
+} = roomDataSlice.actions
 
 export const getRooms = (state: RootState, roomId?: string) => {
 	if (roomId) {

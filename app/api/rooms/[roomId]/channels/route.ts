@@ -125,6 +125,15 @@ export async function POST(
 			)
 		}
 
+		const participantProfileIds = await prisma.roomParticipant.findMany({
+			where: {
+				roomId: paramsFields.data.roomId,
+			},
+			select: {
+				profileId: true,
+			},
+		})
+
 		await prisma.roomChannel.create({
 			data: {
 				name: bodyFields.data.name,
@@ -133,7 +142,13 @@ export async function POST(
 			},
 		})
 
-		socket.emit('update_rooms', [sessionCheck.profileId])
+		socket.emit(
+			'update_roomChannels',
+			participantProfileIds.map(
+				(participantProfileId) => participantProfileId.profileId
+			),
+			paramsFields.data.roomId
+		)
 
 		return NextResponse.json<SuccessResponse>(
 			{

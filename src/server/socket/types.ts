@@ -1,6 +1,5 @@
 import { types as mediasoupTypes } from 'mediasoup'
 import { DmMessage } from '../../lib/schemas/dm.schema'
-import { RoomMessage } from '@prisma/client'
 import { Server, Socket } from 'socket.io'
 import {
 	DtlsParameters,
@@ -13,6 +12,7 @@ import {
 	VoiceProduceOptions,
 	VoiceTransportOptions,
 } from './schemas/call.schema'
+import { RoomMessage } from '@/src/lib/schemas/room.schema'
 
 export type SocketServer = Server<
 	ClientToServerEvents,
@@ -43,6 +43,7 @@ export interface ServerToClientEvents {
 	loggedIn_sameProfile: () => void
 	update_profile: () => void
 	update_rooms: () => void
+	update_roomChannels: (roomId: string) => void
 	update_dmSessions: () => void
 	update_friends: () => void
 	update_friendRequests: () => void
@@ -61,6 +62,7 @@ export interface ClientToServerEvents {
 	set_profileId: (profileId: number) => void
 	update_profile: (profileIds: number[]) => void
 	update_rooms: (profileIds: number[]) => void
+	update_roomChannels: (profileIds: number[], roomId: string) => void
 	update_dmSessions: (profileIds: number[]) => void
 	update_friends: (profileIds: number[]) => void
 	update_friendRequests: (profileIds: number[]) => void

@@ -12,6 +12,7 @@ export function registerCoreEvents(
 		set_profileId: z.tuple([z.number()]),
 		update_profile: z.tuple([z.array(z.number())]),
 		update_rooms: z.tuple([z.array(z.number())]),
+		update_roomChannels: z.tuple([z.array(z.number()), z.number()]),
 		update_dmSessions: z.tuple([z.array(z.number())]),
 		update_friends: z.tuple([z.array(z.number())]),
 		update_friendRequests: z.tuple([z.array(z.number())]),
@@ -62,6 +63,13 @@ export function registerCoreEvents(
 
 	socket.on('update_rooms', (profileIds) => {
 		io.to(getSocketIdByProfileIds(profileIds)).emit('update_rooms')
+	})
+
+	socket.on('update_roomChannels', (profileIds, roomId) => {
+		io.to(getSocketIdByProfileIds(profileIds)).emit(
+			'update_roomChannels',
+			roomId
+		)
 	})
 
 	socket.on('update_dmSessions', (profileIds) => {
