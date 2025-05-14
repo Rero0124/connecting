@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { VerifySession } from '../../schemas/session.schema'
 
-interface sessionState {
+interface sessionFeatureState {
 	session: VerifySession
 }
 
-const initialState: sessionState = {
+const initialState: sessionFeatureState = {
 	session: {
 		isAuth: false,
 	},

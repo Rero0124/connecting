@@ -4,7 +4,7 @@ import { Room, RoomMessage } from '../../schemas/room.schema'
 import { SerializeDatesForRedux } from '../../util'
 import { RoomChannel } from '@prisma/client'
 
-interface RoomDataState {
+interface RoomFeatureState {
 	rooms: RoomState[]
 	roomDetails: Record<
 		string,
@@ -16,13 +16,13 @@ interface RoomDataState {
 	>
 }
 
-const initialState: RoomDataState = {
+const initialState: RoomFeatureState = {
 	rooms: [],
 	roomDetails: {},
 }
 
-export const roomDataSlice = createSlice({
-	name: 'roomData',
+export const roomSlice = createSlice({
+	name: 'room',
 	initialState,
 	reducers: {
 		setRooms: (state, action: PayloadAction<RoomState[]>) => {
@@ -63,13 +63,13 @@ export const {
 	setRoomChannels,
 	removeRoomDetail,
 	addRoomMessage,
-} = roomDataSlice.actions
+} = roomSlice.actions
 
 export const getRooms = (state: RootState, roomId?: string) => {
 	if (roomId) {
-		return state.roomDate.rooms.find((room) => room.id === roomId)
+		return state.room.rooms.find((room) => room.id === roomId)
 	} else {
-		return state.roomDate.rooms
+		return state.room.rooms
 	}
 }
 
@@ -77,4 +77,4 @@ export type RoomState = SerializeDatesForRedux<Room>
 export type RoomMesssageState = SerializeDatesForRedux<RoomMessage>
 export type RoomChannelState = SerializeDatesForRedux<RoomChannel>
 
-export default roomDataSlice.reducer
+export default roomSlice.reducer

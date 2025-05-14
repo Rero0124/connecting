@@ -1,6 +1,6 @@
 'use client'
 
-import { setDmDetail } from '@/src/lib/features/dmData/dmDataSlice'
+import { setDmDetail } from '@/src/lib/features/dm/dmSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useVoiceCall } from '@/src/lib/hooks/useVoiceCall'
 import {
@@ -13,8 +13,8 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function Main() {
-	const dmData = useAppSelector((state) => state.dmData)
-	const saveData = useAppSelector((state) => state.saveData)
+	const dmState = useAppSelector((state) => state.dm)
+	const viewContextState = useAppSelector((state) => state.viewContext)
 	const dispatch = useAppDispatch()
 	const {
 		startCalling,
@@ -71,7 +71,7 @@ export default function Main() {
 	}
 
 	useEffect(() => {
-		if (!dmData.dmDetails[id]) {
+		if (!dmState.dmDetails[id]) {
 			fetchWithValidation(
 				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}`,
 				{
@@ -84,12 +84,12 @@ export default function Main() {
 				}
 			})
 		}
-	}, [dmData])
+	}, [dmState])
 
 	return (
 		<div className="flex flex-col justify-between h-full">
 			<div className="flex justify-between items-center h-12 border-b">
-				<span className="ml-4">{dmData.dmDetails[id]?.name ?? ''}</span>
+				<span className="ml-4">{dmState.dmDetails[id]?.name ?? ''}</span>
 				<div className="flex justify-between">
 					<div onClick={handleCallingStart}>통화</div>
 				</div>
@@ -127,19 +127,19 @@ export default function Main() {
 				</div>
 			)}
 			<div className="flex flex-col grow overflow-y-auto h-0">
-				{dmData.dmDetails[id] &&
-					dmData.dmDetails[id].message.map((message, idx) => {
+				{dmState.dmDetails[id] &&
+					dmState.dmDetails[id].message.map((message, idx) => {
 						const pastMessageSameUser =
 							message.profileId === pastMessageProfileId
 						pastMessageProfileId = message.profileId
 						const nextMessageSameDate =
-							dmData.dmDetails[id].message.length - 1 > idx
+							dmState.dmDetails[id].message.length - 1 > idx
 								? new Date(message.sentAt).toLocaleString() ===
 									new Date(
-										dmData.dmDetails[id].message[idx + 1].sentAt
+										dmState.dmDetails[id].message[idx + 1].sentAt
 									).toLocaleString()
 								: false
-						return message.profileId !== saveData.profile?.id ? (
+						return message.profileId !== viewContextState.profile?.id ? (
 							<div
 								key={`DmMessage_${message.dmSessionId}_${message.id}`}
 								className="flex justify-start px-1"

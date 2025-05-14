@@ -8,7 +8,7 @@ import { UpdateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
 
 export default function FriendReceivePage() {
 	const initialRequests = useAppSelector(
-		(state) => state.friendsData.receivedFriendRequests
+		(state) => state.friend.receivedFriendRequests
 	)
 	const [receivedFriendRequests, setReceivedFriendRequests] =
 		useState(initialRequests)

@@ -4,18 +4,18 @@ import {
 	addDmMessage,
 	setAllowedDmSession,
 	setNotAllowedDmSession,
-} from '@/src/lib/features/dmData/dmDataSlice'
+} from '@/src/lib/features/dm/dmSlice'
 import {
 	setFriends,
 	setReceivedFriendRequests,
 	setSentFriendRequests,
-} from '@/src/lib/features/friendData/friendDataSlice'
+} from '@/src/lib/features/friend/friendSlice'
 import {
 	addRoomMessage,
 	setRoomChannels,
 	setRooms,
-} from '@/src/lib/features/roomData/roomDataSlice'
-import { setProfile } from '@/src/lib/features/saveData/saveDataSlice'
+} from '@/src/lib/features/room/roomSlice'
+import { setProfile } from '@/src/lib/features/viewContext/viewContextSlice'
 import { setSession } from '@/src/lib/features/session/sessionSlice'
 import { setTransport } from '@/src/lib/features/socket/socketSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'

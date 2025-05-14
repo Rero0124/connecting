@@ -1,7 +1,8 @@
 'use client'
 
-import { getFriendRequests } from '@/src/lib/features/friendData/friendDataSlice'
+import { getFriendRequests } from '@/src/lib/features/friend/friendSlice'
 import { useAppSelector } from '@/src/lib/hooks'
+import { deserializeDatesFromRedux } from '@/src/lib/util'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -20,7 +21,7 @@ export default function FriendDetailModal({
 	onAccept,
 	onCancel,
 }: FriendDetailModalProps) {
-	const friendsData = useAppSelector((state) => state.friendsData)
+	const friendState = useAppSelector((state) => state.friend)
 	const [friendRequest, setFriendRequest] = useState<{
 		profile: {
 			statusType: string
@@ -36,9 +37,9 @@ export default function FriendDetailModal({
 	}>()
 	useEffect(() => {
 		if (friendRequestId) {
-			const request = getFriendRequests(friendsData, friendRequestId)
+			const request = getFriendRequests(friendState, friendRequestId)
 			if (request && !Array.isArray(request)) {
-				setFriendRequest(request)
+				setFriendRequest(deserializeDatesFromRedux(request))
 			}
 		}
 	}, [friendRequestId])
@@ -62,7 +63,7 @@ export default function FriendDetailModal({
 						</p>
 						<p className="mb-1">
 							<span className="text-gray-400">요청일:</span>{' '}
-							{new Date(friendRequest.sentAt).toLocaleString()}
+							{friendRequest.sentAt.toLocaleString()}
 						</p>
 					</div>
 

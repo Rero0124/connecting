@@ -3,7 +3,7 @@
 import {
 	setInitLoadEnd,
 	setProfile,
-} from '@/src/lib/features/saveData/saveDataSlice'
+} from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { socket } from '@/src/lib/socket'
 import { useEffect, useState } from 'react'
@@ -32,12 +32,12 @@ import {
 	setFriends,
 	setReceivedFriendRequests,
 	setSentFriendRequests,
-} from '@/src/lib/features/friendData/friendDataSlice'
+} from '@/src/lib/features/friend/friendSlice'
 import {
 	setAllowedDmSession,
 	setNotAllowedDmSession,
-} from '@/src/lib/features/dmData/dmDataSlice'
-import { setRooms } from '@/src/lib/features/roomData/roomDataSlice'
+} from '@/src/lib/features/dm/dmSlice'
+import { setRooms } from '@/src/lib/features/room/roomSlice'
 import { Socket } from 'socket.io'
 import { SocketProvider } from './SocketProvider'
 import { setSession } from '@/src/lib/features/session/sessionSlice'
@@ -52,7 +52,7 @@ export default function RootLayout({
 	const [loginModalKey, setLoginModalKey] = useState(0)
 	const [profiles, setProfiles] = useState<Profile[]>([])
 
-	const saveData = useAppSelector((state) => state.saveData)
+	const viewContextState = useAppSelector((state) => state.viewContext)
 	const session = useAppSelector((state) => state.session.session)
 	const dispatch = useAppDispatch()
 
@@ -173,7 +173,7 @@ export default function RootLayout({
 	}
 
 	useEffect(() => {
-		if (!saveData.initLoad) {
+		if (!viewContextState.initLoad) {
 			getInitData().then(async () => {
 				if (session.isAuth) {
 					socket.emit('set_profileId', session.profileId)
@@ -185,19 +185,22 @@ export default function RootLayout({
 	return (
 		<SocketProvider>
 			<div className="flex flex-col h-full">
-				{saveData.initLoad ? (
+				{viewContextState.initLoad ? (
 					<>
 						<header className="flex flex-row items-center justify-between h-16 border-b border-foreground px-4">
 							{/* 왼쪽 영역 */}
 							<div className="flex-1 flex items-center pl-4">
 								<p className="text-base font-medium">
-									{saveData.profile?.name ?? saveData.profile?.tag}
+									{viewContextState.profile?.name ??
+										viewContextState.profile?.tag}
 								</p>
 							</div>
 
 							{/* 중앙 제목 */}
 							<div className="flex-none text-center">
-								<h1 className="text-lg font-semibold">{saveData.title}</h1>
+								<h1 className="text-lg font-semibold">
+									{viewContextState.title}
+								</h1>
 							</div>
 
 							{/* 오른쪽 버튼들 */}

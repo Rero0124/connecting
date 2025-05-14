@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { DmMessage, DmSession } from '../../schemas/dm.schema'
 import { SerializeDatesForRedux } from '../../util'
 
-interface DmSessionDataState {
+interface DmFeatureState {
 	allowedDmSessions: DmSessionState[]
 	notAllowedDmSessions: DmSessionState[]
 	dmDetails: Record<
@@ -13,14 +13,14 @@ interface DmSessionDataState {
 	>
 }
 
-const initialState: DmSessionDataState = {
+const initialState: DmFeatureState = {
 	allowedDmSessions: [],
 	notAllowedDmSessions: [],
 	dmDetails: {},
 }
 
-export const dmDataSlice = createSlice({
-	name: 'dmData',
+export const dmSlice = createSlice({
+	name: 'dm',
 	initialState,
 	reducers: {
 		setAllowedDmSession: (state, action: PayloadAction<DmSessionState[]>) => {
@@ -59,10 +59,10 @@ export const {
 	setDmDetail,
 	removeDmDetail,
 	addDmMessage,
-} = dmDataSlice.actions
+} = dmSlice.actions
 
 export const getAllowedDmSession = (
-	state: DmSessionDataState,
+	state: DmFeatureState,
 	dmSessionId?: string
 ) => {
 	if (dmSessionId) {
@@ -75,7 +75,7 @@ export const getAllowedDmSession = (
 }
 
 export const getNotAllowedDmSession = (
-	state: DmSessionDataState,
+	state: DmFeatureState,
 	dmSessionId?: string
 ) => {
 	if (dmSessionId) {
@@ -90,4 +90,4 @@ export const getNotAllowedDmSession = (
 export type DmSessionState = SerializeDatesForRedux<DmSession>
 export type DmMessageState = SerializeDatesForRedux<DmMessage>
 
-export default dmDataSlice.reducer
+export default dmSlice.reducer

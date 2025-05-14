@@ -1,6 +1,6 @@
 'use client'
 
-import { setSelectedFriendSubMenu } from '@/src/lib/features/saveData/saveDataSlice'
+import { setSelectedFriendSubMenu } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch } from '@/src/lib/hooks'
 import { RootState } from '@/src/lib/store'
 import { useEffect } from 'react'
@@ -23,9 +23,9 @@ const getStatusColor = (status: string): string => {
 }
 
 export default function FriendList() {
-	const { friends } = useSelector((state: RootState) => state.friendsData)
+	const { friends } = useSelector((state: RootState) => state.friend)
 	const { selectedFriendSubMenu } = useSelector(
-		(state: RootState) => state.saveData
+		(state: RootState) => state.viewContext
 	)
 	const dispatch = useAppDispatch()
 

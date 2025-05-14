@@ -1,11 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { VerifySession } from '../../schemas/session.schema'
 
-interface SocketState {
+interface SocketFeatureState {
 	transport: string
 }
 
-const initialState: SocketState = {
+const initialState: SocketFeatureState = {
 	transport: 'N/A',
 }
 

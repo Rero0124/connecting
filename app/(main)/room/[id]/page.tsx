@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useParams } from 'next/navigation'
-import { setRoomDetail } from '@/src/lib/features/roomData/roomDataSlice'
+import { setRoomDetail } from '@/src/lib/features/room/roomSlice'
 import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
 import {
 	CreateRoomMessageBodySchema,
@@ -12,7 +12,7 @@ import {
 
 export default function Main() {
 	const [pendingMessage, setPendingMessage] = useState<string>('')
-	const roomData = useAppSelector((state) => state.roomDate)
+	const roomState = useAppSelector((state) => state.room)
 	const dispatch = useAppDispatch()
 
 	const { id } = useParams<{ id: string }>()
@@ -34,7 +34,7 @@ export default function Main() {
 	}
 
 	useEffect(() => {
-		if (!roomData.roomDetails[id]) {
+		if (!roomState.roomDetails[id]) {
 			fetchWithValidation(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
 				cache: 'no-store',
 				dataSchema: GetRoomResponseSchema,
@@ -44,14 +44,14 @@ export default function Main() {
 				}
 			})
 		}
-	}, [roomData])
+	}, [roomState])
 
 	return (
 		<div className="flex flex-col justify-between h-full">
 			<div className="">title</div>
 			<div className="flex flex-col">
-				{roomData.roomDetails[id] &&
-					roomData.roomDetails[id].message.map((message) => (
+				{roomState.roomDetails[id] &&
+					roomState.roomDetails[id].message.map((message) => (
 						<div key={`DmMessage_${message.roomId}_${message.id}`}>
 							{message.content}
 						</div>

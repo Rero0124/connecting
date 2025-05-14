@@ -5,7 +5,7 @@ import {
 	setNavSize,
 	setSelectedMessageMenu,
 	setTitle,
-} from '@/src/lib/features/saveData/saveDataSlice'
+} from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useEffect, useRef, useState } from 'react'
 import AddMessageModal from '@/app/(main)/message/AddMessageModal'
@@ -17,9 +17,9 @@ export default function Layout({
 	children: React.ReactNode
 }>) {
 	const { navSize, title, selectedMessageMenu } = useAppSelector(
-		(state) => state.saveData
+		(state) => state.viewContext
 	)
-	const dmData = useAppSelector((state) => state.dmData)
+	const dmState = useAppSelector((state) => state.dm)
 	const dispatch = useAppDispatch()
 
 	const [addMessageModalOpen, setAddMessageModalOpen] = useState<boolean>(false)
@@ -153,7 +153,7 @@ export default function Layout({
 							<span>∇</span>
 						</div>
 					</div>
-					{dmData.allowedDmSessions.map((dmSession) => (
+					{dmState.allowedDmSessions.map((dmSession) => (
 						<Menu
 							key={dmSession.id}
 							href={`/message/${dmSession.id}`}

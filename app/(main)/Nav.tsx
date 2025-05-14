@@ -39,8 +39,8 @@ const NavButton = ({
 const NavSepar = () => <hr className="w-10 mx-4 m-3" />
 
 export default function Nav() {
-	const roomDate = useAppSelector((state) => state.roomDate)
-	const profile = useAppSelector((state) => state.saveData.profile)
+	const roomState = useAppSelector((state) => state.room)
+	const profile = useAppSelector((state) => state.viewContext.profile)
 	const [showSettings, setShowSettings] = useState(false)
 	const [showProfileModal, setShowProfileModal] = useState(false)
 	const settingsRef = useRef<HTMLDivElement>(null)
@@ -67,7 +67,7 @@ export default function Nav() {
 						<NavButton href="/friend">친구</NavButton>
 						<NavButton href="/message">DM</NavButton>
 						<NavSepar />
-						{roomDate.rooms.map((room) => (
+						{roomState.rooms.map((room) => (
 							<NavButton
 								key={`nav_room_link_${room.id}`}
 								href={`/room/${room.id}`}
@@ -75,7 +75,7 @@ export default function Nav() {
 								{room.name}
 							</NavButton>
 						))}
-						{roomDate.rooms.length > 0 && <NavSepar />}
+						{roomState.rooms.length > 0 && <NavSepar />}
 						<NavButton href="/">생성</NavButton>
 						<NavButton href="/">검색</NavButton>
 					</div>

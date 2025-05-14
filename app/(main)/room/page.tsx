@@ -5,13 +5,13 @@ import { redirect } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function Main() {
-	const roomData = useAppSelector((state) => state.roomDate)
+	const roomState = useAppSelector((state) => state.room)
 	useEffect(() => {
-		if (roomData.rooms.length === 0) {
+		if (roomState.rooms.length === 0) {
 			redirect('/message')
 		} else {
-			redirect(`/room/${roomData.rooms[0].id}`)
+			redirect(`/room/${roomState.rooms[0].id}`)
 		}
-	}, [roomData])
+	}, [roomState])
 	return <></>
 }

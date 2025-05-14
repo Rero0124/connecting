@@ -5,24 +5,22 @@ import {
 	setNavSize,
 	setSelectedMessageMenu,
 	setTitle,
-} from '@/src/lib/features/saveData/saveDataSlice'
+} from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
 import { GetRoomResponseSchema } from '@/src/lib/schemas/room.schema'
-import { setRoomDetail } from '@/src/lib/features/roomData/roomDataSlice'
+import { setRoomDetail } from '@/src/lib/features/room/roomSlice'
 
 export default function Layout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
 }>) {
-	const { navSize, title, selectedMessageMenu } = useAppSelector(
-		(state) => state.saveData
-	)
-	const roomData = useAppSelector((state) => state.roomDate)
+	const { navSize, title } = useAppSelector((state) => state.viewContext)
+	const roomState = useAppSelector((state) => state.room)
 	const dispatch = useAppDispatch()
 	const navRef = useRef<HTMLDivElement>(null)
 	const { id } = useParams<{ id: string }>()
@@ -38,7 +36,7 @@ export default function Layout({
 	}
 
 	useEffect(() => {
-		if (!roomData.roomDetails[id]) {
+		if (!roomState.roomDetails[id]) {
 			fetchWithValidation(`${process.env.NEXT_PUBLIC_API_URL}/room/${id}`, {
 				cache: 'no-store',
 				dataSchema: GetRoomResponseSchema,
@@ -48,7 +46,7 @@ export default function Layout({
 				}
 			})
 		} else {
-			dispatch(setTitle(roomData.roomDetails[id]?.name))
+			dispatch(setTitle(roomState.roomDetails[id]?.name))
 		}
 	}, [id])
 
@@ -116,8 +114,8 @@ export default function Layout({
 							<span>∇</span>
 						</div>
 					</div>
-					{roomData.roomDetails[id] &&
-						roomData.roomDetails[id].channel.map((channel) => (
+					{roomState.roomDetails[id] &&
+						roomState.roomDetails[id].channel.map((channel) => (
 							<Menu
 								key={`${channel.id}`}
 								href={`/room/${channel.id}`}

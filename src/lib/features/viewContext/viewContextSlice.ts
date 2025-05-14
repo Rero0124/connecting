@@ -1,9 +1,9 @@
-import { createSlice, Middleware, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { getCookieValue, SerializeDatesForRedux } from '@/src/lib/util'
 import { RootState } from '@/src/lib/store'
 import { Profile } from '../../schemas/profile.schema'
 
-interface SaveDataState {
+interface ViewContextFeatureState {
 	initLoad: boolean
 	selectedFriendMenu?: string
 	selectedFriendSubMenu?: string
@@ -20,7 +20,7 @@ const oldSaveData: {
 	navSize?: number
 } = JSON.parse(getCookieValue('savedata') ?? '{}')
 
-const initialState: SaveDataState = {
+const initialState: ViewContextFeatureState = {
 	initLoad: false,
 	title: '',
 	navSize: oldSaveData.navSize ?? 200,
@@ -29,7 +29,7 @@ const initialState: SaveDataState = {
 	selectedMessageMenu: oldSaveData.selectedMessageMenu,
 }
 
-const setCookieBySaveData = (state: SaveDataState) => {
+const setCookieBySaveData = (state: ViewContextFeatureState) => {
 	const {
 		selectedFriendMenu,
 		selectedFriendSubMenu,
@@ -46,8 +46,8 @@ const setCookieBySaveData = (state: SaveDataState) => {
 		})
 }
 
-export const saveDataSlice = createSlice({
-	name: 'saveData',
+export const viewContextSlice = createSlice({
+	name: 'viewContext',
 	initialState,
 	reducers: {
 		setInitLoadEnd: (state) => {
@@ -90,19 +90,19 @@ export const {
 	setSelectedFriendMenu,
 	setSelectedFriendSubMenu,
 	setSelectedMessageMenu,
-} = saveDataSlice.actions
+} = viewContextSlice.actions
 
-export const getInitLoadEnd = (state: RootState) => state.saveData.initLoad
-export const getProfile = (state: RootState) => state.saveData.profile
-export const getTitle = (state: RootState) => state.saveData.title
-export const getNavSize = (state: RootState) => state.saveData.navSize
+export const getInitLoadEnd = (state: RootState) => state.viewContext.initLoad
+export const getProfile = (state: RootState) => state.viewContext.profile
+export const getTitle = (state: RootState) => state.viewContext.title
+export const getNavSize = (state: RootState) => state.viewContext.navSize
 export const getSelectedFriendMenu = (state: RootState) =>
-	state.saveData.selectedFriendMenu
+	state.viewContext.selectedFriendMenu
 export const getSelectedFriendSubMenu = (state: RootState) =>
-	state.saveData.selectedFriendSubMenu
+	state.viewContext.selectedFriendSubMenu
 export const getSelectedMessageMenu = (state: RootState) =>
-	state.saveData.selectedMessageMenu
+	state.viewContext.selectedMessageMenu
 
 export type ProfileState = SerializeDatesForRedux<Profile>
 
-export default saveDataSlice.reducer
+export default viewContextSlice.reducer

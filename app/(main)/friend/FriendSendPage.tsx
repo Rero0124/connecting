@@ -6,7 +6,7 @@ import { fetchWithValidation } from '@/src/lib/util'
 import { UpdateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
 
 export default function FriendSendPage() {
-	const friendsData = useAppSelector((state) => state.friendsData)
+	const friendState = useAppSelector((state) => state.friend)
 	const [selectedFriendRequestId, setSelectedFriendRequestId] =
 		useState<number>()
 
@@ -38,11 +38,11 @@ export default function FriendSendPage() {
 	return (
 		<div className="p-6">
 			<h2 className="text-xl font-bold mb-4">보낸 친구 신청</h2>
-			{friendsData.sentFriendRequests.length === 0 ? (
+			{friendState.sentFriendRequests.length === 0 ? (
 				<p>보낸 친구 신청이 없습니다.</p>
 			) : (
 				<ul className="space-y-3">
-					{friendsData.sentFriendRequests.map((friendRequest) => (
+					{friendState.sentFriendRequests.map((friendRequest) => (
 						<li
 							key={friendRequest.profile.tag}
 							className="border p-3 rounded flex justify-between items-center hover:bg-gray-100"

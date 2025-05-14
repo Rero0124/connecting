@@ -3,22 +3,22 @@ import { Friend, FriendRequest } from '../../schemas/friend.schema'
 import { ProfileFilter } from '../../schemas/profile.schema'
 import { SerializeDatesForRedux } from '../../util'
 
-interface FriendDataState {
+interface FriendFeatureState {
 	friends: FriendState[]
 	sentFriendRequests: FriendRequestState[]
 	receivedFriendRequests: FriendRequestState[]
 	filterFriends: ProfileFilterState[]
 }
 
-const initialState: FriendDataState = {
+const initialState: FriendFeatureState = {
 	friends: [],
 	sentFriendRequests: [],
 	receivedFriendRequests: [],
 	filterFriends: [],
 }
 
-export const friendDataSlice = createSlice({
-	name: 'savedata',
+export const friendSlice = createSlice({
+	name: 'friend',
 	initialState,
 	reducers: {
 		setFriends: (state, action: PayloadAction<FriendState[]>) => {
@@ -47,9 +47,9 @@ export const {
 	setSentFriendRequests,
 	setReceivedFriendRequests,
 	setFilterFriends,
-} = friendDataSlice.actions
+} = friendSlice.actions
 
-export const getFriends = (state: FriendDataState, tag?: string) => {
+export const getFriends = (state: FriendFeatureState, tag?: string) => {
 	if (tag) {
 		return state.friends.find((friend) => friend.tag === tag)
 	} else {
@@ -58,7 +58,7 @@ export const getFriends = (state: FriendDataState, tag?: string) => {
 }
 
 export const getFriendRequests = (
-	state: FriendDataState,
+	state: FriendFeatureState,
 	requestId?: number
 ) => {
 	if (requestId) {
@@ -70,7 +70,7 @@ export const getFriendRequests = (
 	}
 }
 
-export const getSentAddFriends = (state: FriendDataState, tag?: string) => {
+export const getSentAddFriends = (state: FriendFeatureState, tag?: string) => {
 	if (tag) {
 		return state.sentFriendRequests.find(
 			(sentFriendRequest) => sentFriendRequest.profile.tag === tag
@@ -80,7 +80,10 @@ export const getSentAddFriends = (state: FriendDataState, tag?: string) => {
 	}
 }
 
-export const getReceivedAddFriends = (state: FriendDataState, tag?: string) => {
+export const getReceivedAddFriends = (
+	state: FriendFeatureState,
+	tag?: string
+) => {
 	if (tag) {
 		return state.receivedFriendRequests.find(
 			(receivedFriendRequest) => receivedFriendRequest.profile.tag === tag
@@ -90,7 +93,7 @@ export const getReceivedAddFriends = (state: FriendDataState, tag?: string) => {
 	}
 }
 
-export const getFilterFriends = (state: FriendDataState, tag?: string) => {
+export const getFilterFriends = (state: FriendFeatureState, tag?: string) => {
 	if (tag) {
 		return state.filterFriends.find(
 			(filterFriend) => filterFriend.profile.tag === tag
@@ -104,4 +107,4 @@ export type FriendState = SerializeDatesForRedux<Friend>
 export type FriendRequestState = SerializeDatesForRedux<FriendRequest>
 export type ProfileFilterState = SerializeDatesForRedux<ProfileFilter>
 
-export default friendDataSlice.reducer
+export default friendSlice.reducer

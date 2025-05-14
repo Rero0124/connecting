@@ -17,11 +17,11 @@ export default function NewMessageModal({
 	isOpen,
 	onClose,
 }: NewMessageModalProps) {
-	const saveData = useAppSelector((state) => state.saveData)
+	const viewContextState = useAppSelector((state) => state.viewContext)
 
 	const [title, setTitle] = useState('')
 	const [imagePreview, setImagePreview] = useState(
-		saveData.profile?.image ?? ''
+		viewContextState.profile?.image ?? ''
 	)
 	const [imageEncoded, setImageEncoded] = useState<string | null>(null)
 	const [recipients, setRecipients] = useState<
@@ -98,7 +98,7 @@ export default function NewMessageModal({
 			if (profilesResponse.status === 'success') {
 				setSearchedUsers(
 					profilesResponse.data.filter(
-						(profile) => profile.tag !== saveData.profile?.tag
+						(profile) => profile.tag !== viewContextState.profile?.tag
 					)
 				)
 			}
@@ -108,7 +108,7 @@ export default function NewMessageModal({
 	useEffect(() => {
 		if (!isOpen) {
 			setTitle('')
-			setImagePreview(saveData.profile?.image ?? '')
+			setImagePreview(viewContextState.profile?.image ?? '')
 			setImageEncoded(null)
 			setRecipients([])
 			setSearchText('')

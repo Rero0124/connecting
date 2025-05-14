@@ -5,7 +5,7 @@ import {
 	setNavSize,
 	setSelectedFriendMenu,
 	setTitle,
-} from '@/src/lib/features/saveData/saveDataSlice'
+} from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useEffect, useRef } from 'react'
 
@@ -15,7 +15,7 @@ export default function Layout({
 	children: React.ReactNode
 }>) {
 	const { navSize, title, selectedFriendMenu } = useAppSelector(
-		(state) => state.saveData
+		(state) => state.viewContext
 	)
 	const dispatch = useAppDispatch()
 
