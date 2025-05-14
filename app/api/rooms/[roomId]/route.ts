@@ -54,23 +54,25 @@ export async function GET(
 				},
 			},
 			include: {
-				message: {
-					where: {
-						sentAt: {
-							gte: new Date(new Date().setDate(new Date().getDate() - 7)),
-						},
-					},
+				channel: {
 					include: {
-						profile: {
-							select: {
-								tag: true,
-								name: true,
-								image: true,
+						message: {
+							include: {
+								profile: {
+									select: {
+										tag: true,
+										name: true,
+										image: true,
+									},
+								},
 							},
+							orderBy: {
+								sentAt: 'desc',
+							},
+							take: 200,
 						},
 					},
 				},
-				channel: true,
 			},
 		})
 

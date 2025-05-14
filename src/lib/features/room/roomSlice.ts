@@ -1,17 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from '@/src/lib/store'
 import { Room, RoomMessage } from '../../schemas/room.schema'
 import { SerializeDatesForRedux } from '../../util'
-import { RoomChannel } from '@prisma/client'
+import { ChannelType, RoomChannel } from '@prisma/client'
 
 interface RoomFeatureState {
 	rooms: RoomState[]
 	roomDetails: Record<
 		string,
 		RoomState & {
-			message: RoomMesssageState[]
-		} & {
-			channel: RoomChannelState[]
+			channel: Record<
+				number,
+				RoomChannelState & {
+					message: RoomMesssageState[]
+				}
+			>
 		}
 	>
 }
@@ -32,27 +34,47 @@ export const roomSlice = createSlice({
 			state,
 			action: PayloadAction<
 				RoomState & {
-					message: RoomMesssageState[]
-				} & {
-					channel: RoomChannelState[]
+					channel: (RoomChannelState & {
+						message: RoomMesssageState[]
+					})[]
 				}
 			>
 		) => {
 			const key = action.payload.id
-			state.roomDetails[key] = action.payload
-		},
-		setRoomChannels: (state, action: PayloadAction<RoomChannelState[]>) => {
-			const key = action.payload[0].roomId
-			if (state.roomDetails[key]) {
-				state.roomDetails[key].channel = action.payload
+			const { channel, ...roomDetail } = action.payload
+			state.roomDetails[key] = {
+				...roomDetail,
+				channel: channel.reduce<
+					Record<
+						number,
+						RoomChannelState & {
+							message: RoomMesssageState[]
+						}
+					>
+				>((acc, channel) => {
+					acc[channel.id] = channel
+					return acc
+				}, {}),
 			}
 		},
 		removeRoomDetail: (state, action: PayloadAction<string>) => {
 			delete state.roomDetails[action.payload]
 		},
+		updateRoomChannels: (state, action: PayloadAction<RoomChannelState[]>) => {
+			action.payload.forEach((channel) => {
+				const roomId = channel.roomId
+				if (state.roomDetails[roomId]) {
+					state.roomDetails[roomId].channel[channel.id] = {
+						...state.roomDetails[roomId].channel[channel.id],
+						...channel,
+					}
+				}
+			})
+		},
 		addRoomMessage: (state, action: PayloadAction<RoomMesssageState>) => {
-			const key = action.payload.roomId
-			state.roomDetails[key].message.push(action.payload)
+			state.roomDetails[action.payload.roomId].channel[
+				action.payload.roomChannelId
+			].message.push(action.payload)
 		},
 	},
 })
@@ -60,17 +82,39 @@ export const roomSlice = createSlice({
 export const {
 	setRooms,
 	setRoomDetail,
-	setRoomChannels,
 	removeRoomDetail,
+	updateRoomChannels,
 	addRoomMessage,
 } = roomSlice.actions
 
-export const getRooms = (state: RootState, roomId?: string) => {
+export const getRooms = (state: RoomFeatureState, roomId?: string) => {
 	if (roomId) {
-		return state.room.rooms.find((room) => room.id === roomId)
+		return state.rooms.find((room) => room.id === roomId)
 	} else {
-		return state.room.rooms
+		return state.rooms
 	}
+}
+
+export const getRoomTextChannel = (
+	state: RoomFeatureState,
+	roomId: string,
+	channelId?: number
+) => {
+	const room = state.roomDetails[roomId]
+	if (!room || !room.channel || Object.keys(room.channel).length === 0)
+		return undefined
+
+	if (channelId) {
+		const findedChannel = Object.values(room.channel).find(
+			(channel) => channel.id === channelId && channel.type === ChannelType.text
+		)
+		if (findedChannel) {
+			return findedChannel
+		}
+	}
+	return Object.values(room.channel).find(
+		(channel) => channel.type === ChannelType.text
+	)
 }
 
 export type RoomState = SerializeDatesForRedux<Room>

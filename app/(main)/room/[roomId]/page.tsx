@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useParams } from 'next/navigation'
-import { setRoomDetail } from '@/src/lib/features/room/roomSlice'
+import {
+	getRoomTextChannel,
+	setRoomDetail,
+} from '@/src/lib/features/room/roomSlice'
 import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
 import {
 	CreateRoomMessageBodySchema,
@@ -15,12 +18,15 @@ export default function Main() {
 	const roomState = useAppSelector((state) => state.room)
 	const dispatch = useAppDispatch()
 
-	const { id } = useParams<{ id: string }>()
+	const { roomId } = useParams<{ roomId: string }>()
+
+	const channel = getRoomTextChannel(roomState, roomId)
+	const channelId = channel ? channel.id : 0
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()
 		fetchWithValidation(
-			`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}/messages`,
+			`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}/channels/${channelId}/messages`,
 			{
 				method: 'POST',
 				headers: {
@@ -34,15 +40,19 @@ export default function Main() {
 	}
 
 	useEffect(() => {
-		if (!roomState.roomDetails[id]) {
-			fetchWithValidation(`${process.env.NEXT_PUBLIC_API_URL}/rooms/${id}`, {
-				cache: 'no-store',
-				dataSchema: GetRoomResponseSchema,
-			}).then((data) => {
+		if (!roomState.roomDetails[roomId]) {
+			fetchWithValidation(
+				`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}`,
+				{
+					cache: 'no-store',
+					dataSchema: GetRoomResponseSchema,
+				}
+			).then((data) => {
 				if (data.status === 'success') {
 					dispatch(setRoomDetail(serializeDatesForRedux(data.data)))
 				}
 			})
+		} else {
 		}
 	}, [roomState])
 
@@ -50,8 +60,8 @@ export default function Main() {
 		<div className="flex flex-col justify-between h-full">
 			<div className="">title</div>
 			<div className="flex flex-col">
-				{roomState.roomDetails[id] &&
-					roomState.roomDetails[id].message.map((message) => (
+				{channel &&
+					channel.message.map((message) => (
 						<div key={`DmMessage_${message.roomId}_${message.id}`}>
 							{message.content}
 						</div>

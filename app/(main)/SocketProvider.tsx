@@ -12,8 +12,8 @@ import {
 } from '@/src/lib/features/friend/friendSlice'
 import {
 	addRoomMessage,
-	setRoomChannels,
 	setRooms,
+	updateRoomChannels,
 } from '@/src/lib/features/room/roomSlice'
 import { setProfile } from '@/src/lib/features/viewContext/viewContextSlice'
 import { setSession } from '@/src/lib/features/session/sessionSlice'
@@ -201,7 +201,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 					if (roomChannelsResponse.status === 'success') {
 						dispatch(
-							setRoomChannels(serializeDatesForRedux(roomChannelsResponse.data))
+							updateRoomChannels(
+								serializeDatesForRedux(roomChannelsResponse.data)
+							)
 						)
 					}
 				}

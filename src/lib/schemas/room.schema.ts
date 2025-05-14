@@ -58,12 +58,13 @@ export const GetRoomParamsSchema = z.object({
 	roomId: z.string(),
 })
 
-export const GetRoomResponseSchema = RoomSchema.merge(
-	z.object({
-		message: z.array(RoomMessageSchema),
-		channel: z.array(RoomChannelSchema),
-	})
-)
+export const GetRoomResponseSchema = RoomSchema.extend({
+	channel: z.array(
+		RoomChannelSchema.extend({
+			message: z.array(RoomMessageSchema),
+		})
+	),
+})
 
 export const GetRoomChannelsParamsSchema = z.object({
 	roomId: z.string(),
