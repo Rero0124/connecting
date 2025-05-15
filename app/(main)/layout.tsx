@@ -3,6 +3,7 @@ import { SocketProvider } from '../../src/provider/SocketProvider'
 import { MainLayout } from '@/src/components/layout/MainLayout'
 import { redirect } from 'next/navigation'
 import { verifySession } from '@/src/lib/session'
+import ContextMenuProvider from '@/src/provider/ContextMenuProvider'
 
 export default async function RootLayout({
 	children,
@@ -145,7 +146,9 @@ export default async function RootLayout({
 
 	return (
 		<SocketProvider>
-			<MainLayout initData={initData}>{children}</MainLayout>
+			<ContextMenuProvider>
+				<MainLayout initData={initData}>{children}</MainLayout>
+			</ContextMenuProvider>
 		</SocketProvider>
 	)
 }

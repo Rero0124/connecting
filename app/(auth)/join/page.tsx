@@ -5,6 +5,6 @@ export const metadata: Metadata = {
 	title: '회원가입',
 }
 
-export default function Join() {
+export default function JoinPage() {
 	return <JoinForm />
 }

@@ -114,3 +114,18 @@ export function promiseAll<T extends any[]>(values: {
 }): Promise<T> {
 	return Promise.all(values) as Promise<T>
 }
+
+export function mergeRefs<T>(
+	...refs: (React.Ref<T> | undefined)[]
+): React.RefCallback<T> {
+	return (element) => {
+		refs.forEach((ref) => {
+			if (!ref) return
+			if (typeof ref === 'function') {
+				ref(element)
+			} else if (typeof ref === 'object' && ref !== null) {
+				;(ref as React.RefObject<T | null>).current = element
+			}
+		})
+	}
+}

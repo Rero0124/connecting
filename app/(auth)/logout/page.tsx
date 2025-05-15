@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { useEffect } from 'react'
 
-export default function Logout() {
+export default function LogoutPage() {
 	useEffect(() => {
 		fetch('/api/session', {
 			method: 'DELETE',

@@ -94,6 +94,10 @@ export const MainLayout = ({
 	}
 
 	useEffect(() => {
+		document.body.addEventListener('contextmenu', (e) => {
+			e.preventDefault()
+			console.log(e.target)
+		})
 		dispatch(setSession(initData.session))
 		dispatch(setProfile(serializeDatesForRedux(initData.profile)))
 		dispatch(setRooms(serializeDatesForRedux(initData.rooms)))

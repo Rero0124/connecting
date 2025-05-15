@@ -6,6 +6,8 @@ import {
 	setSelectedFriendMenu,
 } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
+import { setContextMenu } from '@/src/provider/ContextMenuProvider'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
@@ -16,6 +18,7 @@ export default function NavDefault() {
 	const dispatch = useAppDispatch()
 
 	const navRef = useRef<HTMLDivElement>(null)
+	const contextRef = useRef<HTMLDivElement>(null)
 
 	const onDragEnd = ({ x }: { x: number }) => {
 		dispatch(setNavSize(x))
@@ -30,6 +33,28 @@ export default function NavDefault() {
 	useEffect(() => {
 		if (!selectedFriendMenu) {
 			dispatch(setSelectedFriendMenu('list'))
+		}
+		if (contextRef.current) {
+			setContextMenu(contextRef.current, [
+				{
+					name: '친구목록',
+					callback: () => {
+						redirect('/friend/list')
+					},
+				},
+				{
+					name: '친구추가',
+					callback: () => {
+						redirect('/friend/request')
+					},
+				},
+				{
+					name: '친구 관리',
+					callback: () => {
+						redirect('/friend/manage')
+					},
+				},
+			])
 		}
 	}, [])
 
@@ -67,6 +92,7 @@ export default function NavDefault() {
 	}
 	return (
 		<DragAbleDiv
+			ref={contextRef}
 			classname="bg-background"
 			option={dragAbleDivOption}
 			onDragging={onDragging}

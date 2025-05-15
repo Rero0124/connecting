@@ -1,3 +1,4 @@
+import { mergeRefs } from '@/src/lib/util'
 import { useEffect, useRef } from 'react'
 
 export interface DragAbleDivOption {
@@ -19,6 +20,7 @@ export interface DragAbleDivOption {
 }
 
 export default function DragAbleDiv({
+	ref,
 	children,
 	option,
 	classname = '',
@@ -26,6 +28,7 @@ export default function DragAbleDiv({
 	onDragging,
 	onDragEnd,
 }: {
+	ref?: React.RefObject<HTMLDivElement | null>
 	children: React.ReactNode
 	option: {
 		direction:
@@ -49,7 +52,7 @@ export default function DragAbleDiv({
 	onDragging?: (movedPx: { x: number; y: number }) => void
 	onDragEnd?: (movedPx: { x: number; y: number }) => void
 }) {
-	const ref = useRef<HTMLDivElement>(null)
+	const currentRef = useRef<HTMLDivElement>(null)
 	const childRef = useRef<HTMLDivElement>(null)
 
 	const prevPos = {
@@ -65,13 +68,13 @@ export default function DragAbleDiv({
 	}
 
 	useEffect(() => {
-		if (ref.current && childRef.current) {
-			ref.current.addEventListener('mousedown', mouseDownHandler)
+		if (currentRef.current && childRef.current) {
+			currentRef.current.addEventListener('mousedown', mouseDownHandler)
 			childRef.current.addEventListener('mousedown', (e: Event) => {
 				e.stopPropagation()
 			})
 		}
-	}, [ref, childRef])
+	}, [currentRef, childRef])
 
 	const hoverSize = option.hoverSize ?? 4
 	const minWidth = option.minWidth ?? 100
@@ -102,29 +105,29 @@ export default function DragAbleDiv({
 
 	function mouseDownHandler(e: MouseEvent) {
 		e.preventDefault()
-		if (ref.current) {
+		if (currentRef.current) {
 			prevPos.x = e.clientX
 			prevPos.y = e.clientY
-			prevPos.width = ref.current.clientWidth
-			prevPos.height = ref.current.clientHeight
+			prevPos.width = currentRef.current.clientWidth
+			prevPos.height = currentRef.current.clientHeight
 			document.addEventListener('mousemove', mouseMoveHandler)
 			document.addEventListener('mouseup', mouseUpHandler)
 		}
 	}
 
 	function mouseMoveHandler(e: MouseEvent) {
-		if (ref.current) {
+		if (currentRef.current) {
 			const dx = e.clientX - prevPos.x + prevPos.width
 			const dy = e.clientY - prevPos.y + prevPos.height
 			if (moveX) {
 				const nPosX = minWidth > dx ? minWidth : maxWidth < dx ? maxWidth : dx
-				ref.current.style.width = `${nPosX}px`
+				currentRef.current.style.width = `${nPosX}px`
 				movedPx.x = nPosX - hoverSize
 			}
 			if (moveY) {
 				const nPosY =
 					minHeight > dy ? minHeight : maxHeight < dy ? maxHeight : dy
-				ref.current.style.height = `${nPosY}px`
+				currentRef.current.style.height = `${nPosY}px`
 				movedPx.y = nPosY - hoverSize
 			}
 			if (onDragging && onDraggingAllow) {
@@ -140,7 +143,7 @@ export default function DragAbleDiv({
 	function mouseUpHandler() {
 		document.removeEventListener('mousemove', mouseMoveHandler)
 		document.removeEventListener('mouseup', mouseUpHandler)
-		if (ref.current) {
+		if (currentRef.current) {
 			if (onDragEnd) onDragEnd(movedPx)
 		}
 	}
@@ -152,7 +155,7 @@ export default function DragAbleDiv({
 
 	return (
 		<div
-			ref={ref}
+			ref={mergeRefs(ref, currentRef)}
 			className={classname}
 			style={{ ...basicStyle, ...style }}
 			onMouseDown={setPreventDefault}
