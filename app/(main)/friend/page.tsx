@@ -2,26 +2,21 @@
 
 import { useSelector } from 'react-redux'
 import { RootState } from '@/src/lib/store'
-import FriendList from './FriendList'
-import FriendAdd from './FriendAdd'
-import FriendManage from './FriendManage'
+import { redirect } from 'next/navigation'
 
 export default function Main() {
 	const { selectedFriendMenu } = useSelector(
-		(state: RootState) => state.saveData
+		(state: RootState) => state.viewContext
 	)
 
-	return (
-		<>
-			{selectedFriendMenu === 'list' ? (
-				<FriendList />
-			) : selectedFriendMenu === 'add' ? (
-				<FriendAdd />
-			) : selectedFriendMenu === 'manage' ? (
-				<FriendManage />
-			) : (
-				<></>
-			)}
-		</>
-	)
+	switch (selectedFriendMenu) {
+		case 'list':
+			redirect('/friend/list')
+		case 'request':
+			redirect('/friend/request')
+		case 'manage':
+			redirect('/friend/manage')
+		default:
+			redirect('/friend/list')
+	}
 }

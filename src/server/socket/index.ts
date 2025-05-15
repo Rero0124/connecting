@@ -22,7 +22,18 @@ export async function setupSocket(
 		SocketData
 	>(server, {
 		cors: {
-			origin: process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000',
+			origin: (origin, callback) => {
+				const allowedOrigins = [
+					'http://localhost:3000',
+					process.env.NEXT_PUBLIC_BASE_URL,
+				].filter(Boolean)
+
+				if (!origin || allowedOrigins.includes(origin)) {
+					callback(null, true)
+				} else {
+					callback(new Error('Not allowed by CORS'))
+				}
+			},
 			methods: ['GET', 'POST'],
 		},
 		transports: ['polling', 'websocket'],

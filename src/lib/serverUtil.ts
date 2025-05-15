@@ -2,6 +2,8 @@
 import { deleteSession, verifySession } from './session'
 import { ResponseDictionary } from '../types/dictionaries/res/dict'
 import prisma from './prisma'
+import bcryptjs from 'bcryptjs'
+import { Profile } from './schemas/profile.schema'
 import { ErrorResponse, SuccessResponse } from './schemas/api.schema'
 import { SessionUserSuccessResponse } from './schemas/user.schema'
 import { SessionProfileSuccessResponse } from './schemas/profile.schema'
@@ -157,5 +159,50 @@ export async function verifyProfileIdInSession(
 			},
 		},
 		status: 200,
+	}
+}
+
+export const getAuthUserProfiles = async (
+	email: string,
+	password: string
+): Promise<
+	| {
+			isAuth: false
+	  }
+	| {
+			isAuth: true
+			profiles: Profile[]
+	  }
+> => {
+	const user = await prisma.user.findUnique({
+		where: { email },
+	})
+
+	if (!user) {
+		return {
+			isAuth: false,
+		}
+	}
+
+	if (!bcryptjs.compareSync(password, user.password)) {
+		return {
+			isAuth: false,
+		}
+	}
+
+	const profiles = await prisma.profile.findMany({
+		omit: {
+			userId: true,
+		},
+		where: {
+			user: {
+				email,
+			},
+		},
+	})
+
+	return {
+		isAuth: true,
+		profiles,
 	}
 }

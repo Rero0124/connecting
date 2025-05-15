@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
-import FriendAddPage from './FriendAddPage'
+import FriendAddPage from '@/src/components/friendRequest/FriendAddPage'
 import FriendSendPage from './FriendSendPage'
-import FriendReceivePage from './FriendReceivePage'
+import FriendReceivePage from '@/src/components/friendRequest/FriendReceivePage'
 
 export default function FriendAdd() {
 	const [selectedMenu, setSelectedMenu] = useState<string>('send')

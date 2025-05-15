@@ -50,7 +50,7 @@ const order: Record<FriendStatus, number> = {
 }
 
 export default function FriendManage() {
-	const friendsData = useSelector((state: RootState) => state.friendsData)
+	const friendsData = useSelector((state: RootState) => state.friend)
 	const sortedFriends = [...friendsData.friends].sort(
 		(a: Friend, b: Friend) =>
 			order[a.statusType as FriendStatus] - order[b.statusType as FriendStatus]

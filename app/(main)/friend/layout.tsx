@@ -1,150 +1,22 @@
-'use client'
+import { Metadata } from 'next'
 
-import DragAbleDiv, { DragAbleDivOption } from '@/app/_components/DragAbleDiv'
-import {
-	setNavSize,
-	setSelectedFriendMenu,
-	setTitle,
-} from '@/src/lib/features/viewContext/viewContextSlice'
-import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
-import { useEffect, useRef } from 'react'
+export const metadata: Metadata = {
+	title: {
+		default: '친구',
+		template: `친구 | %s`,
+	},
+}
 
-export default function Layout({
+export default async function Layout({
 	children,
+	nav,
 }: Readonly<{
 	children: React.ReactNode
+	nav: React.ReactNode
 }>) {
-	const { navSize, title, selectedFriendMenu } = useAppSelector(
-		(state) => state.viewContext
-	)
-	const dispatch = useAppDispatch()
-
-	const navRef = useRef<HTMLDivElement>(null)
-
-	const onDragEnd = ({ x }: { x: number }) => {
-		dispatch(setNavSize(x))
-	}
-
-	const onDragging = ({ x }: { x: number }) => {
-		if (navRef.current) {
-			navRef.current.style.width = `${x}px`
-		}
-	}
-
-	const friendMenus: {
-		name: string
-		title?: string
-	}[] = [
-		{
-			name: 'list',
-			title: '친구 목록',
-		},
-		{
-			name: 'add',
-			title: '친구 추가',
-		},
-		{
-			name: 'manage',
-			title: '친구 관리',
-		},
-	]
-
-	const getFriendMenuTitle = (name: string) =>
-		friendMenus.find((v) => name.endsWith(v.name))?.title
-
-	useEffect(() => {
-		if (!selectedFriendMenu) {
-			dispatch(setSelectedFriendMenu(friendMenus[0].name))
-			dispatch(setTitle(friendMenus[0].title ?? friendMenus[0].name))
-		} else {
-			dispatch(
-				setTitle(getFriendMenuTitle(selectedFriendMenu) ?? selectedFriendMenu)
-			)
-		}
-	}, [])
-
-	useEffect(() => {
-		document.title = title
-	}, [title])
-
-	const dragAbleDivOption: DragAbleDivOption = {
-		direction: 'right',
-		hoverSize: 8,
-		onDraggingInterval: 0,
-		minWidth: 180,
-		maxWidth: 300,
-		hoverColor: 'background-light',
-	}
-
-	function Menu({
-		children,
-		name,
-		classname = '',
-	}: {
-		children: React.ReactNode
-		name: string
-		classname?: string
-	}) {
-		const onClick = () => {
-			dispatch(setSelectedFriendMenu(name))
-			dispatch(setTitle(getFriendMenuTitle(name) ?? name))
-		}
-
-		return (
-			<div
-				className={`block h-12 px-2.5 py-0.5 leading-12 mb-1 rounded ${classname}`}
-				onClick={onClick}
-			>
-				{children}
-			</div>
-		)
-	}
-
 	return (
 		<>
-			<DragAbleDiv
-				classname="bg-background"
-				option={dragAbleDivOption}
-				onDragging={onDragging}
-				onDragEnd={onDragEnd}
-			>
-				<div
-					ref={navRef}
-					className="bg-background flex flex-col h-full pl-2.5 pr-1 py-2"
-					style={{ width: navSize }}
-				>
-					<Menu
-						name="list"
-						classname={
-							selectedFriendMenu === 'list'
-								? 'bg-background-light'
-								: 'hover:bg-background-light'
-						}
-					>
-						친구목록
-					</Menu>
-					<Menu
-						name="add"
-						classname={
-							selectedFriendMenu === 'add'
-								? 'bg-background-light'
-								: 'hover:bg-background-light'
-						}
-					>
-						친구추가
-					</Menu>
-					<Menu
-						name="manage"
-						classname={
-							selectedFriendMenu === 'manage'
-								? 'bg-background-light'
-								: 'hover:bg-background-light'
-						}
-					>
-						친구 관리
-					</Menu>
-				</div>
-			</DragAbleDiv>
+			{nav}
 			<div className="grow">{children}</div>
 			<div className="flex flex-col w-72 border-l-[1px]">
 				<div className="block h-12 px-2.5 py-0.5 leading-12">현재 활동중</div>

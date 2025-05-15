@@ -30,27 +30,24 @@ export default function Main() {
 	const [isCalling, setIsCalling] = useState(false)
 	let pastMessageProfileId = -1
 
-	const { id } = useParams<{ id: string }>()
+	const { dmSessionId } = useParams<{ dmSessionId: string }>()
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()
-		fetchWithValidation(
-			`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}/messages`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				bodySchema: CreateDmMessageBodySchema,
-				body: { message: pendingMessage },
-			}
-		)
+		fetchWithValidation(`/api/dm-sessions/${dmSessionId}/messages`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			bodySchema: CreateDmMessageBodySchema,
+			body: { message: pendingMessage },
+		})
 		setPendingMessage('')
 	}
 
 	const handleCallingStart = () => {
 		setIsCalling(true)
-		startCalling(id)
+		startCalling(dmSessionId)
 	}
 
 	const handleCallingStop = () => {
@@ -71,14 +68,11 @@ export default function Main() {
 	}
 
 	useEffect(() => {
-		if (!dmState.dmDetails[id]) {
-			fetchWithValidation(
-				`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions/${id}`,
-				{
-					cache: 'no-store',
-					dataSchema: GetDmSessionResponseSchema,
-				}
-			).then((data) => {
+		if (!dmState.dmDetails[dmSessionId]) {
+			fetchWithValidation(`/api/dm-sessions/${dmSessionId}`, {
+				cache: 'no-store',
+				dataSchema: GetDmSessionResponseSchema,
+			}).then((data) => {
 				if (data.status === 'success') {
 					dispatch(setDmDetail(serializeDatesForRedux(data.data)))
 				}
@@ -89,7 +83,9 @@ export default function Main() {
 	return (
 		<div className="flex flex-col justify-between h-full">
 			<div className="flex justify-between items-center h-12 border-b">
-				<span className="ml-4">{dmState.dmDetails[id]?.name ?? ''}</span>
+				<span className="ml-4">
+					{dmState.dmDetails[dmSessionId]?.name ?? ''}
+				</span>
 				<div className="flex justify-between">
 					<div onClick={handleCallingStart}>통화</div>
 				</div>
@@ -127,16 +123,16 @@ export default function Main() {
 				</div>
 			)}
 			<div className="flex flex-col grow overflow-y-auto h-0">
-				{dmState.dmDetails[id] &&
-					dmState.dmDetails[id].message.map((message, idx) => {
+				{dmState.dmDetails[dmSessionId] &&
+					dmState.dmDetails[dmSessionId].message.map((message, idx) => {
 						const pastMessageSameUser =
 							message.profileId === pastMessageProfileId
 						pastMessageProfileId = message.profileId
 						const nextMessageSameDate =
-							dmState.dmDetails[id].message.length - 1 > idx
+							dmState.dmDetails[dmSessionId].message.length - 1 > idx
 								? new Date(message.sentAt).toLocaleString() ===
 									new Date(
-										dmState.dmDetails[id].message[idx + 1].sentAt
+										dmState.dmDetails[dmSessionId].message[idx + 1].sentAt
 									).toLocaleString()
 								: false
 						return message.profileId !== viewContextState.profile?.id ? (

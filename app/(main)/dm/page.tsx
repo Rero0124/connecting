@@ -15,7 +15,7 @@ export default function Main() {
 						return (
 							<Link
 								key={`key_allowed_message_` + allowedDmSession.id}
-								href={`/message/${allowedDmSession.id}`}
+								href={`/dm/${allowedDmSession.id}`}
 								className="block"
 							>
 								<p>{allowedDmSession.name}</p>

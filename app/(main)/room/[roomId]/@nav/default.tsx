@@ -1,6 +1,6 @@
 'use client'
 
-import DragAbleDiv, { DragAbleDivOption } from '@/app/_components/DragAbleDiv'
+import DragAbleDiv, { DragAbleDivOption } from '@/src/components/ui/DragAbleDiv'
 import { getRoomTextChannel } from '@/src/lib/features/room/roomSlice'
 import { setNavSize } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'

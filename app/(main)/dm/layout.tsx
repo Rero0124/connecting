@@ -1,6 +1,6 @@
 'use client'
 
-import DragAbleDiv, { DragAbleDivOption } from '@/app/_components/DragAbleDiv'
+import DragAbleDiv, { DragAbleDivOption } from '@/src/components/ui/DragAbleDiv'
 import {
 	setNavSize,
 	setSelectedMessageMenu,
@@ -8,7 +8,7 @@ import {
 } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
 import { useEffect, useRef, useState } from 'react'
-import AddMessageModal from '@/app/(main)/message/AddMessageModal'
+import AddDmModal from '@/src/components/dm/AddDmModal'
 import Link from 'next/link'
 
 export default function Layout({
@@ -154,11 +154,7 @@ export default function Layout({
 						</div>
 					</div>
 					{dmState.allowedDmSessions.map((dmSession) => (
-						<Menu
-							key={dmSession.id}
-							href={`/message/${dmSession.id}`}
-							name="send"
-						>
+						<Menu key={dmSession.id} href={`/dm/${dmSession.id}`} name="send">
 							{dmSession.name}
 						</Menu>
 					))}
@@ -170,7 +166,7 @@ export default function Layout({
 					중요 알림 (친한친구 채팅 및 약속)
 				</div>
 			</div>
-			<AddMessageModal
+			<AddDmModal
 				isOpen={addMessageModalOpen}
 				onClose={() => {
 					setAddMessageModalOpen(false)

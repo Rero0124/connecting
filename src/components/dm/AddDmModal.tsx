@@ -71,7 +71,7 @@ export default function NewMessageModal({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
-		fetch(`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`, {
+		fetch(`/api/dm-sessions`, {
 			method: 'POST',
 			body: JSON.stringify({
 				name: title,
@@ -90,7 +90,7 @@ export default function NewMessageModal({
 		setSearchText(e.currentTarget.value)
 		if (e.currentTarget.value !== '') {
 			const profilesResponse = await fetchWithValidation(
-				`${process.env.NEXT_PUBLIC_API_URL}/profiles?tag=${e.currentTarget.value}`,
+				`/api/profiles?tag=${e.currentTarget.value}`,
 				{
 					dataSchema: GetProfilesResponseSchema,
 				}

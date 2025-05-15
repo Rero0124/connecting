@@ -17,14 +17,14 @@ export async function PATCH(
 		const paramsFields = UpdateUserPasswordParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message: '유저 아이디의 형식이 잘못되었습니다.',
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const data = await verifyUserIdInSession(paramsFields.data.userId)

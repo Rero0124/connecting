@@ -57,14 +57,14 @@ export async function PATCH(
 				message = 'name 의 형식이 잘못되었습니다.'
 			}
 
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message,
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const oldRoom = await prisma.room.findFirst({

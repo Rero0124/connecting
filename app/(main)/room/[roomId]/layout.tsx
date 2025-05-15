@@ -1,10 +1,30 @@
-export default function Layout({
-	children,
-	nav,
-}: Readonly<{
-	children: React.ReactNode
+import prisma from '@/src/lib/prisma'
+import { Metadata } from 'next'
+
+type LayoutProps = {
 	nav: React.ReactNode
-}>) {
+	params: Promise<{ roomId: string }>
+	children: React.ReactNode
+}
+
+export async function generateMetadata({
+	params,
+}: LayoutProps): Promise<Metadata> {
+	const { roomId } = await params
+	const room = await prisma.room.findUnique({
+		where: { id: roomId },
+		select: { name: true },
+	})
+
+	return {
+		title: {
+			default: room?.name ?? '채팅방',
+			template: `%s | ${room?.name ?? '채팅방'}`,
+		},
+	}
+}
+
+export default function Layout({ children, nav }: Readonly<LayoutProps>) {
 	return (
 		<>
 			{nav}

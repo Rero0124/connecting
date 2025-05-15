@@ -18,14 +18,14 @@ export async function GET(
 		const paramsFields = GetProfilesByUserParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message: '유저 아이디의 형식이 잘못되었습니다.',
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
@@ -77,14 +77,14 @@ export async function POST(
 		const paramsFields = CreateProfileByUserParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message: '유저 아이디의 형식이 잘못되었습니다.',
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const data = await verifyUserIdInSession(paramsFields.data.userId)

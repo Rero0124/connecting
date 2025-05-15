@@ -15,14 +15,14 @@ export async function GET(
 		const paramsFields = GetProfileParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message: '태그 형식이 잘못되었습니다.',
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const profile = await prisma.profile.findFirst({

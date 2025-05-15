@@ -36,14 +36,14 @@ export async function GET(
 				message = 'profileId의 형식이 잘못되었습니다.'
 			}
 
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message,
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
@@ -120,14 +120,14 @@ export async function PATCH(
 				message = 'profileId의 형식이 잘못되었습니다.'
 			}
 
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message,
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const data = await verifyProfileIdInSession(
@@ -172,14 +172,14 @@ export async function PATCH(
 				message = 'statusId 의의 형식이 잘못되었습니다.'
 			}
 
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message,
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const profile = await prisma.profile.update({
@@ -247,14 +247,14 @@ export async function DELETE(
 				message = 'profileId의 형식이 잘못되었습니다.'
 			}
 
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message,
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const data = await verifyProfileIdInSession(

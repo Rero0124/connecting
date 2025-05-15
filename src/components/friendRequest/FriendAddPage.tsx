@@ -6,6 +6,7 @@ import {
 	Profile,
 } from '@/src/lib/schemas/profile.schema'
 import { fetchWithValidation } from '@/src/lib/util'
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 export default function FriendAddPage() {
@@ -155,7 +156,7 @@ export default function FriendAddPage() {
 			{!profileLoading && profile && (
 				<div className="border rounded p-4 mt-2 bg-white">
 					<div className="flex gap-4 items-center">
-						<img
+						<Image
 							src={profile.image ?? '/default-profile.png'}
 							alt="프로필 이미지"
 							className="w-12 h-12 rounded-full object-cover"

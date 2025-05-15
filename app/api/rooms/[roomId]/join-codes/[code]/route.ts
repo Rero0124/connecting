@@ -40,14 +40,14 @@ export async function DELETE(
 				message = 'code의 형식이 잘못되었습니다.'
 			}
 
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message,
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const room = await prisma.room.findFirst({

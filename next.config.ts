@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
 		return [
 			{
 				source: '/',
-				destination: '/message',
+				destination: '/dm',
 				permanent: true,
 			},
 		]

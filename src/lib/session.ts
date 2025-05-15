@@ -42,12 +42,12 @@ export async function deleteSession() {
 	cookieStore.delete('session')
 }
 
-export async function verifySession(): Promise<VerifySession> {
+export async function verifySession(isUpdate = true): Promise<VerifySession> {
 	const cookie = (await cookies()).get('session')?.value
 	const session = await decrypt(cookie)
 
 	if (session && new Date(session.expiresAt) > new Date()) {
-		await createSession(session.userId, session.profileId)
+		if (isUpdate) await createSession(session.userId, session.profileId)
 		return {
 			isAuth: true,
 			userId: session.userId,

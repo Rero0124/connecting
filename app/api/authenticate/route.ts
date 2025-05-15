@@ -1,6 +1,4 @@
-import prisma from '@/src/lib/prisma'
 import { NextResponse, type NextRequest } from 'next/server'
-import bcryptjs from 'bcryptjs'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import {
 	AuthGetProfilesBodySchema,
@@ -11,6 +9,7 @@ import {
 	RESPONSE_CODE,
 	RESPONSE_CODE_AUTH_GET_PROFILES_BODY_INVALID,
 } from '@/src/lib/constants/responseCode'
+import { getAuthUserProfiles } from '@/src/lib/serverUtil'
 
 export async function POST(request: NextRequest) {
 	try {
@@ -46,49 +45,25 @@ export async function POST(request: NextRequest) {
 
 		const { email, password } = bodyFields.data
 
-		const user = await prisma.user.findUnique({
-			where: { email },
-		})
+		const profiles = await getAuthUserProfiles(email, password)
 
-		if (!user) {
+		if (!profiles.isAuth) {
 			return NextResponse.json<ErrorResponse>(
 				{
 					status: 'error',
-					code: RESPONSE_CODE.AUTH.GET_PROFILES_UNMATCH_USER,
+					code: 0x0,
 					message: '이메일 또는 비밀번호가 일치하지 않습니다.',
 				},
 				{ status: 400 }
 			)
 		}
-
-		if (!bcryptjs.compareSync(password, user.password)) {
-			return NextResponse.json<ErrorResponse>(
-				{
-					status: 'error',
-					code: RESPONSE_CODE.AUTH.GET_PROFILES_UNMATCH_USER,
-					message: '이메일 또는 비밀번호가 일치하지 않습니다.',
-				},
-				{ status: 400 }
-			)
-		}
-
-		const profiles = await prisma.profile.findMany({
-			omit: {
-				userId: true,
-			},
-			where: {
-				user: {
-					email,
-				},
-			},
-		})
 
 		return NextResponse.json<AuthGetProfilesSuccessResponse>(
 			{
 				status: 'success',
 				code: RESPONSE_CODE.AUTH.GET_PROFILES_SUCCESS,
 				message: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.message,
-				data: profiles,
+				data: profiles.profiles,
 			},
 			{ status: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.status }
 		)

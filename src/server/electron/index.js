@@ -13,7 +13,9 @@ function startElectron() {
 			},
 		})
 
-		win.loadURL(process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000') // dev 모드용
+		win.webContents.session.clearCache()
+
+		win.loadURL('http://localhost:3000') // dev 모드용
 	}
 
 	app.whenReady().then(() => {

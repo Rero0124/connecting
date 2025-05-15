@@ -25,29 +25,23 @@ export default function Main() {
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()
-		fetchWithValidation(
-			`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}/channels/${channelId}/messages`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				bodySchema: CreateRoomMessageBodySchema,
-				body: { message: pendingMessage },
-			}
-		)
+		fetchWithValidation(`/api/rooms/${roomId}/channels/${channelId}/messages`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			bodySchema: CreateRoomMessageBodySchema,
+			body: { message: pendingMessage },
+		})
 		setPendingMessage('')
 	}
 
 	useEffect(() => {
 		if (!roomState.roomDetails[roomId]) {
-			fetchWithValidation(
-				`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}`,
-				{
-					cache: 'no-store',
-					dataSchema: GetRoomResponseSchema,
-				}
-			).then((data) => {
+			fetchWithValidation(`/api/rooms/${roomId}`, {
+				cache: 'no-store',
+				dataSchema: GetRoomResponseSchema,
+			}).then((data) => {
 				if (data.status === 'success') {
 					dispatch(setRoomDetail(serializeDatesForRedux(data.data)))
 				}

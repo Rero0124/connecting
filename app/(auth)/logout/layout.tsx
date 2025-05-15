@@ -1,8 +1,7 @@
-import type { Metadata } from 'next'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-	title: 'Room',
-	description: 'Connecting',
+	title: '로그아웃 중..',
 }
 
 export default function Layout({

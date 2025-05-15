@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { getCookieValue, SerializeDatesForRedux } from '@/src/lib/util'
+import { SerializeDatesForRedux } from '@/src/lib/util'
 import { RootState } from '@/src/lib/store'
 import { Profile } from '../../schemas/profile.schema'
+import { getCookieValue } from '../../clientUtil'
 
 interface ViewContextFeatureState {
 	initLoad: boolean

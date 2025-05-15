@@ -32,14 +32,14 @@ export async function GET(
 		const paramsFields = GetRoomJoinCodesParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return {
-				response: {
+			return NextResponse.json<ErrorResponse>(
+				{
 					status: 'error',
 					code: 0x0,
 					message: '방 아이디의 형식이 잘못되었습니다.',
 				},
-				status: 400,
-			}
+				{ status: 400 }
+			)
 		}
 
 		const room = await prisma.room.findFirst({

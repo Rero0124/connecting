@@ -6,7 +6,6 @@ import {
 	SuccessResponse,
 	SuccessResponseSchema,
 } from './schemas/api.schema'
-import { VerifySession, VerifySessionSchema } from './schemas/session.schema'
 
 export type SerializeDatesForRedux<T extends object> = {
 	[K in keyof T]: T[K] extends Date
@@ -114,27 +113,4 @@ export function promiseAll<T extends any[]>(values: {
 	[K in keyof T]: Promise<T[K]>
 }): Promise<T> {
 	return Promise.all(values) as Promise<T>
-}
-
-export function getCookieValue(name: string) {
-	const regex = new RegExp(`(^| )${name}=([^;]+)`)
-	if (typeof document !== 'undefined') {
-		const match = document.cookie.match(regex)
-		if (match) {
-			return match[2]
-		}
-	}
-}
-
-export async function getSession(): Promise<VerifySession> {
-	const sessionResponse = await fetchWithValidation('/api/session', {
-		dataSchema: VerifySessionSchema,
-	})
-	if (sessionResponse.status === 'error') {
-		return {
-			isAuth: false,
-		}
-	} else {
-		return sessionResponse.data
-	}
 }

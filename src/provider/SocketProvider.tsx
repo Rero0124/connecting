@@ -58,12 +58,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 			socket.on('get_profileId', async () => {
 				if (!sessionRef.current.isAuth) {
-					const newSession = await fetchWithValidation(
-						`${process.env.NEXT_PUBLIC_API_URL}/session`,
-						{
-							dataSchema: GetSessionResponseSchema,
-						}
-					)
+					const newSession = await fetchWithValidation(`/api/session`, {
+						dataSchema: GetSessionResponseSchema,
+					})
 					if (newSession.status === 'success' && newSession.data.isAuth) {
 						socket.emit('set_profileId', newSession.data.profileId)
 						dispatch(setSession(newSession.data))
@@ -76,7 +73,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			})
 
 			socket.on('loggedIn_sameProfile', () => {
-				fetch(`${process.env.NEXT_PUBLIC_API_URL}/session`, {
+				fetch(`/api/session`, {
 					method: 'DELETE',
 				}).then(() => {
 					location.reload()
@@ -87,7 +84,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 				;``
 				if (sessionRef.current.isAuth) {
 					const profileResponse = await fetchWithValidation(
-						`${process.env.NEXT_PUBLIC_API_URL}/users/${sessionRef.current.userId}/profiles/${sessionRef.current.profileId}`,
+						`/api/users/${sessionRef.current.userId}/profiles/${sessionRef.current.profileId}`,
 						{
 							cache: 'no-store',
 							dataSchema: GetProfileByUserResponseSchema,
@@ -101,13 +98,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 			socket.on('update_rooms', async () => {
 				if (sessionRef.current.isAuth) {
-					const roomsResponse = await fetchWithValidation(
-						`${process.env.NEXT_PUBLIC_API_URL}/rooms`,
-						{
-							cache: 'no-store',
-							dataSchema: GetRoomsResponseSchema,
-						}
-					)
+					const roomsResponse = await fetchWithValidation(`/api/rooms`, {
+						cache: 'no-store',
+						dataSchema: GetRoomsResponseSchema,
+					})
 
 					if (roomsResponse.status === 'success') {
 						dispatch(setRooms(serializeDatesForRedux(roomsResponse.data)))
@@ -118,7 +112,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			socket.on('update_dmSessions', async () => {
 				if (sessionRef.current.isAuth) {
 					const dmSessionsResponse = await fetchWithValidation(
-						`${process.env.NEXT_PUBLIC_API_URL}/dm-sessions`,
+						`/api/dm-sessions`,
 						{
 							cache: 'no-store',
 							dataSchema: GetDmSessionsResponseSchema,
@@ -146,13 +140,10 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 			socket.on('update_friends', async () => {
 				if (sessionRef.current.isAuth) {
-					const friendsResponse = await fetchWithValidation(
-						`${process.env.NEXT_PUBLIC_API_URL}/friends`,
-						{
-							cache: 'no-store',
-							dataSchema: GetFriendsResponseSchema,
-						}
-					)
+					const friendsResponse = await fetchWithValidation(`/api/friends`, {
+						cache: 'no-store',
+						dataSchema: GetFriendsResponseSchema,
+					})
 
 					if (friendsResponse.status === 'success') {
 						dispatch(setFriends(serializeDatesForRedux(friendsResponse.data)))
@@ -163,7 +154,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			socket.on('update_friendRequests', async () => {
 				if (sessionRef.current.isAuth) {
 					const friendRequestsResponse = await fetchWithValidation(
-						`${process.env.NEXT_PUBLIC_API_URL}/friend-requests`,
+						`/api/friend-requests`,
 						{
 							cache: 'no-store',
 							dataSchema: GetFriendRequestsResponseSchema,
@@ -192,7 +183,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			socket.on('update_roomChannels', async (roomId) => {
 				if (sessionRef.current.isAuth) {
 					const roomChannelsResponse = await fetchWithValidation(
-						`${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomId}/channels`,
+						`/api/rooms/${roomId}/channels`,
 						{
 							cache: 'no-store',
 							dataSchema: GetRoomChannelsResponseSchema,

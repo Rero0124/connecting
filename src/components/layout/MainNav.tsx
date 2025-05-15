@@ -3,7 +3,7 @@
 import { useAppSelector } from '@/src/lib/hooks'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import ProfileEditModal from './ProfileEditModal' // 모달 임포트
+import ProfileEditModal from '@/src/components/profile/ProfileEditModal' // 모달 임포트
 
 const NavButton = ({
 	href,
@@ -38,7 +38,7 @@ const NavButton = ({
 
 const NavSepar = () => <hr className="w-10 mx-4 m-3" />
 
-export default function Nav() {
+export const MainNav = () => {
 	const roomState = useAppSelector((state) => state.room)
 	const profile = useAppSelector((state) => state.viewContext.profile)
 	const [showSettings, setShowSettings] = useState(false)
@@ -65,7 +65,7 @@ export default function Nav() {
 				<div className="flex flex-col grow overflow-y-auto h-0">
 					<div className="relative inset-0 overflow-y-auto">
 						<NavButton href="/friend">친구</NavButton>
-						<NavButton href="/message">DM</NavButton>
+						<NavButton href="/dm">DM</NavButton>
 						<NavSepar />
 						{roomState.rooms.map((room) => (
 							<NavButton
@@ -125,3 +125,5 @@ export default function Nav() {
 		</>
 	)
 }
+
+export default MainNav

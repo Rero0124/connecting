@@ -1,11 +1,4 @@
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-	title: 'Connecting',
-	description: 'Connecting',
-}
-
-export default function Layout({
+export default function AuthLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode

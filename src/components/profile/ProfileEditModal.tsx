@@ -1,7 +1,8 @@
 'use client'
 
+import { getSession } from '@/src/lib/clientUtil'
 import { UpdateProfileByUserBodySchema } from '@/src/lib/schemas/profile.schema'
-import { fetchWithValidation, getSession } from '@/src/lib/util'
+import { fetchWithValidation } from '@/src/lib/util'
 import Image from 'next/image'
 import { useState } from 'react'
 
