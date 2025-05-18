@@ -37,7 +37,7 @@ export default function LoginModal({ open, onClose }: Props) {
 		}
 	}, [open])
 
-	const selectProfile = (profileId: number) => {
+	const selectProfile = (profileId: bigint) => {
 		if (formRef.current && profileIdRef.current) {
 			profileIdRef.current.value = profileId.toString()
 			formRef.current.requestSubmit()

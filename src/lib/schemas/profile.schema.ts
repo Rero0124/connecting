@@ -3,12 +3,12 @@ import { SuccessResponse } from './api.schema'
 import { FilterType, StatusType } from '@prisma/client'
 
 export const ProfileSchema = z.object({
-	id: z.number(),
+	id: z.bigint(),
 	image: z.string(),
 	tag: z.string(),
 	name: z.string().nullable(),
 	statusType: z.nativeEnum(StatusType),
-	statusId: z.number(),
+	statusId: z.bigint(),
 	information: z.string(),
 	isCompany: z.boolean(),
 	isOnline: z.boolean(),
@@ -16,16 +16,16 @@ export const ProfileSchema = z.object({
 })
 
 export const ProfileFilterSchema = z.object({
-	id: z.number(),
-	profileId: z.number(),
-	filterProfileId: z.number(),
+	id: z.bigint(),
+	profileId: z.bigint(),
+	filterProfileId: z.bigint(),
 	filterType: z.nativeEnum(FilterType),
 	profile: ProfileSchema,
 })
 
 export const SessionProfileSchema = z.object({
-	userId: z.number(),
-	profileId: z.number(),
+	userId: z.bigint(),
+	profileId: z.bigint(),
 	tag: z.string(),
 })
 
@@ -38,22 +38,22 @@ export const GetProfileParamsSchema = z.object({
 export const GetProfileResponseSchema = ProfileSchema
 
 export const GetProfilesByUserParamsSchema = z.object({
-	userId: z.coerce.number(),
+	userId: z.coerce.bigint(),
 })
 
 export const GetProfilesByUserResponseSchema = z.array(ProfileSchema)
 
 export const GetProfileByUserParamsSchema = z.object({
-	userId: z.coerce.number(),
-	profileId: z.coerce.number(),
+	userId: z.coerce.bigint(),
+	profileId: z.coerce.bigint(),
 })
 export const GetProfileByUserResponseSchema = ProfileSchema
 
 export const GetProfileFiltersResponseSchema = z.array(ProfileFilterSchema)
 
 export const UpdateProfileByUserParamsSchema = z.object({
-	userId: z.coerce.number(),
-	profileId: z.coerce.number(),
+	userId: z.coerce.bigint(),
+	profileId: z.coerce.bigint(),
 })
 
 export const UpdateProfileByUserBodySchema = z.object({
@@ -62,11 +62,11 @@ export const UpdateProfileByUserBodySchema = z.object({
 	image: z.string().optional(),
 	information: z.string().optional(),
 	statusType: z.nativeEnum(StatusType).optional(),
-	statusId: z.number().optional(),
+	statusId: z.bigint().optional(),
 })
 
 export const CreateProfileByUserParamsSchema = z.object({
-	userId: z.coerce.number(),
+	userId: z.coerce.bigint(),
 })
 
 export const CreateProfileByUserBodySchema = z.object({
@@ -75,21 +75,21 @@ export const CreateProfileByUserBodySchema = z.object({
 	image: z.string(),
 	information: z.string(),
 	statusType: z.nativeEnum(StatusType),
-	statusId: z.number(),
+	statusId: z.bigint(),
 })
 
 export const CreateProfileFilterBodySchema = z.object({
-	profileId: z.number(),
+	profileId: z.bigint(),
 	filterType: z.nativeEnum(FilterType),
 })
 
 export const DeleteProfileByUserParamsSchema = z.object({
-	userId: z.coerce.number(),
-	profileId: z.coerce.number(),
+	userId: z.coerce.bigint(),
+	profileId: z.coerce.bigint(),
 })
 
 export const DeleteProfileFilterParamsSchema = z.object({
-	filterId: z.coerce.number(),
+	filterId: z.coerce.bigint(),
 })
 
 export type Profile = z.infer<typeof ProfileSchema>

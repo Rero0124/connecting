@@ -6,7 +6,7 @@ export default function LoginProfileSelect({
 	onCancel,
 }: {
 	profiles: any[]
-	onSelect: (profileId: number) => void
+	onSelect: (profileId: bigint) => void
 	onCancel: () => void
 }) {
 	return (

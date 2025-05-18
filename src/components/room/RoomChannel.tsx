@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
-import { useParams } from 'next/navigation'
 import {
 	getRoomTextChannel,
 	setRoomDetail,
@@ -18,13 +17,13 @@ export const RoomChannel = ({
 	channelId,
 }: {
 	roomId: string
-	channelId: number
+	channelId: bigint | null
 }) => {
 	const [pendingMessage, setPendingMessage] = useState<string>('')
 	const roomState = useAppSelector((state) => state.room)
 	const dispatch = useAppDispatch()
 
-	const channel = getRoomTextChannel(roomState, roomId, channelId)
+	const channel = getRoomTextChannel(roomState, roomId, channelId ?? undefined)
 
 	const submitMessage = (e: React.FormEvent) => {
 		e.preventDefault()

@@ -98,7 +98,7 @@ export const getRoomById = cache(async (roomId: string) => {
 })
 
 export const getChannelByRoomIdAndId = cache(
-	async (roomId: string, channelId: number) => {
+	async (roomId: string, channelId?: bigint) => {
 		const channel = await prisma.roomChannel.findFirst({
 			where: {
 				id: channelId,

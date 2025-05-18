@@ -30,7 +30,7 @@ export const LoginForm = () => {
 		setSelectProfileModelOpen(false)
 	}
 
-	const selectProfile = (profileId: number) => {
+	const selectProfile = (profileId: bigint) => {
 		if (formRef.current && profileIdRef.current) {
 			profileIdRef.current.value = profileId.toString()
 			formRef.current.requestSubmit()

@@ -9,7 +9,7 @@ interface RoomFeatureState {
 		string,
 		RoomState & {
 			channel: Record<
-				number,
+				string,
 				RoomChannelState & {
 					message: RoomMesssageState[]
 				}
@@ -46,7 +46,7 @@ export const roomSlice = createSlice({
 				...roomDetail,
 				channel: channel.reduce<
 					Record<
-						number,
+						string,
 						RoomChannelState & {
 							message: RoomMesssageState[]
 						}
@@ -98,7 +98,7 @@ export const getRooms = (state: RoomFeatureState, roomId?: string) => {
 export const getRoomTextChannel = (
 	state: RoomFeatureState,
 	roomId: string,
-	channelId?: number
+	channelId?: bigint
 ) => {
 	const room = state.roomDetails[roomId]
 	if (!room || !room.channel || Object.keys(room.channel).length === 0)
@@ -106,7 +106,8 @@ export const getRoomTextChannel = (
 
 	if (channelId) {
 		const findedChannel = Object.values(room.channel).find(
-			(channel) => channel.id === channelId && channel.type === ChannelType.text
+			(channel) =>
+				channel.id === channelId.toString() && channel.type === ChannelType.text
 		)
 		if (findedChannel) {
 			return findedChannel

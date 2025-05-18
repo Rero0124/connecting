@@ -4,7 +4,7 @@ import {
 	GetProfilesResponseSchema,
 	Profile,
 } from '@/src/lib/schemas/profile.schema'
-import { fetchWithValidation } from '@/src/lib/util'
+import { fetchWithValidation, toBigInt } from '@/src/lib/util'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -26,7 +26,7 @@ export default function NewMessageModal({
 	const [imageEncoded, setImageEncoded] = useState<string | null>(null)
 	const [recipients, setRecipients] = useState<
 		{
-			id: number
+			id: bigint
 			label: string
 		}[]
 	>([])
@@ -35,15 +35,19 @@ export default function NewMessageModal({
 
 	const handleRecipientsChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const selectedOptions = Array.from(e.target.selectedOptions, (option) => ({
-			id: Number(option.value),
+			id: toBigInt(option.value),
 			label: option.innerText,
 		}))
+
 		setRecipients(
-			selectedOptions.filter((selectedOption) => !isNaN(selectedOption.id))
+			selectedOptions.filter(
+				(selectedOption): selectedOption is { id: bigint; label: string } =>
+					selectedOption.id !== null
+			)
 		)
 	}
 
-	const removeRecipient = (id: number) => {
+	const removeRecipient = (id: bigint) => {
 		setRecipients((prev) => prev.filter((recipient) => recipient.id !== id))
 	}
 

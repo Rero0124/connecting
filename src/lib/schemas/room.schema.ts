@@ -1,19 +1,18 @@
 import { ChannelType, ContentType, IconType } from '@prisma/client'
 import { z } from 'zod'
 import { SuccessResponse } from './api.schema'
-import { channel } from 'diagnostics_channel'
 
 export const RoomSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	masterProfileId: z.number(),
+	masterProfileId: z.bigint(),
 	iconType: z.nativeEnum(IconType),
 	iconData: z.string(),
 	createdAt: z.coerce.date(),
 })
 
 export const RoomChannelSchema = z.object({
-	id: z.number(),
+	id: z.bigint(),
 	roomId: z.string(),
 	name: z.string(),
 	type: z.nativeEnum(ChannelType),
@@ -26,10 +25,10 @@ export const RoomMessageSchema = z.object({
 		tag: z.string(),
 		image: z.string(),
 	}),
-	id: z.number(),
+	id: z.bigint(),
 	roomId: z.string(),
-	roomChannelId: z.number(),
-	profileId: z.number(),
+	roomChannelId: z.bigint(),
+	profileId: z.bigint(),
 	sentAt: z.coerce.date(),
 	content: z.string(),
 	contentType: z.nativeEnum(ContentType),
@@ -38,17 +37,17 @@ export const RoomMessageSchema = z.object({
 })
 
 export const RoomParticipantSchema = z.object({
-	id: z.number(),
+	id: z.bigint(),
 	joinedAt: z.coerce.date(),
-	profileId: z.number(),
+	profileId: z.bigint(),
 	roomId: z.string(),
 })
 
 export const RoomJoinCodeSchema = z.object({
-	id: z.number(),
+	id: z.bigint(),
 	code: z.string(),
 	roomId: z.string(),
-	authorProfileId: z.number(),
+	authorProfileId: z.bigint(),
 	expiresAt: z.coerce.date(),
 })
 
@@ -90,7 +89,7 @@ export const UpdateRoomParamsSchema = z.object({
 
 export const UpdateRoomChannelParamsSchema = z.object({
 	roomId: z.string(),
-	channelId: z.coerce.number(),
+	channelId: z.coerce.bigint(),
 })
 
 export const UpdateRoomChannelBodySchema = z.object({
@@ -128,7 +127,7 @@ export const CreateRoomParticipantBodySchema = z.object({
 
 export const CreateRoomMessageParamsSchema = z.object({
 	roomId: z.string(),
-	channelId: z.coerce.number(),
+	channelId: z.coerce.bigint(),
 })
 
 export const CreateRoomMessageBodySchema = z.object({
@@ -151,12 +150,12 @@ export const DeleteRoomParamsSchema = z.object({
 
 export const DeleteRoomChannelParamsSchema = z.object({
 	roomId: z.string(),
-	channelId: z.coerce.number(),
+	channelId: z.coerce.bigint(),
 })
 
 export const DeleteRoomParticipantParamsSchema = z.object({
 	roomId: z.string(),
-	profileId: z.coerce.number(),
+	profileId: z.coerce.bigint(),
 })
 
 export const DeleteRoomJoinCodeParamsSchema = z.object({

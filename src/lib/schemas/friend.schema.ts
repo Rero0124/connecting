@@ -5,9 +5,9 @@ import { SuccessResponse } from './api.schema'
 export const FriendSchema = ProfileSchema
 
 export const FriendRequestSchema = z.object({
-	id: z.number(),
+	id: z.bigint(),
 	sentAt: z.coerce.date(),
-	profileId: z.number(),
+	profileId: z.bigint(),
 	profile: ProfileSchema,
 })
 
@@ -19,7 +19,7 @@ export const GetFriendRequestsResponseSchema = z.object({
 })
 
 export const UpdateFriendRequestParamsSchema = z.object({
-	requestId: z.coerce.number(),
+	requestId: z.coerce.bigint(),
 })
 export const UpdateFriendRequestBodySchema = z.discriminatedUnion('type', [
 	z.object({ type: z.literal('accept') }),
@@ -35,7 +35,7 @@ export const DeleteFriendParamsSchema = z.object({
 })
 
 export const DeleteFriendRequestParamsSchema = z.object({
-	requestId: z.coerce.number(),
+	requestId: z.coerce.bigint(),
 })
 
 export type Friend = z.infer<typeof FriendSchema>

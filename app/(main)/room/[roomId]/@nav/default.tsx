@@ -1,4 +1,5 @@
 import RoomNav from '@/src/components/room/RoomNav'
+import { toBigInt } from '@/src/lib/util'
 
 export default async function RoomNavDefault({
 	params,
@@ -6,7 +7,6 @@ export default async function RoomNavDefault({
 	params: Promise<{ roomId: string; channelId: string }>
 }) {
 	const { roomId, channelId } = await params
-	const channelIdNumber = isNaN(Number(channelId)) ? -1 : Number(channelId)
 
-	return <RoomNav roomId={roomId} channelId={channelIdNumber} />
+	return <RoomNav roomId={roomId} channelId={toBigInt(channelId)} />
 }

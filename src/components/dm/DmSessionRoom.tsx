@@ -28,7 +28,7 @@ export const DmSessionRoom = () => {
 	} = useVoiceCall()
 	const [pendingMessage, setPendingMessage] = useState<string>('')
 	const [isCalling, setIsCalling] = useState(false)
-	let pastMessageProfileId = -1
+	let pastMessageProfileId = -1n
 
 	const { dmSessionId } = useParams<{ dmSessionId: string }>()
 

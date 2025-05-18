@@ -23,7 +23,7 @@ export async function decrypt(session: string | undefined = '') {
 	} catch (error) {}
 }
 
-export async function createSession(userId: number, profileId: number) {
+export async function createSession(userId: bigint, profileId: bigint) {
 	const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 	const session = await encrypt({ userId, expiresAt, profileId })
 	const cookieStore = await cookies()

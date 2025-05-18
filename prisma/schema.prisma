@@ -39,7 +39,7 @@ enum ChannelType {
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   email String @db.VarChar(255) @unique
   password String
   createdAt DateTime @default(now()) @map("created_at")
@@ -49,10 +49,10 @@ model User {
 }
 
 model Profile {
-  id Int @id @default(autoincrement())
-  userId Int @map("user_id")
+  id BigInt @id @default(autoincrement())
+  userId BigInt @map("user_id")
   statusType StatusType @map("status_type")
-  statusId Int @map("status_id")
+  statusId BigInt @map("status_id")
   tag String @unique @map("user_tag")
   name String? @db.VarChar(100) @map("user_name")
   information String @db.VarChar(255)
@@ -80,10 +80,10 @@ model Profile {
 }
 
 model DeletedProfile {
-  id Int @id
-  userId Int @map("user_id")
+  id BigInt @id
+  userId BigInt @map("user_id")
   statusType StatusType @map("status_type")
-  statusId Int @map("status_id")
+  statusId BigInt @map("status_id")
   tag String @unique @map("user_tag")
   name String? @db.VarChar(100) @map("user_name")
   information String @db.VarChar(255)
@@ -97,9 +97,9 @@ model DeletedProfile {
 }
 
 model ProfileStatus {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   name String
-  userId Int @map("user_id")
+  userId BigInt @map("user_id")
   isOnline Boolean @map("is_online")
   isAlarm Boolean @map("is_alarm")
   timeout Int @default(-1)
@@ -110,9 +110,9 @@ model ProfileStatus {
 }
 
 model ProfileFilter {
-  id Int @id @default(autoincrement())
-  profileId Int @map("profile_id")
-  filterProfileId Int @map("filter_profile_id")
+  id BigInt @id @default(autoincrement())
+  profileId BigInt @map("profile_id")
+  filterProfileId BigInt @map("filter_profile_id")
   filterType FilterType @map("filter_type")
   byProfile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, name: "filter_by_profile")
   profile Profile @relation(fields: [filterProfileId], references: [id], onDelete: Cascade, name: "filter_profile")
@@ -122,9 +122,9 @@ model ProfileFilter {
 }
 
 model Friend {
-  id Int @id @default(autoincrement())
-  profileId Int @map("profile_id")
-  friendProfileId Int @map("friend_profile_id")
+  id BigInt @id @default(autoincrement())
+  profileId BigInt @map("profile_id")
+  friendProfileId BigInt @map("friend_profile_id")
   isFavorite Boolean @map("is_favorite") @default(false)
   byProfile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, name: "friend_by_profile")
   friendProfile Profile @relation(fields: [friendProfileId], references: [id], onDelete: Cascade, name: "friend_profile")
@@ -135,9 +135,9 @@ model Friend {
 }
 
 model FriendRequest {
-  id Int @id @default(autoincrement())
-  profileId Int @map("user_profile_id")
-  requestProfileId Int @map("friend_profile_id")
+  id BigInt @id @default(autoincrement())
+  profileId BigInt @map("user_profile_id")
+  requestProfileId BigInt @map("friend_profile_id")
   sentAt DateTime @default(now()) @map("sent_at")
   byProfile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade, name: "friend_request_by_profile")
   requestProfile Profile @relation(fields: [requestProfileId], references: [id], onDelete: Cascade, name: "friend_request_profile")
@@ -159,9 +159,9 @@ model DmSession {
 }
 
 model DmParticipant {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   dmSessionId String @db.VarChar(25) @map("dm_session_id") 
-  profileId Int @map("profile_id")
+  profileId BigInt @map("profile_id")
   joinedAt DateTime @default(now()) @map("joined_at")
   isNotAllowed Boolean @default(false) @map("is_not_allowed")
   dmSession DmSession @relation(fields: [dmSessionId], references: [id], onDelete: Cascade)
@@ -173,9 +173,9 @@ model DmParticipant {
 }
 
 model DmMessage {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   dmSessionId String @db.VarChar(25) @map("dm_session_id") 
-  profileId Int @map("profile_id")
+  profileId BigInt @map("profile_id")
   contentType ContentType @default(text) @map("content_type")
   content String
   isPinned Boolean @default(false) @map("is_pinned")
@@ -193,7 +193,7 @@ model DmMessage {
 model Room {
   id String @db.VarChar(25) @id @default(cuid())
   name String @db.VarChar(100)
-  masterProfileId Int @map("master_profile_id")
+  masterProfileId BigInt @map("master_profile_id")
   iconType IconType @map("icon_type")
   iconData String @map("icon_data")
   createdAt DateTime @default(now()) @map("created_at")
@@ -207,9 +207,9 @@ model Room {
 }
 
 model RoomJoinCode {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   code String @db.VarChar(25) @unique @default(cuid())
-  authorProfileId Int @map("author_profile_id")
+  authorProfileId BigInt @map("author_profile_id")
   roomId String @db.VarChar(25) @map("room_id")
   expiresAt DateTime @map("expiresAt")
   authorProfile Profile @relation(fields: [authorProfileId], references: [id], onDelete: Cascade)
@@ -221,9 +221,9 @@ model RoomJoinCode {
 }
 
 model RoomParticipant {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
-  profileId Int @map("user_profile_id")
+  profileId BigInt @map("user_profile_id")
   joinedAt DateTime @default(now()) @map("joined_at")
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
@@ -233,7 +233,7 @@ model RoomParticipant {
 }
 
 model RoomChannel {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
   name String @db.VarChar(100)
   type ChannelType @map("type")
@@ -246,10 +246,10 @@ model RoomChannel {
 }
 
 model RoomMessage {
-  id Int @id @default(autoincrement())
+  id BigInt @id @default(autoincrement())
   roomId String @db.VarChar(25) @map("room_id") 
-  roomChannelId Int @map("room_channel_id")
-  profileId Int @map("profile_id")
+  roomChannelId BigInt @map("room_channel_id")
+  profileId BigInt @map("profile_id")
   contentType ContentType @default(text) @map("content_type")
   content String
   isPinned Boolean @default(false) @map("is_pinned")

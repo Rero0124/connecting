@@ -10,9 +10,11 @@ import {
 export type SerializeDatesForRedux<T extends object> = {
 	[K in keyof T]: T[K] extends Date
 		? string
-		: T[K] extends object
-			? SerializeDatesForRedux<T[K]>
-			: T[K]
+		: T[K] extends bigint
+			? string
+			: T[K] extends object
+				? SerializeDatesForRedux<T[K]>
+				: T[K]
 }
 
 export function serializeDatesForRedux<T extends object>(
@@ -29,6 +31,8 @@ export function serializeDatesForRedux<T extends object>(
 			JSON.stringify(item, (key, value) => {
 				if (value instanceof Date) {
 					return value.toISOString()
+				} else if (isBigInt(value)) {
+					return value.toString()
 				}
 				return value
 			})
@@ -51,6 +55,8 @@ export function deserializeDatesFromRedux<T extends object>(
 				!isNaN(Date.parse(value))
 			) {
 				return new Date(value)
+			} else if ((key === 'id' || key.endsWith('Id')) && isBigInt(value)) {
+				return toBigInt(value)
 			}
 			return value
 		})
@@ -127,5 +133,22 @@ export function mergeRefs<T>(
 				;(ref as React.RefObject<T | null>).current = element
 			}
 		})
+	}
+}
+
+export function isBigInt(value: any): value is bigint {
+	try {
+		BigInt(value)
+		return true
+	} catch {
+		return false
+	}
+}
+
+export function toBigInt(value: any): bigint | null {
+	try {
+		return BigInt(value)
+	} catch {
+		return null
 	}
 }

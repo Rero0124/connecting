@@ -7,7 +7,7 @@ interface Props {
 	open: boolean
 	profiles?: Profile[]
 	onClose: () => void
-	onSelect: (profileId: number) => void
+	onSelect: (profileId: bigint) => void
 	onLoginAnotherAccount?: () => void
 }
 

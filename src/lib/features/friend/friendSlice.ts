@@ -59,11 +59,11 @@ export const getFriends = (state: FriendFeatureState, tag?: string) => {
 
 export const getFriendRequests = (
 	state: FriendFeatureState,
-	requestId?: number
+	requestId?: bigint
 ) => {
 	if (requestId) {
 		return [...state.sentFriendRequests, ...state.receivedFriendRequests].find(
-			(sentFriendRequest) => sentFriendRequest.id === requestId
+			(sentFriendRequest) => sentFriendRequest.id === requestId.toString()
 		)
 	} else {
 		return state.sentFriendRequests

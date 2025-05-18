@@ -67,7 +67,7 @@ export async function setupSocket(
 	})
 
 	const globalData: SocektGlobalData = {
-		socketMap: new Map<number, string>(),
+		socketMap: new Map<bigint, string>(),
 		worker: worker,
 		router: router,
 		sendTransports: {},

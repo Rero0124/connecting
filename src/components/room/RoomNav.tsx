@@ -11,7 +11,7 @@ export const RoomNav = ({
 	channelId,
 }: {
 	roomId: string
-	channelId?: number
+	channelId: bigint | null
 }) => {
 	const { navSize, title } = useAppSelector((state) => state.viewContext)
 	const roomState = useAppSelector((state) => state.room)
@@ -48,7 +48,7 @@ export const RoomNav = ({
 		children?: React.ReactNode
 		name: string
 		classname?: string
-		channelId?: number
+		channelId?: bigint
 	}) {
 		const onClick = () => {
 			setSelectedChannelId(

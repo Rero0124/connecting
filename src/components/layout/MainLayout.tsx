@@ -79,7 +79,7 @@ export const MainLayout = ({
 		}
 	}
 
-	const selectProfile = async (profileId: number) => {
+	const selectProfile = async (profileId: bigint) => {
 		const sessionResponse = await fetchWithValidation(`/api/session`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },

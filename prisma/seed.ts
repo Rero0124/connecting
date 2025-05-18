@@ -13,7 +13,7 @@ const userData: Prisma.UserCreateInput[] = [
 	},
 ]
 
-const getUserProfileData = (userIds: number[]): Prisma.ProfileCreateInput[] => [
+const getUserProfileData = (userIds: bigint[]): Prisma.ProfileCreateInput[] => [
 	{
 		user: {
 			connect: {
@@ -60,7 +60,7 @@ const getUserProfileData = (userIds: number[]): Prisma.ProfileCreateInput[] => [
 	},
 ]
 
-const getRoomData = (userProfileIds: number[]): Prisma.RoomCreateInput[] => [
+const getRoomData = (userProfileIds: bigint[]): Prisma.RoomCreateInput[] => [
 	{
 		name: '테스트',
 		masterProfile: {
@@ -81,6 +81,27 @@ const getRoomData = (userProfileIds: number[]): Prisma.RoomCreateInput[] => [
 					},
 					{
 						profileId: userProfileIds[2],
+					},
+					{
+						profileId: userProfileIds[3],
+					},
+				],
+			},
+		},
+		channel: {
+			createMany: {
+				data: [
+					{
+						name: 'test',
+						type: 'text',
+					},
+					{
+						name: 'test2',
+						type: 'text',
+					},
+					{
+						name: 'test3',
+						type: 'text',
 					},
 				],
 			},

@@ -6,18 +6,18 @@ export const UserSchema = z.object({
 })
 
 export const SessionUserSchema = z.object({
-	userId: z.number(),
+	userId: z.bigint(),
 	email: z.string(),
 })
 
 export const GetUserParamsSchema = z.object({
-	userId: z.coerce.number(),
+	userId: z.coerce.bigint(),
 })
 
 export const GetUserResponseSchema = UserSchema
 
 export const UpdateUserParamsSchema = z.object({
-	userId: z.coerce.number(),
+	userId: z.coerce.bigint(),
 })
 
 export const UpdateUserBodySchema = z.object({
@@ -25,11 +25,11 @@ export const UpdateUserBodySchema = z.object({
 })
 
 export const DeleteUserParamsSchema = z.object({
-	userId: z.coerce.number(),
+	userId: z.coerce.bigint(),
 })
 
 export const UpdateUserPasswordParamsSchema = z.object({
-	userId: z.coerce.number(),
+	userId: z.coerce.bigint(),
 })
 
 export const UpdateUserPasswordBodySchema = z.object({

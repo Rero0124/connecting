@@ -9,18 +9,18 @@ export function registerCoreEvents(
 	globalData: SocektGlobalData
 ) {
 	const ClientToServerCoreSchemas = {
-		set_profileId: z.tuple([z.number()]),
-		update_profile: z.tuple([z.array(z.number())]),
-		update_rooms: z.tuple([z.array(z.number())]),
-		update_roomChannels: z.tuple([z.array(z.number()), z.number()]),
-		update_dmSessions: z.tuple([z.array(z.number())]),
-		update_friends: z.tuple([z.array(z.number())]),
-		update_friendRequests: z.tuple([z.array(z.number())]),
-		send_dmMessage: z.tuple([DmMessageSchema, z.array(z.number())]),
-		send_roomMessage: z.tuple([RoomMessageSchema, z.array(z.number())]),
+		set_profileId: z.tuple([z.bigint()]),
+		update_profile: z.tuple([z.array(z.bigint())]),
+		update_rooms: z.tuple([z.array(z.bigint())]),
+		update_roomChannels: z.tuple([z.array(z.bigint()), z.string()]),
+		update_dmSessions: z.tuple([z.array(z.bigint())]),
+		update_friends: z.tuple([z.array(z.bigint())]),
+		update_friendRequests: z.tuple([z.array(z.bigint())]),
+		send_dmMessage: z.tuple([DmMessageSchema, z.array(z.bigint())]),
+		send_roomMessage: z.tuple([RoomMessageSchema, z.array(z.bigint())]),
 	}
 
-	const getSocketIdByProfileIds = (profileIds: number[]) => {
+	const getSocketIdByProfileIds = (profileIds: bigint[]) => {
 		return profileIds
 			.map((profileId) => globalData.socketMap.get(profileId))
 			.filter((socketId) => socketId !== undefined)

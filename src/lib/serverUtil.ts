@@ -8,8 +8,9 @@ import { Profile } from './schemas/profile.schema'
 import { ErrorResponse, SuccessResponse } from './schemas/api.schema'
 import { SessionUserSuccessResponse } from './schemas/user.schema'
 import { SessionProfileSuccessResponse } from './schemas/profile.schema'
+import { toBigInt } from './util'
 
-export async function verifyUserIdInSession(userId: number): Promise<{
+export async function verifyUserIdInSession(userId: bigint): Promise<{
 	response: SessionUserSuccessResponse | ErrorResponse
 	status: number
 }> {
@@ -80,7 +81,7 @@ export async function verifyProfileIdInSession(
 	response: SessionProfileSuccessResponse | ErrorResponse
 	status: number
 }> {
-	const profileIdNumber = Number(profileId)
+	const profileIdBigInt = toBigInt(profileId)
 	const sessionCheck = await verifySession()
 
 	const data = await verifyUserIdInSession(userId)
@@ -102,7 +103,7 @@ export async function verifyProfileIdInSession(
 		}
 	}
 
-	if (isNaN(profileIdNumber)) {
+	if (!profileIdBigInt) {
 		return {
 			response: {
 				status: 'error',
@@ -113,7 +114,7 @@ export async function verifyProfileIdInSession(
 		}
 	}
 
-	if (sessionCheck.profileId !== profileIdNumber) {
+	if (sessionCheck.profileId !== profileIdBigInt) {
 		return {
 			response: {
 				status: 'error',

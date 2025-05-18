@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 interface FriendDetailModalProps {
-	friendRequestId: number
+	friendRequestId: bigint
 	type: 'send' | 'receive'
 	onClose: () => void
 	onAccept?: () => void
@@ -25,14 +25,14 @@ export default function FriendDetailModal({
 	const [friendRequest, setFriendRequest] = useState<{
 		profile: {
 			statusType: string
-			statusId: number
+			statusId: bigint
 			tag: string
 			name: string | null
 			image: string
 			isOnline: boolean
 			createdAt: Date
 		}
-		id: number
+		id: bigint
 		sentAt: Date
 	}>()
 	useEffect(() => {

@@ -29,7 +29,7 @@ export type SocketSocekt = Socket<
 >
 
 export interface SocektGlobalData {
-	socketMap: Map<number, string>
+	socketMap: Map<bigint, string>
 	worker: mediasoupTypes.Worker
 	router: mediasoupTypes.Router
 	sendTransports: Record<string, mediasoupTypes.WebRtcTransport>
@@ -59,15 +59,15 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-	set_profileId: (profileId: number) => void
-	update_profile: (profileIds: number[]) => void
-	update_rooms: (profileIds: number[]) => void
-	update_roomChannels: (profileIds: number[], roomId: string) => void
-	update_dmSessions: (profileIds: number[]) => void
-	update_friends: (profileIds: number[]) => void
-	update_friendRequests: (profileIds: number[]) => void
-	send_dmMessage: (dmMessage: DmMessage, profileIds: number[]) => void
-	send_roomMessage: (roomMessage: RoomMessage, profileIds: number[]) => void
+	set_profileId: (profileId: bigint) => void
+	update_profile: (profileIds: bigint[]) => void
+	update_rooms: (profileIds: bigint[]) => void
+	update_roomChannels: (profileIds: bigint[], roomId: string) => void
+	update_dmSessions: (profileIds: bigint[]) => void
+	update_friends: (profileIds: bigint[]) => void
+	update_friendRequests: (profileIds: bigint[]) => void
+	send_dmMessage: (dmMessage: DmMessage, profileIds: bigint[]) => void
+	send_roomMessage: (roomMessage: RoomMessage, profileIds: bigint[]) => void
 	call_createTransport: (
 		type: TransportType,
 		callback: (params: VoiceTransportOptions | { error: string }) => void
@@ -98,6 +98,6 @@ export interface ClientToServerEvents {
 }
 
 export interface SocketData {
-	profileId?: number
+	profileId?: bigint
 	callId?: string
 }

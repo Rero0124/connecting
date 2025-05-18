@@ -3,13 +3,13 @@ import { ProfileSchema } from './profile.schema'
 import { SuccessResponse } from './api.schema'
 
 export const AuthLoginInputSchema = z.object({
-	profileId: z.coerce.number(),
+	profileId: z.coerce.bigint(),
 	email: z.string().email({ message: 'Please enter a valid email.' }).trim(),
 	password: z.string().trim(),
 })
 
 export const AuthLoginBodySchema = z.object({
-	profileId: z.coerce.number(),
+	profileId: z.coerce.bigint(),
 	email: z.string().email().trim(),
 	password: z.string().trim(),
 })
@@ -58,7 +58,7 @@ export const AuthJoinBodySchema = z.object({
 })
 
 export const AuthChangeProfileBodySchema = z.object({
-	profileId: z.number(),
+	profileId: z.bigint(),
 })
 
 export type AuthLoginInput = z.infer<typeof AuthLoginInputSchema>
