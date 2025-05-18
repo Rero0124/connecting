@@ -236,7 +236,6 @@ export function useVoiceCall(
 	async function toggleScreen() {
 		if (!screenProducer) {
 			const stream = await getScreenStream()
-			console.log(stream)
 			const track = stream.getVideoTracks()[0]
 			if (!sendTransport) return
 			const newScreenProducer = await sendTransport.produce({ track })

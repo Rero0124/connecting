@@ -64,7 +64,6 @@ export default function ContextMenuProvider({
 				<div
 					className="absolute z-50 bg-background border rounded shadow-lg"
 					style={{ left: position.x, top: position.y }}
-					onMouseLeave={() => setIsOpen(false)}
 				>
 					<ul>
 						{contexts.map((context, idx) => (

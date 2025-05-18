@@ -37,14 +37,14 @@ const setCookieBySaveData = (state: ViewContextFeatureState) => {
 		selectedMessageMenu,
 		navSize,
 	} = state
-	document.cookie =
-		'savedata=' +
+	document.cookie = `viewContext=${encodeURIComponent(
 		JSON.stringify({
 			selectedFriendMenu,
 			selectedFriendSubMenu,
 			selectedMessageMenu,
 			navSize,
 		})
+	)}; path=/`
 }
 
 export const viewContextSlice = createSlice({

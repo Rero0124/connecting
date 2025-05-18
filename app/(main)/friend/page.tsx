@@ -1,15 +1,10 @@
-'use client'
-
-import { useSelector } from 'react-redux'
-import { RootState } from '@/src/lib/store'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-export default function Main() {
-	const { selectedFriendMenu } = useSelector(
-		(state: RootState) => state.viewContext
-	)
+export default async function Main() {
+	const viewContext = (await cookies()).get('viewContext')?.value
 
-	switch (selectedFriendMenu) {
+	switch (viewContext) {
 		case 'list':
 			redirect('/friend/list')
 		case 'request':

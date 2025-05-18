@@ -1,6 +1,9 @@
 'use client'
 
-import { setSelectedFriendSubMenu } from '@/src/lib/features/viewContext/viewContextSlice'
+import {
+	setSelectedFriendMenu,
+	setSelectedFriendSubMenu,
+} from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch } from '@/src/lib/hooks'
 import { RootState } from '@/src/lib/store'
 import { useEffect } from 'react'
@@ -30,6 +33,7 @@ export default function FriendList() {
 	const dispatch = useAppDispatch()
 
 	useEffect(() => {
+		dispatch(setSelectedFriendMenu('list'))
 		if (!['all', 'online', 'favorite'].includes(selectedFriendSubMenu ?? '')) {
 			dispatch(setSelectedFriendSubMenu('all'))
 		}

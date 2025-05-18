@@ -12,7 +12,7 @@ import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function Main() {
+export const DmSessionRoom = () => {
 	const dmState = useAppSelector((state) => state.dm)
 	const viewContextState = useAppSelector((state) => state.viewContext)
 	const dispatch = useAppDispatch()
@@ -192,3 +192,5 @@ export default function Main() {
 		</div>
 	)
 }
+
+export default DmSessionRoom

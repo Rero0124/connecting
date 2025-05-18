@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAppDispatch } from '@/src/lib/hooks'
+import { setSelectedFriendMenu } from '@/src/lib/features/viewContext/viewContextSlice'
 
 type FriendStatus = 'ONLINE' | 'AWAY' | 'DO_NOT_DISTURB' | 'OFFLINE'
 
@@ -51,6 +53,8 @@ const order: Record<FriendStatus, number> = {
 
 export default function FriendManage() {
 	const friendsData = useSelector((state: RootState) => state.friend)
+	const dispatch = useAppDispatch()
+
 	const sortedFriends = [...friendsData.friends].sort(
 		(a: Friend, b: Friend) =>
 			order[a.statusType as FriendStatus] - order[b.statusType as FriendStatus]
@@ -62,6 +66,7 @@ export default function FriendManage() {
 
 	// 외부 클릭 시 더보기 메뉴 닫기
 	useEffect(() => {
+		dispatch(setSelectedFriendMenu('manage'))
 		const handleClickOutside = (event: MouseEvent) => {
 			if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
 				setActiveFriendTag(null)
@@ -124,7 +129,7 @@ export default function FriendManage() {
 						<button
 							title="메시지"
 							className="text-sm text-blue-400 hover:underline"
-							onClick={() => router.push(`/message/${friend.tag}`)}
+							onClick={() => router.push(`/dm/${friend.tag}`)}
 						>
 							메세지
 						</button>

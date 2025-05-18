@@ -1,6 +1,6 @@
-import RoomNav from '@/src/components/room/RoomNav'
+import { RoomChannel } from '@/src/components/room/RoomChannel'
 
-export default async function RoomNavDefault({
+export default async function Layout({
 	params,
 }: {
 	params: Promise<{ roomId: string; channelId: string }>
@@ -8,5 +8,5 @@ export default async function RoomNavDefault({
 	const { roomId, channelId } = await params
 	const channelIdNumber = isNaN(Number(channelId)) ? -1 : Number(channelId)
 
-	return <RoomNav roomId={roomId} channelId={channelIdNumber} />
+	return <RoomChannel roomId={roomId} channelId={channelIdNumber} />
 }

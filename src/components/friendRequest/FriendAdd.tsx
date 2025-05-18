@@ -1,11 +1,14 @@
 'use client'
-import { useState } from 'react'
+import { use, useEffect, useState } from 'react'
 import FriendAddPage from '@/src/components/friendRequest/FriendAddPage'
 import FriendSendPage from './FriendSendPage'
 import FriendReceivePage from '@/src/components/friendRequest/FriendReceivePage'
+import { useAppDispatch } from '@/src/lib/hooks'
+import { setSelectedFriendMenu } from '@/src/lib/features/viewContext/viewContextSlice'
 
 export default function FriendAdd() {
 	const [selectedMenu, setSelectedMenu] = useState<string>('send')
+	const dispatch = useAppDispatch()
 
 	function Menu({
 		children,
@@ -29,6 +32,10 @@ export default function FriendAdd() {
 			</div>
 		)
 	}
+
+	useEffect(() => {
+		dispatch(setSelectedFriendMenu('request'))
+	}, [])
 
 	return (
 		<div className="flex flex-col">

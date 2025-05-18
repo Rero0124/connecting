@@ -1,17 +1,28 @@
-'use client'
-
-import { useAppSelector } from '@/src/lib/hooks'
+import prisma from '@/src/lib/prisma'
+import { verifySession } from '@/src/lib/session'
 import { redirect } from 'next/navigation'
-import { useEffect } from 'react'
 
-export default function Page() {
-	const roomState = useAppSelector((state) => state.room)
-	useEffect(() => {
-		if (roomState.rooms.length === 0) {
-			redirect('/dm')
-		} else {
-			redirect(`/room/${roomState.rooms[0].id}`)
-		}
-	}, [roomState])
-	return <></>
+export default async function Page() {
+	const session = await verifySession(false)
+
+	if (!session.isAuth) redirect('/login')
+
+	const room = await prisma.room.findFirst({
+		where: {
+			participant: {
+				some: {
+					profile: {
+						id: session.profileId,
+						userId: session.userId,
+					},
+				},
+			},
+		},
+		select: {
+			id: true,
+			name: true,
+		},
+	})
+
+	room ? redirect(`/room/${room.id}`) : redirect('/dm')
 }

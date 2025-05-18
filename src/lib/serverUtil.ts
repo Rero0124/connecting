@@ -1,4 +1,5 @@
-'use server'
+import 'server-only'
+
 import { deleteSession, verifySession } from './session'
 import { ResponseDictionary } from '../types/dictionaries/res/dict'
 import prisma from './prisma'
