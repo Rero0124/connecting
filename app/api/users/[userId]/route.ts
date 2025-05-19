@@ -1,8 +1,8 @@
 import prisma from '@/src/lib/prisma'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { deleteSession } from '@/src/lib/session'
-import { verifyUserIdInSession } from '@/src/lib/serverUtil'
+import { apiJsonResponse, verifyUserIdInSession } from '@/src/lib/serverUtil'
 import {
 	GetUserParamsSchema,
 	GetUserSuccessResponse,
@@ -19,7 +19,7 @@ export async function GET(
 		const paramsFields = GetUserParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -32,7 +32,7 @@ export async function GET(
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -40,7 +40,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<GetUserSuccessResponse>(
+		return apiJsonResponse<GetUserSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -50,7 +50,7 @@ export async function GET(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -69,7 +69,7 @@ export async function PATCH(
 		const paramsFields = UpdateUserParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -82,7 +82,7 @@ export async function PATCH(
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -93,7 +93,7 @@ export async function PATCH(
 		const bodyFields = UpdateUserBodySchema.safeParse(await request.json())
 
 		if (!bodyFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -112,7 +112,7 @@ export async function PATCH(
 			},
 		})
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_USER_UPDATE_SUCCESS.code,
@@ -121,7 +121,7 @@ export async function PATCH(
 			{ status: ResponseDictionary.kr.RESPONSE_USER_UPDATE_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -140,7 +140,7 @@ export async function DELETE(
 		const paramsFields = GetUserParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -153,7 +153,7 @@ export async function DELETE(
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -169,7 +169,7 @@ export async function DELETE(
 
 		await deleteSession()
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_USER_DELETE_SUCCESS.code,
@@ -178,7 +178,7 @@ export async function DELETE(
 			{ status: ResponseDictionary.kr.RESPONSE_USER_DELETE_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import {
 	AuthGetProfilesBodySchema,
@@ -9,7 +9,7 @@ import {
 	RESPONSE_CODE,
 	RESPONSE_CODE_AUTH_GET_PROFILES_BODY_INVALID,
 } from '@/src/lib/constants/responseCode'
-import { getAuthUserProfiles } from '@/src/lib/serverUtil'
+import { apiJsonResponse, getAuthUserProfiles } from '@/src/lib/serverUtil'
 
 export async function POST(request: NextRequest) {
 	try {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 				code = RESPONSE_CODE.AUTH.GET_PROFILES_BODY_INVALID_PASSWORD
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code,
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 		const profiles = await getAuthUserProfiles(email, password)
 
 		if (!profiles.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		return NextResponse.json<AuthGetProfilesSuccessResponse>(
+		return apiJsonResponse<AuthGetProfilesSuccessResponse>(
 			{
 				status: 'success',
 				code: RESPONSE_CODE.AUTH.GET_PROFILES_SUCCESS,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 			{ status: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: RESPONSE_CODE.INTERNAL_SERVER_ERROR,

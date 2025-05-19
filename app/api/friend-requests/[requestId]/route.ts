@@ -5,10 +5,11 @@ import {
 	UpdateFriendRequestBodySchema,
 	UpdateFriendRequestParamsSchema,
 } from '@/src/lib/schemas/friend.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function PATCH(
 	request: NextRequest,
@@ -18,7 +19,7 @@ export async function PATCH(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -31,7 +32,7 @@ export async function PATCH(
 		const paramsFields = UpdateFriendRequestParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -46,7 +47,7 @@ export async function PATCH(
 		)
 
 		if (!bodyFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -71,7 +72,7 @@ export async function PATCH(
 						friendRequest.requestProfileId === sessionCheck.profileId))
 			)
 		) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -113,7 +114,7 @@ export async function PATCH(
 					friendRequest.requestProfileId,
 				])
 
-				return NextResponse.json<SuccessResponse>(
+				return apiJsonResponse<SuccessResponse>(
 					{
 						status: 'success',
 						code: 0x0,
@@ -133,7 +134,7 @@ export async function PATCH(
 					friendRequest.requestProfileId,
 				])
 
-				return NextResponse.json<SuccessResponse>(
+				return apiJsonResponse<SuccessResponse>(
 					{
 						status: 'success',
 						code: 0x0,
@@ -142,7 +143,7 @@ export async function PATCH(
 					{ status: 201 }
 				)
 			default:
-				return NextResponse.json<ErrorResponse>(
+				return apiJsonResponse<ErrorResponse>(
 					{
 						status: 'error',
 						code: 0x0,
@@ -152,7 +153,7 @@ export async function PATCH(
 				)
 		}
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -171,7 +172,7 @@ export async function DELETE(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -184,7 +185,7 @@ export async function DELETE(
 		const paramsFields = DeleteFriendRequestParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -205,7 +206,7 @@ export async function DELETE(
 			(friendRequest.profileId !== sessionCheck.profileId &&
 				friendRequest.requestProfileId !== sessionCheck.profileId)
 		) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -226,7 +227,7 @@ export async function DELETE(
 			friendRequest.requestProfileId,
 		])
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -235,7 +236,7 @@ export async function DELETE(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

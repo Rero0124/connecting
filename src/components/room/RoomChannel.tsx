@@ -6,7 +6,7 @@ import {
 	getRoomTextChannel,
 	setRoomDetail,
 } from '@/src/lib/features/room/roomSlice'
-import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
+import { fetchWithValidation, serializeData } from '@/src/lib/util'
 import {
 	CreateRoomMessageBodySchema,
 	GetRoomResponseSchema,
@@ -45,7 +45,7 @@ export const RoomChannel = ({
 				dataSchema: GetRoomResponseSchema,
 			}).then((data) => {
 				if (data.status === 'success') {
-					dispatch(setRoomDetail(serializeDatesForRedux(data.data)))
+					dispatch(setRoomDetail(serializeData(data.data)))
 				}
 			})
 		} else {

@@ -21,7 +21,7 @@ export async function PATCH(
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -34,7 +34,7 @@ export async function PATCH(
 		const paramsFields = UpdateRoomParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -57,7 +57,7 @@ export async function PATCH(
 				message = 'name 의 형식이 잘못되었습니다.'
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -86,7 +86,7 @@ export async function PATCH(
 		})
 
 		if (!oldRoom) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -97,7 +97,7 @@ export async function PATCH(
 		}
 
 		if (oldRoom.masterProfileId === sessionCheck.profileId) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -132,7 +132,7 @@ export async function PATCH(
 			)
 		)
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -141,7 +141,7 @@ export async function PATCH(
 			{ status: 201 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -159,7 +159,7 @@ export async function DELETE(
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -172,7 +172,7 @@ export async function DELETE(
 		const paramsFields = DeleteRoomChannelParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -201,7 +201,7 @@ export async function DELETE(
 		})
 
 		if (!room) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -212,7 +212,7 @@ export async function DELETE(
 		}
 
 		if (room.masterProfileId === sessionCheck.profileId) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -246,7 +246,7 @@ export async function DELETE(
 			paramsFields.data.roomId
 		)
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -255,7 +255,7 @@ export async function DELETE(
 			{ status: 204 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

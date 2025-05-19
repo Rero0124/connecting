@@ -1,10 +1,11 @@
 import prisma from '@/src/lib/prisma'
 import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 import { DeleteRoomParticipantParamsSchema } from '@/src/lib/schemas/room.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function DELETE(
 	request: NextRequest,
@@ -13,7 +14,7 @@ export async function DELETE(
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -41,7 +42,7 @@ export async function DELETE(
 				message = 'profileId의 형식이 잘못되었습니다.'
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -70,7 +71,7 @@ export async function DELETE(
 		})
 
 		if (!room) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -84,7 +85,7 @@ export async function DELETE(
 			room.masterProfileId === sessionCheck.profileId &&
 			paramsFields.data.profileId !== sessionCheck.profileId
 		) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -105,7 +106,7 @@ export async function DELETE(
 		})
 
 		if (!roomParticipant) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -123,7 +124,7 @@ export async function DELETE(
 
 		socket.emit('update_rooms', [paramsFields.data.profileId])
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -132,7 +133,7 @@ export async function DELETE(
 			{ status: 204 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

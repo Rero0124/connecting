@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { SerializeDatesForRedux } from '@/src/lib/util'
+import { SerializeData } from '@/src/lib/util'
 import { RootState } from '@/src/lib/store'
 import { Profile } from '../../schemas/profile.schema'
 import { getCookieValue } from '../../clientUtil'
@@ -54,10 +54,7 @@ export const viewContextSlice = createSlice({
 		setInitLoadEnd: (state) => {
 			state.initLoad = true
 		},
-		setProfile: (
-			state,
-			action: PayloadAction<SerializeDatesForRedux<Profile>>
-		) => {
+		setProfile: (state, action: PayloadAction<SerializeData<Profile>>) => {
 			state.profile = action.payload
 		},
 		setTitle: (state, action: PayloadAction<string>) => {
@@ -104,6 +101,6 @@ export const getSelectedFriendSubMenu = (state: RootState) =>
 export const getSelectedMessageMenu = (state: RootState) =>
 	state.viewContext.selectedMessageMenu
 
-export type ProfileState = SerializeDatesForRedux<Profile>
+export type ProfileState = SerializeData<Profile>
 
 export default viewContextSlice.reducer

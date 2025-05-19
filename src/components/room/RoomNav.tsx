@@ -4,6 +4,7 @@ import DragAbleDiv, { DragAbleDivOption } from '@/src/components/ui/DragAbleDiv'
 import { getRoomTextChannel } from '@/src/lib/features/room/roomSlice'
 import { setNavSize } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
+import { toBigInt } from '@/src/lib/util'
 import { useRef, useState } from 'react'
 
 export const RoomNav = ({
@@ -18,7 +19,7 @@ export const RoomNav = ({
 	const dispatch = useAppDispatch()
 	const navRef = useRef<HTMLDivElement>(null)
 
-	const [selectedChannelId, setSelectedChannelId] = useState(channelId ?? -1)
+	const [selectedChannelId, setSelectedChannelId] = useState(channelId ?? -1n)
 
 	const onDragEnd = ({ x }: { x: number }) => {
 		dispatch(setNavSize(x))
@@ -52,7 +53,7 @@ export const RoomNav = ({
 	}) {
 		const onClick = () => {
 			setSelectedChannelId(
-				getRoomTextChannel(roomState, roomId, channelId)?.id ?? -2
+				toBigInt(getRoomTextChannel(roomState, roomId, channelId)?.id) ?? -2n
 			)
 		}
 
@@ -86,7 +87,11 @@ export const RoomNav = ({
 				{roomState.roomDetails[roomId] &&
 					Object.values(roomState.roomDetails[roomId].channel).map(
 						(channel) => (
-							<Channel key={`${channel.id}`} channelId={channel.id} name="send">
+							<Channel
+								key={`${channel.id}`}
+								channelId={toBigInt(channel.id) ?? -1n}
+								name="send"
+							>
 								{channel.name}
 							</Channel>
 						)

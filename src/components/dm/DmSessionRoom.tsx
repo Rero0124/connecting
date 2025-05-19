@@ -7,7 +7,12 @@ import {
 	CreateDmMessageBodySchema,
 	GetDmSessionResponseSchema,
 } from '@/src/lib/schemas/dm.schema'
-import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
+import {
+	deserializeData,
+	fetchWithValidation,
+	serializeData,
+	toBigInt,
+} from '@/src/lib/util'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -74,7 +79,7 @@ export const DmSessionRoom = () => {
 				dataSchema: GetDmSessionResponseSchema,
 			}).then((data) => {
 				if (data.status === 'success') {
-					dispatch(setDmDetail(serializeDatesForRedux(data.data)))
+					dispatch(setDmDetail(serializeData(data.data)))
 				}
 			})
 		}
@@ -125,9 +130,9 @@ export const DmSessionRoom = () => {
 			<div className="flex flex-col grow overflow-y-auto h-0">
 				{dmState.dmDetails[dmSessionId] &&
 					dmState.dmDetails[dmSessionId].message.map((message, idx) => {
-						const pastMessageSameUser =
-							message.profileId === pastMessageProfileId
-						pastMessageProfileId = message.profileId
+						const msg = deserializeData(message)
+						const pastMessageSameUser = msg.profileId === pastMessageProfileId
+						pastMessageProfileId = msg.profileId
 						const nextMessageSameDate =
 							dmState.dmDetails[dmSessionId].message.length - 1 > idx
 								? new Date(message.sentAt).toLocaleString() ===

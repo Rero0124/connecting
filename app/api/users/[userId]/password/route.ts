@@ -1,8 +1,8 @@
 import prisma from '@/src/lib/prisma'
 import bcryptjs from 'bcryptjs'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { verifyUserIdInSession } from '@/src/lib/serverUtil'
+import { apiJsonResponse, verifyUserIdInSession } from '@/src/lib/serverUtil'
 import {
 	UpdateUserPasswordBodySchema,
 	UpdateUserPasswordParamsSchema,
@@ -17,7 +17,7 @@ export async function PATCH(
 		const paramsFields = UpdateUserPasswordParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -30,7 +30,7 @@ export async function PATCH(
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -43,7 +43,7 @@ export async function PATCH(
 		)
 
 		if (!bodyFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -64,7 +64,7 @@ export async function PATCH(
 			},
 		})
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_USER_UPDATE_SUCCESS.code,
@@ -73,7 +73,7 @@ export async function PATCH(
 			{ status: ResponseDictionary.kr.RESPONSE_USER_UPDATE_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

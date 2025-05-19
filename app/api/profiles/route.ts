@@ -1,8 +1,9 @@
 import prisma from '@/src/lib/prisma'
 import { ErrorResponse } from '@/src/lib/schemas/api.schema'
 import { GetProfilesSuccessResponse } from '@/src/lib/schemas/profile.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
 	try {
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<GetProfilesSuccessResponse>(
+		return apiJsonResponse<GetProfilesSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

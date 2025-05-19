@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { DmMessage, DmSession } from '../../schemas/dm.schema'
-import { SerializeDatesForRedux } from '../../util'
+import { SerializeData } from '../../util'
 
 interface DmFeatureState {
 	allowedDmSessions: DmSessionState[]
@@ -87,7 +87,7 @@ export const getNotAllowedDmSession = (
 	}
 }
 
-export type DmSessionState = SerializeDatesForRedux<DmSession>
-export type DmMessageState = SerializeDatesForRedux<DmMessage>
+export type DmSessionState = SerializeData<DmSession>
+export type DmMessageState = SerializeData<DmMessage>
 
 export default dmSlice.reducer

@@ -1,9 +1,10 @@
 import prisma from '@/src/lib/prisma'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { AuthJoinBodySchema } from '@/src/lib/schemas/auth.schema'
 import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 
 export async function POST(request: NextRequest) {
 	let user
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
 		const validatedFields = AuthJoinBodySchema.safeParse(await request.json())
 
 		if (!validatedFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_JOIN_SUCCESS.code,
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
 			})
 		}
 
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

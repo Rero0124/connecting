@@ -6,10 +6,11 @@ import {
 	GetRoomParticipantsParamsSchema,
 	GetRoomParticipantsSuccessResponse,
 } from '@/src/lib/schemas/room.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(
 	request: NextRequest,
@@ -19,7 +20,7 @@ export async function GET(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -32,7 +33,7 @@ export async function GET(
 		const paramsFields = GetRoomParticipantsParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -60,7 +61,7 @@ export async function GET(
 		})
 
 		if (!room) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -76,7 +77,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<GetRoomParticipantsSuccessResponse>(
+		return apiJsonResponse<GetRoomParticipantsSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -86,7 +87,7 @@ export async function GET(
 			{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -105,7 +106,7 @@ export async function POST(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -120,7 +121,7 @@ export async function POST(
 		)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -135,7 +136,7 @@ export async function POST(
 		)
 
 		if (!bodyFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -155,7 +156,7 @@ export async function POST(
 		})
 
 		if (!room) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -177,7 +178,7 @@ export async function POST(
 		})
 
 		if (!roomJoinCode) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -194,7 +195,7 @@ export async function POST(
 				},
 			})
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -212,7 +213,7 @@ export async function POST(
 		})
 
 		if (isRoomParticipant > 0) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -231,7 +232,7 @@ export async function POST(
 
 		socket.emit('update_rooms', [sessionCheck.profileId])
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -240,7 +241,7 @@ export async function POST(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

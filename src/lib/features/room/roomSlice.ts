@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Room, RoomMessage } from '../../schemas/room.schema'
-import { SerializeDatesForRedux } from '../../util'
+import { SerializeData } from '../../util'
 import { ChannelType, RoomChannel } from '@prisma/client'
 
 interface RoomFeatureState {
@@ -118,8 +118,8 @@ export const getRoomTextChannel = (
 	)
 }
 
-export type RoomState = SerializeDatesForRedux<Room>
-export type RoomMesssageState = SerializeDatesForRedux<RoomMessage>
-export type RoomChannelState = SerializeDatesForRedux<RoomChannel>
+export type RoomState = SerializeData<Room>
+export type RoomMesssageState = SerializeData<RoomMessage>
+export type RoomChannelState = SerializeData<RoomChannel>
 
 export default roomSlice.reducer

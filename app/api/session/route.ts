@@ -1,5 +1,5 @@
 import prisma from '@/src/lib/prisma'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 import bcryptjs from 'bcryptjs'
 import { createSession, deleteSession, verifySession } from '@/src/lib/session'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
@@ -12,13 +12,14 @@ import {
 	AuthLoginBodySchema,
 } from '@/src/lib/schemas/auth.schema'
 import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 
 export async function GET(request: NextRequest) {
 	try {
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
 			)
 		}
 
-		return NextResponse.json<GetSessionSuccessResponse>(
+		return apiJsonResponse<GetSessionSuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.code,
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
 			{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 		const loginFields = AuthLoginBodySchema.safeParse(await request.json())
 
 		if (!loginFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_LOGIN_FAILED.code,
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 		})
 
 		if (!user) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		if (!bcryptjs.compareSync(password, user.password)) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
 		})
 
 		if (!profile) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-		return NextResponse.json<VerifySessionSuccessResponse>(
+		return apiJsonResponse<VerifySessionSuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.code,
@@ -137,7 +138,7 @@ export async function POST(request: NextRequest) {
 			{ status: ResponseDictionary.kr.RESPONSE_LOGIN_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -156,7 +157,7 @@ export async function PATCH(request: NextRequest) {
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -167,7 +168,7 @@ export async function PATCH(request: NextRequest) {
 		}
 
 		if (!bodyFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -185,7 +186,7 @@ export async function PATCH(request: NextRequest) {
 		})
 
 		if (!userProfile) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_AUTH_USER_PROFILE_FAILED.code,
@@ -200,7 +201,7 @@ export async function PATCH(request: NextRequest) {
 		}
 
 		await createSession(userProfile.userId, userProfile.id)
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_AUTH_USER_PROFILE_SUCCESS.code,
@@ -212,7 +213,7 @@ export async function PATCH(request: NextRequest) {
 			}
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -226,7 +227,7 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE() {
 	try {
 		await deleteSession()
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: ResponseDictionary.kr.RESPONSE_LOGOUT_SUCCESS.code,
@@ -235,7 +236,7 @@ export async function DELETE() {
 			{ status: ResponseDictionary.kr.RESPONSE_LOGOUT_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

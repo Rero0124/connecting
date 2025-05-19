@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Friend, FriendRequest } from '../../schemas/friend.schema'
 import { ProfileFilter } from '../../schemas/profile.schema'
-import { SerializeDatesForRedux } from '../../util'
+import { SerializeData } from '../../util'
 
 interface FriendFeatureState {
 	friends: FriendState[]
@@ -103,8 +103,8 @@ export const getFilterFriends = (state: FriendFeatureState, tag?: string) => {
 	}
 }
 
-export type FriendState = SerializeDatesForRedux<Friend>
-export type FriendRequestState = SerializeDatesForRedux<FriendRequest>
-export type ProfileFilterState = SerializeDatesForRedux<ProfileFilter>
+export type FriendState = SerializeData<Friend>
+export type FriendRequestState = SerializeData<FriendRequest>
+export type ProfileFilterState = SerializeData<ProfileFilter>
 
 export default friendSlice.reducer

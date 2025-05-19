@@ -4,8 +4,9 @@ import {
 	GetProfileParamsSchema,
 	GetProfileSuccessResponse,
 } from '@/src/lib/schemas/profile.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(
 	request: NextRequest,
@@ -15,7 +16,7 @@ export async function GET(
 		const paramsFields = GetProfileParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -35,7 +36,7 @@ export async function GET(
 		})
 
 		if (!profile) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -45,7 +46,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<GetProfileSuccessResponse>(
+		return apiJsonResponse<GetProfileSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -55,7 +56,7 @@ export async function GET(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

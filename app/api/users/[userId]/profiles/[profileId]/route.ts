@@ -8,12 +8,13 @@ import {
 	UpdateProfileByUserParamsSchema,
 } from '@/src/lib/schemas/profile.schema'
 import {
+	apiJsonResponse,
 	verifyProfileIdInSession,
 	verifyUserIdInSession,
 } from '@/src/lib/serverUtil'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(
 	request: NextRequest,
@@ -36,7 +37,7 @@ export async function GET(
 				message = 'profileId의 형식이 잘못되었습니다.'
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -49,7 +50,7 @@ export async function GET(
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -68,7 +69,7 @@ export async function GET(
 		})
 
 		if (!profile) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -78,7 +79,7 @@ export async function GET(
 			)
 		}
 
-		return NextResponse.json<GetProfileByUserSuccessResponse>(
+		return apiJsonResponse<GetProfileByUserSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -88,7 +89,7 @@ export async function GET(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -120,7 +121,7 @@ export async function PATCH(
 				message = 'profileId의 형식이 잘못되었습니다.'
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -136,7 +137,7 @@ export async function PATCH(
 		)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -172,7 +173,7 @@ export async function PATCH(
 				message = 'statusId 의의 형식이 잘못되었습니다.'
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -206,7 +207,7 @@ export async function PATCH(
 
 		socket.emit('update_profile', [profile.id])
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -215,7 +216,7 @@ export async function PATCH(
 			{ status: 201 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -247,7 +248,7 @@ export async function DELETE(
 				message = 'profileId의 형식이 잘못되었습니다.'
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -263,7 +264,7 @@ export async function DELETE(
 		)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -278,7 +279,7 @@ export async function DELETE(
 			},
 		})
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -287,7 +288,7 @@ export async function DELETE(
 			{ status: 204 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

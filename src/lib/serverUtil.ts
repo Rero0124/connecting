@@ -8,7 +8,8 @@ import { Profile } from './schemas/profile.schema'
 import { ErrorResponse, SuccessResponse } from './schemas/api.schema'
 import { SessionUserSuccessResponse } from './schemas/user.schema'
 import { SessionProfileSuccessResponse } from './schemas/profile.schema'
-import { toBigInt } from './util'
+import { serializeData, toBigInt } from './util'
+import { NextResponse } from 'next/server'
 
 export async function verifyUserIdInSession(userId: bigint): Promise<{
 	response: SessionUserSuccessResponse | ErrorResponse
@@ -207,4 +208,11 @@ export const getAuthUserProfiles = async (
 		isAuth: true,
 		profiles,
 	}
+}
+
+export const apiJsonResponse = <T extends SuccessResponse | ErrorResponse>(
+	response: T,
+	init: ResponseInit
+): Response => {
+	return NextResponse.json(serializeData(response), init)
 }

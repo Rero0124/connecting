@@ -7,25 +7,21 @@ import {
 	SuccessResponseSchema,
 } from './schemas/api.schema'
 
-export type SerializeDatesForRedux<T extends object> = {
+export type SerializeData<T extends object> = {
 	[K in keyof T]: T[K] extends Date
 		? string
 		: T[K] extends bigint
 			? string
 			: T[K] extends object
-				? SerializeDatesForRedux<T[K]>
+				? SerializeData<T[K]>
 				: T[K]
 }
 
-export function serializeDatesForRedux<T extends object>(
+export function serializeData<T extends object>(obj: T): SerializeData<T>
+export function serializeData<T extends object>(obj: T[]): SerializeData<T>[]
+export function serializeData<T extends object>(
 	obj: T
-): SerializeDatesForRedux<T>
-export function serializeDatesForRedux<T extends object>(
-	obj: T[]
-): SerializeDatesForRedux<T>[]
-export function serializeDatesForRedux<T extends object>(
-	obj: T
-): SerializeDatesForRedux<T> | SerializeDatesForRedux<T>[] {
+): SerializeData<T> | SerializeData<T>[] {
 	const replacer = (item: T) =>
 		JSON.parse(
 			JSON.stringify(item, (key, value) => {
@@ -44,9 +40,7 @@ export function serializeDatesForRedux<T extends object>(
 	return replacer(obj)
 }
 
-export function deserializeDatesFromRedux<T extends object>(
-	obj: SerializeDatesForRedux<T>
-): T {
+export function deserializeData<T extends object>(obj: SerializeData<T>): T {
 	return JSON.parse(
 		JSON.stringify(obj, (key, value) => {
 			if (

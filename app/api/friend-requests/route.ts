@@ -4,16 +4,17 @@ import {
 	CreateFriendRequestBodySchema,
 	GetFriendRequestsSuccessResponse,
 } from '@/src/lib/schemas/friend.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
 			profile: friendRequest.byProfile,
 		}))
 
-		return NextResponse.json<GetFriendRequestsSuccessResponse>(
+		return apiJsonResponse<GetFriendRequestsSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -114,7 +115,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		if (!bodyFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -134,7 +135,7 @@ export async function POST(request: NextRequest) {
 		})
 
 		if (!profile) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest) {
 		})
 
 		if (friendRequest) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -203,7 +204,7 @@ export async function POST(request: NextRequest) {
 
 		socket.emit('update_friendRequests', [sessionCheck.profileId, profile.id])
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -212,7 +213,7 @@ export async function POST(request: NextRequest) {
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

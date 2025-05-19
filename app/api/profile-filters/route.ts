@@ -4,16 +4,16 @@ import {
 	CreateProfileFilterBodySchema,
 	GetProfileFiltersSuccessResponse,
 } from '@/src/lib/schemas/profile.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { FilterType } from '@prisma/client'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
 	try {
 		const sessionCheck = await verifySession()
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<GetProfileFiltersSuccessResponse>(
+		return apiJsonResponse<GetProfileFiltersSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 		)
 
 		if (!bodyFields.success) {
-			return NextResponse.json<SuccessResponse>(
+			return apiJsonResponse<SuccessResponse>(
 				{
 					status: 'success',
 					code: 0x0,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 			},
 		})
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

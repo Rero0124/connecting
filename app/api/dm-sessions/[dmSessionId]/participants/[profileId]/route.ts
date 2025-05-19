@@ -18,7 +18,7 @@ export async function DELETE(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_SESSION_INVALID,
@@ -49,7 +49,7 @@ export async function DELETE(
 				code = RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_PARAMS_INVALID_PROFILE_ID
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code,
@@ -69,7 +69,7 @@ export async function DELETE(
 		})
 
 		if (!dmSession) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_DM_SESSION_NOT_FOUND,
@@ -90,7 +90,7 @@ export async function DELETE(
 		})
 
 		if (!dmParticipant) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_DM_SESSION_NOT_JOIN,
@@ -122,7 +122,7 @@ export async function DELETE(
 
 		socket.emit('update_dmSessions', [paramsFields.data.profileId])
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_SUCCESS,
@@ -131,7 +131,7 @@ export async function DELETE(
 			{ status: 204 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: RESPONSE_CODE.INTERNAL_SERVER_ERROR,

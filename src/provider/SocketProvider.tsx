@@ -31,7 +31,7 @@ import {
 } from '@/src/lib/schemas/room.schema'
 import { GetSessionResponseSchema } from '@/src/lib/schemas/session.schema'
 import { socket } from '@/src/lib/socket'
-import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
+import { fetchWithValidation, serializeData } from '@/src/lib/util'
 import { useEffect, useRef } from 'react'
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
@@ -91,7 +91,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 						}
 					)
 					if (profileResponse.status === 'success') {
-						dispatch(setProfile(serializeDatesForRedux(profileResponse.data)))
+						dispatch(setProfile(serializeData(profileResponse.data)))
 					}
 				}
 			})
@@ -104,7 +104,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					})
 
 					if (roomsResponse.status === 'success') {
-						dispatch(setRooms(serializeDatesForRedux(roomsResponse.data)))
+						dispatch(setRooms(serializeData(roomsResponse.data)))
 					}
 				}
 			})
@@ -122,14 +122,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					if (dmSessionsResponse.status === 'success') {
 						dispatch(
 							setAllowedDmSession(
-								serializeDatesForRedux(
+								serializeData(
 									dmSessionsResponse.data.allowedDmSessions
 								)
 							)
 						)
 						dispatch(
 							setNotAllowedDmSession(
-								serializeDatesForRedux(
+								serializeData(
 									dmSessionsResponse.data.notAllowedDmSessions
 								)
 							)
@@ -146,7 +146,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					})
 
 					if (friendsResponse.status === 'success') {
-						dispatch(setFriends(serializeDatesForRedux(friendsResponse.data)))
+						dispatch(setFriends(serializeData(friendsResponse.data)))
 					}
 				}
 			})
@@ -164,14 +164,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					if (friendRequestsResponse.status === 'success') {
 						dispatch(
 							setReceivedFriendRequests(
-								serializeDatesForRedux(
+								serializeData(
 									friendRequestsResponse.data.receivedFriendRequests
 								)
 							)
 						)
 						dispatch(
 							setSentFriendRequests(
-								serializeDatesForRedux(
+								serializeData(
 									friendRequestsResponse.data.sentFriendRequests
 								)
 							)
@@ -193,7 +193,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					if (roomChannelsResponse.status === 'success') {
 						dispatch(
 							updateRoomChannels(
-								serializeDatesForRedux(roomChannelsResponse.data)
+								serializeData(roomChannelsResponse.data)
 							)
 						)
 					}
@@ -201,11 +201,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			})
 
 			socket.on('received_dmMessage', (dmMessage) => {
-				dispatch(addDmMessage(serializeDatesForRedux(dmMessage)))
+				dispatch(addDmMessage(serializeData(dmMessage)))
 			})
 
 			socket.on('received_roomMessage', (roomMessage) => {
-				dispatch(addRoomMessage(serializeDatesForRedux(roomMessage)))
+				dispatch(addRoomMessage(serializeData(roomMessage)))
 			})
 		}
 

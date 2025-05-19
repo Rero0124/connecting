@@ -11,10 +11,11 @@ import {
 	GetDmParticipantsParamsSchema,
 	GetDmParticipantsSuccessResponse,
 } from '@/src/lib/schemas/dm.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(
 	request: NextRequest,
@@ -24,7 +25,7 @@ export async function GET(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.GET_DM_PARTICIPANTS_SESSION_INVALID,
@@ -49,7 +50,7 @@ export async function GET(
 				message = 'dmSessionId 의 형식이 잘못되었습니다.'
 				code = RESPONSE_CODE.DM.GET_DM_PARTICIPANTS_PARAMS_INVALID_DM_SESSION_ID
 			}
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code,
@@ -69,7 +70,7 @@ export async function GET(
 		})
 
 		if (!dmSession) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.GET_DM_PARTICIPANTS_DM_SESSION_NOT_FOUND,
@@ -90,7 +91,7 @@ export async function GET(
 		})
 
 		if (!dmParticipant) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.GET_DM_PARTICIPANTS_DM_SESSION_NOT_JOIN,
@@ -106,7 +107,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<GetDmParticipantsSuccessResponse>(
+		return apiJsonResponse<GetDmParticipantsSuccessResponse>(
 			{
 				status: 'success',
 				code: RESPONSE_CODE.DM.GET_DM_PARTICIPANTS_SUCCESS,
@@ -116,7 +117,7 @@ export async function GET(
 			{ status: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_SUCCESS.status }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -136,7 +137,7 @@ export async function POST(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: ResponseDictionary.kr.RESPONSE_SESSION_CHECK_FAILED.code,
@@ -162,7 +163,7 @@ export async function POST(
 				code =
 					RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_PARAMS_INVALID_DM_SESSION_ID
 			}
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code,
@@ -190,7 +191,7 @@ export async function POST(
 				code = RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_BODY_INVALID_PROFILE_ID
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code,
@@ -210,7 +211,7 @@ export async function POST(
 		})
 
 		if (!dmSession) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_DM_SESSION_NOT_FOUND,
@@ -231,7 +232,7 @@ export async function POST(
 		})
 
 		if (!dmParticipant) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_DM_SESSION_NOT_JOIN,
@@ -251,7 +252,7 @@ export async function POST(
 		})
 
 		if (!profile) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_PROFILE_NOT_FOUND,
@@ -269,7 +270,7 @@ export async function POST(
 		})
 
 		if (isDmParticipant > 0) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_ALREADY_PARTICIPANT,
@@ -302,7 +303,7 @@ export async function POST(
 			)
 		)
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_SUCCESS,
@@ -311,7 +312,7 @@ export async function POST(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: RESPONSE_CODE.INTERNAL_SERVER_ERROR,

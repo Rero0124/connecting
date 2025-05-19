@@ -6,9 +6,9 @@ import {
 	GetProfilesByUserParamsSchema,
 	GetProfilesByUserSuccessResponse,
 } from '@/src/lib/schemas/profile.schema'
-import { verifyUserIdInSession } from '@/src/lib/serverUtil'
+import { apiJsonResponse, verifyUserIdInSession } from '@/src/lib/serverUtil'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(
 	request: NextRequest,
@@ -18,7 +18,7 @@ export async function GET(
 		const paramsFields = GetProfilesByUserParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -31,7 +31,7 @@ export async function GET(
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -48,7 +48,7 @@ export async function GET(
 			},
 		})
 
-		return NextResponse.json<GetProfilesByUserSuccessResponse>(
+		return apiJsonResponse<GetProfilesByUserSuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -58,7 +58,7 @@ export async function GET(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,
@@ -77,7 +77,7 @@ export async function POST(
 		const paramsFields = CreateProfileByUserParamsSchema.safeParse(await params)
 
 		if (!paramsFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -90,7 +90,7 @@ export async function POST(
 		const data = await verifyUserIdInSession(paramsFields.data.userId)
 
 		if (data.response.status === 'error') {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					...data.response,
 				},
@@ -103,7 +103,7 @@ export async function POST(
 		)
 
 		if (!bodyFields.success) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: 0x0,
@@ -121,7 +121,7 @@ export async function POST(
 			},
 		})
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: 0x0,
@@ -130,7 +130,7 @@ export async function POST(
 			{ status: 201 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: ResponseDictionary.kr.RESPONSE_INTERNAL_SERVER_ERROR.code,

@@ -9,10 +9,11 @@ import {
 	CreateDmMessageBodySchema,
 	CreateDmMessageParamsSchema,
 } from '@/src/lib/schemas/dm.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function POST(
 	request: NextRequest,
@@ -22,7 +23,7 @@ export async function POST(
 		const sessionCheck = await verifySession()
 
 		if (!sessionCheck.isAuth) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_SESSION_INVALID,
@@ -48,7 +49,7 @@ export async function POST(
 				code = RESPONSE_CODE.DM.CREATE_DM_MESSAGE_PARAMS_INVALID_DM_SESSION_ID
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code,
@@ -74,7 +75,7 @@ export async function POST(
 				code = RESPONSE_CODE.DM.CREATE_DM_MESSAGE_BODY_INVALID_MESSAGE
 			}
 
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code,
@@ -94,7 +95,7 @@ export async function POST(
 		})
 
 		if (!dmSession) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_DM_SESSION_NOT_FOUND,
@@ -118,7 +119,7 @@ export async function POST(
 				profileId: sessionCheck.profileId,
 			}) > -1
 		) {
-			return NextResponse.json<ErrorResponse>(
+			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
 					code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_DM_SESSION_NOT_JOIN,
@@ -153,7 +154,7 @@ export async function POST(
 			)
 		)
 
-		return NextResponse.json<SuccessResponse>(
+		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
 				code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_SUCCESS,
@@ -162,7 +163,7 @@ export async function POST(
 			{ status: 200 }
 		)
 	} catch {
-		return NextResponse.json<ErrorResponse>(
+		return apiJsonResponse<ErrorResponse>(
 			{
 				status: 'error',
 				code: RESPONSE_CODE.INTERNAL_SERVER_ERROR,

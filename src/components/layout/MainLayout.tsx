@@ -25,7 +25,7 @@ import {
 } from '@/src/lib/schemas/profile.schema'
 import { Room } from '@/src/lib/schemas/room.schema'
 import { VerifySession } from '@/src/lib/schemas/session.schema'
-import { fetchWithValidation, serializeDatesForRedux } from '@/src/lib/util'
+import { fetchWithValidation, serializeData } from '@/src/lib/util'
 import { useEffect, useState } from 'react'
 import ChangeProfileModal from '../profile/ChangeProfileModal'
 import LoginModal from '../auth/LoginModal'
@@ -95,27 +95,25 @@ export const MainLayout = ({
 
 	useEffect(() => {
 		dispatch(setSession(initData.session))
-		dispatch(setProfile(serializeDatesForRedux(initData.profile)))
-		dispatch(setRooms(serializeDatesForRedux(initData.rooms)))
+		dispatch(setProfile(serializeData(initData.profile)))
+		dispatch(setRooms(serializeData(initData.rooms)))
 		dispatch(
-			setAllowedDmSession(
-				serializeDatesForRedux(initData.dmSessions.allowedDmSessions)
-			)
+			setAllowedDmSession(serializeData(initData.dmSessions.allowedDmSessions))
 		)
 		dispatch(
 			setNotAllowedDmSession(
-				serializeDatesForRedux(initData.dmSessions.notAllowedDmSessions)
+				serializeData(initData.dmSessions.notAllowedDmSessions)
 			)
 		)
-		dispatch(setFriends(serializeDatesForRedux(initData.friends)))
+		dispatch(setFriends(serializeData(initData.friends)))
 		dispatch(
 			setReceivedFriendRequests(
-				serializeDatesForRedux(initData.friendRequests.receivedFriendRequests)
+				serializeData(initData.friendRequests.receivedFriendRequests)
 			)
 		)
 		dispatch(
 			setSentFriendRequests(
-				serializeDatesForRedux(initData.friendRequests.sentFriendRequests)
+				serializeData(initData.friendRequests.sentFriendRequests)
 			)
 		)
 		setTimeout(() => {

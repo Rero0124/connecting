@@ -2,7 +2,7 @@
 
 import { getFriendRequests } from '@/src/lib/features/friend/friendSlice'
 import { useAppSelector } from '@/src/lib/hooks'
-import { deserializeDatesFromRedux } from '@/src/lib/util'
+import { deserializeData } from '@/src/lib/util'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
@@ -39,7 +39,7 @@ export default function FriendDetailModal({
 		if (friendRequestId) {
 			const request = getFriendRequests(friendState, friendRequestId)
 			if (request && !Array.isArray(request)) {
-				setFriendRequest(deserializeDatesFromRedux(request))
+				setFriendRequest(deserializeData(request))
 			}
 		}
 	}, [friendRequestId])
