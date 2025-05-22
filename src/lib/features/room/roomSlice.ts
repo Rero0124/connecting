@@ -1,17 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { Room, RoomMessage } from '../../schemas/room.schema'
+import { Room, RoomChannel, RoomMessage } from '../../schemas/room.schema'
 import { SerializeData } from '../../util'
-import { ChannelType, RoomChannel } from '@prisma/client'
 
 interface RoomFeatureState {
 	rooms: RoomState[]
-	roomDetails: Record<
+	roomDetails: (RoomState & {
+		channel: (RoomChannelState & {
+			message: RoomMessageState[]
+		})[]
+	})[]
+	roomDetailIdx: Record<
 		string,
-		RoomState & {
+		{
+			idx: number
 			channel: Record<
 				string,
-				RoomChannelState & {
-					message: RoomMesssageState[]
+				{
+					idx: number
+					message: Record<string, number>
 				}
 			>
 		}
@@ -20,7 +26,8 @@ interface RoomFeatureState {
 
 const initialState: RoomFeatureState = {
 	rooms: [],
-	roomDetails: {},
+	roomDetails: [],
+	roomDetailIdx: {},
 }
 
 export const roomSlice = createSlice({
@@ -35,46 +42,114 @@ export const roomSlice = createSlice({
 			action: PayloadAction<
 				RoomState & {
 					channel: (RoomChannelState & {
-						message: RoomMesssageState[]
+						message: RoomMessageState[]
 					})[]
 				}
 			>
 		) => {
-			const key = action.payload.id
+			const roomId = action.payload.id
+			const roomIdx = state.roomDetailIdx[roomId]?.idx
 			const { channel, ...roomDetail } = action.payload
-			state.roomDetails[key] = {
-				...roomDetail,
-				channel: channel.reduce<
-					Record<
-						string,
-						RoomChannelState & {
-							message: RoomMesssageState[]
-						}
-					>
-				>((acc, channel) => {
-					acc[channel.id] = channel
-					return acc
-				}, {}),
+			if (roomIdx !== undefined) {
+				state.roomDetails[roomIdx] = {
+					...roomDetail,
+					channel: [],
+				}
+				state.roomDetailIdx[roomId].channel = {}
+				channel.forEach((chnl) => {
+					const { message, ...channelDetail } = chnl
+					const channelId = chnl.id
+					const channelIdx = state.roomDetails[roomIdx].channel.length
+					state.roomDetails[roomIdx].channel.push({
+						...channelDetail,
+						message: [],
+					})
+					state.roomDetailIdx[roomId].channel[channelId] = {
+						idx: channelIdx,
+						message: {},
+					}
+					message.forEach((msg) => {
+						const messageId = msg.id
+						state.roomDetailIdx[roomId].channel[channelId].message[messageId] =
+							state.roomDetails[roomIdx].channel[channelIdx].message.length
+						state.roomDetails[roomIdx].channel[channelIdx].message.push(msg)
+					})
+				})
+			} else {
+				const newRoomIdx = state.roomDetails.length
+				state.roomDetails.push({
+					...roomDetail,
+					channel: [],
+				})
+				state.roomDetailIdx[roomId] = {
+					idx: newRoomIdx,
+					channel: {},
+				}
+				channel.forEach((chnl) => {
+					const { message, ...channelDetail } = chnl
+					const channelId = chnl.id
+					const channelIdx = state.roomDetails[newRoomIdx].channel.length
+					state.roomDetails[newRoomIdx].channel.push({
+						...channelDetail,
+						message: [],
+					})
+					state.roomDetailIdx[roomId].channel[channelId] = {
+						idx: channelIdx,
+						message: {},
+					}
+					message.forEach((msg) => {
+						const messageId = msg.id
+						state.roomDetailIdx[roomId].channel[channelId].message[messageId] =
+							state.roomDetails[newRoomIdx].channel[channelIdx].message.length
+						state.roomDetails[newRoomIdx].channel[channelIdx].message.push(msg)
+					})
+				})
 			}
 		},
 		removeRoomDetail: (state, action: PayloadAction<string>) => {
-			delete state.roomDetails[action.payload]
+			delete state.roomDetailIdx[action.payload]
 		},
 		updateRoomChannels: (state, action: PayloadAction<RoomChannelState[]>) => {
 			action.payload.forEach((channel) => {
-				const roomId = channel.roomId
-				if (state.roomDetails[roomId]) {
-					state.roomDetails[roomId].channel[channel.id] = {
-						...state.roomDetails[roomId].channel[channel.id],
-						...channel,
+				const roomIdx = state.roomDetailIdx[channel.roomId]?.idx
+				if (roomIdx !== undefined) {
+					let channelIdx =
+						state.roomDetailIdx[channel.roomId].channel[channel.id]?.idx
+					if (channelIdx !== undefined) {
+						const oldChannel = state.roomDetails[roomIdx].channel[channelIdx]
+						state.roomDetails[roomIdx].channel[channelIdx] = {
+							...channel,
+							...oldChannel,
+						}
+					} else {
+						channelIdx = state.roomDetails[roomIdx].channel.length
+						state.roomDetails[roomIdx].channel.push({
+							...channel,
+							message: [],
+						})
+						state.roomDetailIdx[roomIdx].channel[channel.id] = {
+							idx: channelIdx,
+							message: {},
+						}
 					}
 				}
 			})
 		},
-		addRoomMessage: (state, action: PayloadAction<RoomMesssageState>) => {
-			state.roomDetails[action.payload.roomId].channel[
-				action.payload.roomChannelId
-			].message.push(action.payload)
+		addRoomMessage: (state, action: PayloadAction<RoomMessageState>) => {
+			const roomIdx = state.roomDetailIdx[action.payload.roomId]?.idx
+			const channelIdx =
+				state.roomDetailIdx[action.payload.roomId]?.channel[
+					action.payload.roomChannelId
+				]?.idx
+			if (roomIdx !== undefined && channelIdx !== undefined) {
+				state.roomDetailIdx[action.payload.roomId].channel[
+					action.payload.roomChannelId
+				].message[action.payload.id] =
+					state.roomDetails[roomIdx].channel[channelIdx].message.length
+				state.roomDetails[roomIdx].channel[channelIdx].message.push(
+					action.payload
+				)
+			}
 		},
 	},
 })
@@ -100,26 +175,24 @@ export const getRoomTextChannel = (
 	roomId: string,
 	channelId?: bigint
 ) => {
-	const room = state.roomDetails[roomId]
-	if (!room || !room.channel || Object.keys(room.channel).length === 0)
+	const roomIdx = state.roomDetailIdx[roomId]?.idx
+	if (roomIdx === undefined || !state.roomDetails[roomIdx].channel.length)
 		return undefined
 
 	if (channelId) {
-		const findedChannel = Object.values(room.channel).find(
-			(channel) =>
-				channel.id === channelId.toString() && channel.type === ChannelType.text
-		)
-		if (findedChannel) {
-			return findedChannel
-		}
+		const channelIdx =
+			state.roomDetailIdx[roomId].channel[channelId.toString()]?.idx
+		if (channelIdx === undefined) return undefined
+		return state.roomDetails[roomIdx].channel[channelIdx]
 	}
-	return Object.values(room.channel).find(
-		(channel) => channel.type === ChannelType.text
+
+	return state.roomDetails[roomIdx].channel.find(
+		(c) => state.roomDetailIdx[roomId].channel[c.id]
 	)
 }
 
 export type RoomState = SerializeData<Room>
-export type RoomMesssageState = SerializeData<RoomMessage>
+export type RoomMessageState = SerializeData<RoomMessage>
 export type RoomChannelState = SerializeData<RoomChannel>
 
 export default roomSlice.reducer

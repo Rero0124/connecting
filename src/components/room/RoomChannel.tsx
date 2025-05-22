@@ -11,6 +11,11 @@ import {
 	CreateRoomMessageBodySchema,
 	GetRoomResponseSchema,
 } from '@/src/lib/schemas/room.schema'
+import { z } from 'zod'
+import {
+	ApiResponseSchema,
+	SuccessResponseSchema,
+} from '@/src/lib/schemas/api.schema'
 
 export const RoomChannel = ({
 	roomId,
@@ -39,16 +44,18 @@ export const RoomChannel = ({
 	}
 
 	useEffect(() => {
-		if (!roomState.roomDetails[roomId]) {
+		if (
+			roomState.roomDetailIdx[roomId]?.channel[channelId?.toString() ?? '']
+				?.idx === undefined
+		) {
 			fetchWithValidation(`/api/rooms/${roomId}`, {
 				cache: 'no-store',
 				dataSchema: GetRoomResponseSchema,
-			}).then((data) => {
+			}).then(async (data) => {
 				if (data.status === 'success') {
 					dispatch(setRoomDetail(serializeData(data.data)))
 				}
 			})
-		} else {
 		}
 	}, [roomState])
 

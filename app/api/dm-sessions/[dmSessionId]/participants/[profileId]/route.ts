@@ -5,6 +5,7 @@ import {
 import prisma from '@/src/lib/prisma'
 import { ErrorResponse, SuccessResponse } from '@/src/lib/schemas/api.schema'
 import { DeleteDmParticipantParamsSchema } from '@/src/lib/schemas/dm.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
@@ -120,7 +121,7 @@ export async function DELETE(
 			})
 		}
 
-		socket.emit('update_dmSessions', [paramsFields.data.profileId])
+		socket.emit('update_dmSessions', [paramsFields.data.profileId.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

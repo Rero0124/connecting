@@ -33,6 +33,7 @@ import { GetSessionResponseSchema } from '@/src/lib/schemas/session.schema'
 import { socket } from '@/src/lib/socket'
 import { fetchWithValidation, serializeData } from '@/src/lib/util'
 import { useEffect, useRef } from 'react'
+import { getSession } from '../lib/clientUtil'
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
 	const session = useAppSelector((state) => state.session.session)
@@ -58,17 +59,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 			socket.on('get_profileId', async () => {
 				if (!sessionRef.current.isAuth) {
-					const newSession = await fetchWithValidation(`/api/session`, {
-						dataSchema: GetSessionResponseSchema,
-					})
-					if (newSession.status === 'success' && newSession.data.isAuth) {
-						socket.emit('set_profileId', newSession.data.profileId)
-						dispatch(setSession(newSession.data))
+					const newSession = await getSession()
+					if (newSession.isAuth) {
+						socket.emit('set_profileId', newSession.profileId.toString())
+						dispatch(setSession(newSession))
 					} else {
 						location.reload()
 					}
 				} else {
-					socket.emit('set_profileId', sessionRef.current.profileId)
+					socket.emit('set_profileId', sessionRef.current.profileId.toString())
 				}
 			})
 
@@ -122,16 +121,12 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 					if (dmSessionsResponse.status === 'success') {
 						dispatch(
 							setAllowedDmSession(
-								serializeData(
-									dmSessionsResponse.data.allowedDmSessions
-								)
+								serializeData(dmSessionsResponse.data.allowedDmSessions)
 							)
 						)
 						dispatch(
 							setNotAllowedDmSession(
-								serializeData(
-									dmSessionsResponse.data.notAllowedDmSessions
-								)
+								serializeData(dmSessionsResponse.data.notAllowedDmSessions)
 							)
 						)
 					}
@@ -171,9 +166,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 						)
 						dispatch(
 							setSentFriendRequests(
-								serializeData(
-									friendRequestsResponse.data.sentFriendRequests
-								)
+								serializeData(friendRequestsResponse.data.sentFriendRequests)
 							)
 						)
 					}
@@ -192,9 +185,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
 					if (roomChannelsResponse.status === 'success') {
 						dispatch(
-							updateRoomChannels(
-								serializeData(roomChannelsResponse.data)
-							)
+							updateRoomChannels(serializeData(roomChannelsResponse.data))
 						)
 					}
 				}

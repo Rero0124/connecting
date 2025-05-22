@@ -58,7 +58,7 @@ export const AuthJoinBodySchema = z.object({
 })
 
 export const AuthChangeProfileBodySchema = z.object({
-	profileId: z.bigint(),
+	profileId: z.coerce.bigint(),
 })
 
 export type AuthLoginInput = z.infer<typeof AuthLoginInputSchema>

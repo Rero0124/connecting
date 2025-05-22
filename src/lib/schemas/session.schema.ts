@@ -3,8 +3,8 @@ import { SuccessResponse } from './api.schema'
 
 export const SessionSchema = z
 	.object({
-		userId: z.bigint(),
-		profileId: z.bigint(),
+		userId: z.coerce.bigint(),
+		profileId: z.coerce.bigint(),
 		expiresAt: z.coerce.date(),
 	})
 	.optional()
@@ -15,8 +15,8 @@ export const VerifySessionSchema = z.discriminatedUnion('isAuth', [
 	}),
 	z.object({
 		isAuth: z.literal(true),
-		userId: z.bigint(),
-		profileId: z.bigint(),
+		userId: z.coerce.bigint(),
+		profileId: z.coerce.bigint(),
 	}),
 ])
 

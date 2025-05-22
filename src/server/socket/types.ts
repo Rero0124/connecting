@@ -13,6 +13,7 @@ import {
 	VoiceTransportOptions,
 } from './schemas/call.schema'
 import { RoomMessage } from '@/src/lib/schemas/room.schema'
+import { SerializeData } from '@/src/lib/util'
 
 export type SocketServer = Server<
 	ClientToServerEvents,
@@ -29,7 +30,7 @@ export type SocketSocekt = Socket<
 >
 
 export interface SocektGlobalData {
-	socketMap: Map<bigint, string>
+	socketMap: Map<string, string>
 	worker: mediasoupTypes.Worker
 	router: mediasoupTypes.Router
 	sendTransports: Record<string, mediasoupTypes.WebRtcTransport>
@@ -47,8 +48,8 @@ export interface ServerToClientEvents {
 	update_dmSessions: () => void
 	update_friends: () => void
 	update_friendRequests: () => void
-	received_dmMessage: (dmMessage: DmMessage) => void
-	received_roomMessage: (roomMessage: RoomMessage) => void
+	received_dmMessage: (dmMessage: SerializeData<DmMessage>) => void
+	received_roomMessage: (roomMessage: SerializeData<RoomMessage>) => void
 	call_newProducer: (data: {
 		producerId: string
 		socketId: string
@@ -59,15 +60,21 @@ export interface ServerToClientEvents {
 }
 
 export interface ClientToServerEvents {
-	set_profileId: (profileId: bigint) => void
-	update_profile: (profileIds: bigint[]) => void
-	update_rooms: (profileIds: bigint[]) => void
-	update_roomChannels: (profileIds: bigint[], roomId: string) => void
-	update_dmSessions: (profileIds: bigint[]) => void
-	update_friends: (profileIds: bigint[]) => void
-	update_friendRequests: (profileIds: bigint[]) => void
-	send_dmMessage: (dmMessage: DmMessage, profileIds: bigint[]) => void
-	send_roomMessage: (roomMessage: RoomMessage, profileIds: bigint[]) => void
+	set_profileId: (profileId: string) => void
+	update_profile: (profileIds: string[]) => void
+	update_rooms: (profileIds: string[]) => void
+	update_roomChannels: (profileIds: string[], roomId: string) => void
+	update_dmSessions: (profileIds: string[]) => void
+	update_friends: (profileIds: string[]) => void
+	update_friendRequests: (profileIds: string[]) => void
+	send_dmMessage: (
+		dmMessage: SerializeData<DmMessage>,
+		profileIds: string[]
+	) => void
+	send_roomMessage: (
+		roomMessage: SerializeData<RoomMessage>,
+		profileIds: string[]
+	) => void
 	call_createTransport: (
 		type: TransportType,
 		callback: (params: VoiceTransportOptions | { error: string }) => void
@@ -98,6 +105,6 @@ export interface ClientToServerEvents {
 }
 
 export interface SocketData {
-	profileId?: bigint
+	profileId?: string
 	callId?: string
 }

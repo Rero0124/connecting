@@ -1,4 +1,3 @@
-import { RoomChannel } from '@/src/components/room/RoomChannel'
 import { getChannelByRoomIdAndId } from '@/src/lib/cacheUtil'
 import prisma from '@/src/lib/prisma'
 import { toBigInt } from '@/src/lib/util'

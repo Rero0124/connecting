@@ -238,7 +238,7 @@ export async function POST(
 					code: RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_DM_SESSION_NOT_JOIN,
 					message: '해당 DM의 참여자가 아닙니다.',
 				},
-				{ status: 404 }
+				{ status: 403 }
 			)
 		}
 
@@ -273,10 +273,10 @@ export async function POST(
 			return apiJsonResponse<ErrorResponse>(
 				{
 					status: 'error',
-					code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_ALREADY_PARTICIPANT,
+					code: RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_ALREADY_PARTICIPANT,
 					message: '이미 해당 방의 참여자입니다.',
 				},
-				{ status: 400 }
+				{ status: 409 }
 			)
 		}
 
@@ -298,16 +298,16 @@ export async function POST(
 
 		socket.emit(
 			'update_dmSessions',
-			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+			participantProfileIds.map((participantProfileId) =>
+				participantProfileId.profileId.toString()
 			)
 		)
 
 		return apiJsonResponse<SuccessResponse>(
 			{
 				status: 'success',
-				code: RESPONSE_CODE.DM.DELETE_DM_PARTICIPANT_SUCCESS,
-				message: 'DM에 참여하였습니다.',
+				code: RESPONSE_CODE.DM.CREATE_DM_PARTICIPANT_SUCCESS,
+				message: 'DM 에 해당 참여자를 추가하였습니다.',
 			},
 			{ status: 200 }
 		)

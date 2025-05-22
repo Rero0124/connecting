@@ -5,9 +5,9 @@ import { SuccessResponse } from './api.schema'
 export const FriendSchema = ProfileSchema
 
 export const FriendRequestSchema = z.object({
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	sentAt: z.coerce.date(),
-	profileId: z.bigint(),
+	profileId: z.coerce.bigint(),
 	profile: ProfileSchema,
 })
 

@@ -12,9 +12,13 @@ export type SerializeData<T extends object> = {
 		? string
 		: T[K] extends bigint
 			? string
-			: T[K] extends object
-				? SerializeData<T[K]>
-				: T[K]
+			: T[K] extends (infer U)[]
+				? U extends Record<string, unknown>
+					? SerializeData<U>[]
+					: U[]
+				: T[K] extends Record<string, unknown>
+					? SerializeData<T[K]>
+					: T[K]
 }
 
 export function serializeData<T extends object>(obj: T): SerializeData<T>
@@ -22,39 +26,46 @@ export function serializeData<T extends object>(obj: T[]): SerializeData<T>[]
 export function serializeData<T extends object>(
 	obj: T
 ): SerializeData<T> | SerializeData<T>[] {
-	const replacer = (item: T) =>
-		JSON.parse(
-			JSON.stringify(item, (key, value) => {
-				if (value instanceof Date) {
-					return value.toISOString()
-				} else if (isBigInt(value)) {
-					return value.toString()
-				}
-				return value
-			})
-		)
-	if (Array.isArray(obj)) {
-		return obj.map((item) => replacer(item))
+	const replacer = (value: any): any => {
+		if (value instanceof Date) return value.toISOString()
+		if (typeof value === 'bigint') return value.toString()
+		if (Array.isArray(value)) return value.map(replacer)
+		if (value && typeof value === 'object') {
+			return Object.fromEntries(
+				Object.entries(value).map(([k, v]) => [k, replacer(v)])
+			)
+		}
+		return value
 	}
 
-	return replacer(obj)
+	return Array.isArray(obj) ? obj.map(replacer) : replacer(obj)
 }
 
-export function deserializeData<T extends object>(obj: SerializeData<T>): T {
-	return JSON.parse(
-		JSON.stringify(obj, (key, value) => {
+export function deserializeData<T extends object>(obj: SerializeData<T>): T
+export function deserializeData<T extends object>(obj: SerializeData<T>[]): T[]
+export function deserializeData<T extends object>(
+	obj: SerializeData<T> | SerializeData<T>[]
+): T | T[] {
+	const parser = (item: any) => {
+		const result: Record<string, unknown> = {}
+
+		for (const [key, value] of Object.entries(item)) {
 			if (
 				key.endsWith('At') &&
 				typeof value === 'string' &&
 				!isNaN(Date.parse(value))
 			) {
-				return new Date(value)
-			} else if ((key === 'id' || key.endsWith('Id')) && isBigInt(value)) {
-				return toBigInt(value)
-			}
-			return value
-		})
-	)
+				result[key] = new Date(value).toISOString()
+			} else if ((key === 'id' || key.endsWith('Id')) && isBigInt(value))
+				result[key] = toBigInt(value)
+			else if (Array.isArray(value)) result[key] = value.map(parser)
+			else if (value && typeof value === 'object') result[key] = parser(value)
+			else result[key] = value
+		}
+		return result
+	}
+
+	return Array.isArray(obj) ? (obj.map(parser) as T[]) : (parser(obj) as T)
 }
 
 export async function fetchWithValidation<
@@ -69,8 +80,7 @@ export async function fetchWithValidation<
 			? { body: z.infer<Body> }
 			: { body?: BodyInit | null })
 ): Promise<
-	| (T extends z.ZodTypeAny ? SuccessResponse<T> : SuccessResponse)
-	| ErrorResponse
+	(T extends undefined ? SuccessResponse : SuccessResponse<T>) | ErrorResponse
 > {
 	try {
 		const { dataSchema, bodySchema, body, ...fetchOptions } = options ?? {}
@@ -82,20 +92,24 @@ export async function fetchWithValidation<
 
 		const res = await fetch(url, {
 			...fetchOptions,
-			body: JSON.stringify(validateBody),
+			body: JSON.stringify(serializeData(validateBody)),
 		})
 
 		const json = await res.json()
 
-		const apiResponse = await ApiResponseSchema.parseAsync(json)
+		const deserializeJson = deserializeData(json)
+
+		const apiResponse = await ApiResponseSchema.parseAsync(deserializeJson)
 
 		if (apiResponse.status === 'success') {
 			if (options?.dataSchema) {
-				return SuccessResponseSchema(options.dataSchema).parseAsync(
+				return (await SuccessResponseSchema(options.dataSchema).parseAsync(
 					apiResponse
-				) as any
+				)) as unknown as any
 			} else {
-				return SuccessResponseSchema().parseAsync(apiResponse) as any
+				return (await SuccessResponseSchema().parseAsync(
+					apiResponse
+				)) as unknown as any
 			}
 		} else {
 			return ErrorResponseSchema.parseAsync(apiResponse)

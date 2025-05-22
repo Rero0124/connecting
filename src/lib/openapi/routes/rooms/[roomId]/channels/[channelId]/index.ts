@@ -1,0 +1,1 @@
+// auto-generated openapi route file for /rooms\[roomId]\channels\[channelId]

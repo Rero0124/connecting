@@ -3,12 +3,12 @@ import { SuccessResponse } from './api.schema'
 import { FilterType, StatusType } from '@prisma/client'
 
 export const ProfileSchema = z.object({
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	image: z.string(),
 	tag: z.string(),
 	name: z.string().nullable(),
 	statusType: z.nativeEnum(StatusType),
-	statusId: z.bigint(),
+	statusId: z.coerce.bigint(),
 	information: z.string(),
 	isCompany: z.boolean(),
 	isOnline: z.boolean(),
@@ -16,16 +16,16 @@ export const ProfileSchema = z.object({
 })
 
 export const ProfileFilterSchema = z.object({
-	id: z.bigint(),
-	profileId: z.bigint(),
-	filterProfileId: z.bigint(),
+	id: z.coerce.bigint(),
+	profileId: z.coerce.bigint(),
+	filterProfileId: z.coerce.bigint(),
 	filterType: z.nativeEnum(FilterType),
 	profile: ProfileSchema,
 })
 
 export const SessionProfileSchema = z.object({
-	userId: z.bigint(),
-	profileId: z.bigint(),
+	userId: z.coerce.bigint(),
+	profileId: z.coerce.bigint(),
 	tag: z.string(),
 })
 
@@ -62,7 +62,7 @@ export const UpdateProfileByUserBodySchema = z.object({
 	image: z.string().optional(),
 	information: z.string().optional(),
 	statusType: z.nativeEnum(StatusType).optional(),
-	statusId: z.bigint().optional(),
+	statusId: z.coerce.bigint().optional(),
 })
 
 export const CreateProfileByUserParamsSchema = z.object({
@@ -75,11 +75,11 @@ export const CreateProfileByUserBodySchema = z.object({
 	image: z.string(),
 	information: z.string(),
 	statusType: z.nativeEnum(StatusType),
-	statusId: z.bigint(),
+	statusId: z.coerce.bigint(),
 })
 
 export const CreateProfileFilterBodySchema = z.object({
-	profileId: z.bigint(),
+	profileId: z.coerce.bigint(),
 	filterType: z.nativeEnum(FilterType),
 })
 

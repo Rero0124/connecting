@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { SocektGlobalData, SocketServer, SocketSocekt } from '../types'
 import { DmMessageSchema } from '../../../lib/schemas/dm.schema'
 import { RoomMessageSchema } from '../../../lib/schemas/room.schema'
+import { isBigInt, toBigInt } from '@/src/lib/util'
 
 export function registerCoreEvents(
 	io: SocketServer,
@@ -9,18 +10,18 @@ export function registerCoreEvents(
 	globalData: SocektGlobalData
 ) {
 	const ClientToServerCoreSchemas = {
-		set_profileId: z.tuple([z.bigint()]),
-		update_profile: z.tuple([z.array(z.bigint())]),
-		update_rooms: z.tuple([z.array(z.bigint())]),
-		update_roomChannels: z.tuple([z.array(z.bigint()), z.string()]),
-		update_dmSessions: z.tuple([z.array(z.bigint())]),
-		update_friends: z.tuple([z.array(z.bigint())]),
-		update_friendRequests: z.tuple([z.array(z.bigint())]),
-		send_dmMessage: z.tuple([DmMessageSchema, z.array(z.bigint())]),
-		send_roomMessage: z.tuple([RoomMessageSchema, z.array(z.bigint())]),
+		set_profileId: z.tuple([z.coerce.bigint()]),
+		update_profile: z.tuple([z.array(z.coerce.bigint())]),
+		update_rooms: z.tuple([z.array(z.coerce.bigint())]),
+		update_roomChannels: z.tuple([z.array(z.coerce.bigint()), z.string()]),
+		update_dmSessions: z.tuple([z.array(z.coerce.bigint())]),
+		update_friends: z.tuple([z.array(z.coerce.bigint())]),
+		update_friendRequests: z.tuple([z.array(z.coerce.bigint())]),
+		send_dmMessage: z.tuple([DmMessageSchema, z.array(z.coerce.bigint())]),
+		send_roomMessage: z.tuple([RoomMessageSchema, z.array(z.coerce.bigint())]),
 	}
 
-	const getSocketIdByProfileIds = (profileIds: bigint[]) => {
+	const getSocketIdByProfileIds = (profileIds: string[]) => {
 		return profileIds
 			.map((profileId) => globalData.socketMap.get(profileId))
 			.filter((socketId) => socketId !== undefined)

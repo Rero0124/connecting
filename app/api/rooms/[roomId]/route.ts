@@ -68,7 +68,7 @@ export async function GET(
 								},
 							},
 							orderBy: {
-								sentAt: 'desc',
+								sentAt: 'asc',
 							},
 							take: 200,
 						},
@@ -230,8 +230,8 @@ export async function PATCH(
 
 		socket.emit(
 			'update_rooms',
-			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+			participantProfileIds.map((participantProfileId) =>
+				participantProfileId.profileId.toString()
 			)
 		)
 
@@ -342,8 +342,8 @@ export async function DELETE(
 
 		socket.emit(
 			'update_rooms',
-			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+			participantProfileIds.map((participantProfileId) =>
+				participantProfileId.profileId.toString()
 			)
 		)
 

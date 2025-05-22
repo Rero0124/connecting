@@ -6,7 +6,7 @@ export const UserSchema = z.object({
 })
 
 export const SessionUserSchema = z.object({
-	userId: z.bigint(),
+	userId: z.coerce.bigint(),
 	email: z.string(),
 })
 

@@ -12,6 +12,7 @@ import {
 import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
+import { serializeData } from '@/src/lib/util'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { type NextRequest } from 'next/server'
 
@@ -125,7 +126,7 @@ export async function POST(
 					code: RESPONSE_CODE.DM.CREATE_DM_MESSAGE_DM_SESSION_NOT_JOIN,
 					message: 'DM에 참여중이 아닙니다.',
 				},
-				{ status: 404 }
+				{ status: 403 }
 			)
 		}
 
@@ -148,9 +149,9 @@ export async function POST(
 
 		socket.emit(
 			'send_dmMessage',
-			dmMessage,
-			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+			serializeData(dmMessage),
+			participantProfileIds.map((participantProfileId) =>
+				participantProfileId.profileId.toString()
 			)
 		)
 

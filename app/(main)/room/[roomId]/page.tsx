@@ -1,3 +1,4 @@
+import RoomNav from '@/src/components/room/RoomNav'
 import { getFirstChannelInRoom } from '@/src/lib/cacheUtil'
 import { redirect } from 'next/navigation'
 
@@ -12,9 +13,12 @@ export default async function Main({
 	if (channel) redirect(`/room/${roomId}/${channel.id}`)
 
 	return (
-		<div className="flex flex-col h-full w-full items-center justify-center">
-			<p className="text-2xl font-bold">채팅방이 없습니다.</p>
-			<p className="text-2xl font-bold">먼저 채팅방을 만들어주세요.</p>
-		</div>
+		<>
+			<RoomNav roomId={roomId} />
+			<div className="flex flex-col h-full w-full items-center justify-center">
+				<p className="text-2xl font-bold">채팅방이 없습니다.</p>
+				<p className="text-2xl font-bold">먼저 채팅방을 만들어주세요.</p>
+			</div>
+		</>
 	)
 }

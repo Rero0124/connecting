@@ -230,7 +230,7 @@ export async function POST(
 			},
 		})
 
-		socket.emit('update_rooms', [sessionCheck.profileId])
+		socket.emit('update_rooms', [sessionCheck.profileId.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

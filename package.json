@@ -10,7 +10,8 @@
     "lint": "next lint --dir .",
     "lint:fix": "next lint --fix --dir .",
     "socket": "nodemon --watch socket.ts --watch src/server/socket --ext ts --exec node -r @swc-node/register ./socket.ts",
-    "electron": "nodemon --watch electron.js --watch src/server/electron --exec electron ./electron.js"
+    "electron": "nodemon --watch electron.js --watch src/server/electron --exec electron ./electron.js",
+    "generate:openapi-by-router": "node -r @swc-node/register ./scripts/generate-openapi-routes.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -25,14 +26,18 @@
     "jose": "^6.0.10",
     "mediasoup": "^3.15.7",
     "mediasoup-client": "^3.10.1",
+    "mobx": "^6.13.7",
     "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
+    "redoc": "^2.5.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "styled-components": "^6.1.18",
     "swc-node": "^1.0.0",
-    "zod": "^3.24.2"
+    "zod": "3.25",
+    "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

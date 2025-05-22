@@ -4,15 +4,17 @@ import DragAbleDiv, { DragAbleDivOption } from '@/src/components/ui/DragAbleDiv'
 import { getRoomTextChannel } from '@/src/lib/features/room/roomSlice'
 import { setNavSize } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
-import { toBigInt } from '@/src/lib/util'
-import { useRef, useState } from 'react'
+import { RoomChannel } from '@/src/lib/schemas/room.schema'
+import { deserializeData, toBigInt } from '@/src/lib/util'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
 
 export const RoomNav = ({
 	roomId,
 	channelId,
 }: {
 	roomId: string
-	channelId: bigint | null
+	channelId?: bigint | null
 }) => {
 	const { navSize, title } = useAppSelector((state) => state.viewContext)
 	const roomState = useAppSelector((state) => state.room)
@@ -20,6 +22,8 @@ export const RoomNav = ({
 	const navRef = useRef<HTMLDivElement>(null)
 
 	const [selectedChannelId, setSelectedChannelId] = useState(channelId ?? -1n)
+
+	const room = roomState.roomDetails[roomState.roomDetailIdx[roomId]?.idx]
 
 	const onDragEnd = ({ x }: { x: number }) => {
 		dispatch(setNavSize(x))
@@ -49,21 +53,24 @@ export const RoomNav = ({
 		children?: React.ReactNode
 		name: string
 		classname?: string
-		channelId?: bigint
+		channelId?: bigint | null
 	}) {
 		const onClick = () => {
 			setSelectedChannelId(
-				toBigInt(getRoomTextChannel(roomState, roomId, channelId)?.id) ?? -2n
+				toBigInt(
+					getRoomTextChannel(roomState, roomId, channelId ?? undefined)?.id
+				) ?? -2n
 			)
 		}
 
 		return (
-			<div
+			<Link
+				href={`/room/${roomId}/${channelId}`}
 				className={`${classname} block h-8 px-2.5 py-0.5 leading-12 mb-1 rounded`}
 				onClick={onClick}
 			>
 				{children}
-			</div>
+			</Link>
 		)
 	}
 	return (
@@ -84,18 +91,19 @@ export const RoomNav = ({
 						<span className="cursor-pointer">+</span>
 					</div>
 				</div>
-				{roomState.roomDetails[roomId] &&
-					Object.values(roomState.roomDetails[roomId].channel).map(
-						(channel) => (
+				{room &&
+					room.channel.map((serializedChannel) => {
+						const channel = deserializeData(serializedChannel)
+						return (
 							<Channel
 								key={`${channel.id}`}
-								channelId={toBigInt(channel.id) ?? -1n}
+								channelId={toBigInt(channel.id)}
 								name="send"
 							>
 								{channel.name}
 							</Channel>
 						)
-					)}
+					})}
 			</div>
 		</DragAbleDiv>
 	)

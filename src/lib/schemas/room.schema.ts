@@ -5,14 +5,14 @@ import { SuccessResponse } from './api.schema'
 export const RoomSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	masterProfileId: z.bigint(),
+	masterProfileId: z.coerce.bigint(),
 	iconType: z.nativeEnum(IconType),
 	iconData: z.string(),
 	createdAt: z.coerce.date(),
 })
 
 export const RoomChannelSchema = z.object({
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	roomId: z.string(),
 	name: z.string(),
 	type: z.nativeEnum(ChannelType),
@@ -25,10 +25,10 @@ export const RoomMessageSchema = z.object({
 		tag: z.string(),
 		image: z.string(),
 	}),
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	roomId: z.string(),
-	roomChannelId: z.bigint(),
-	profileId: z.bigint(),
+	roomChannelId: z.coerce.bigint(),
+	profileId: z.coerce.bigint(),
 	sentAt: z.coerce.date(),
 	content: z.string(),
 	contentType: z.nativeEnum(ContentType),
@@ -37,17 +37,17 @@ export const RoomMessageSchema = z.object({
 })
 
 export const RoomParticipantSchema = z.object({
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	joinedAt: z.coerce.date(),
-	profileId: z.bigint(),
+	profileId: z.coerce.bigint(),
 	roomId: z.string(),
 })
 
 export const RoomJoinCodeSchema = z.object({
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	code: z.string(),
 	roomId: z.string(),
-	authorProfileId: z.bigint(),
+	authorProfileId: z.coerce.bigint(),
 	expiresAt: z.coerce.date(),
 })
 

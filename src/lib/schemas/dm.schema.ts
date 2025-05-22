@@ -16,9 +16,9 @@ export const DmMessageSchema = z.object({
 		tag: z.string(),
 		image: z.string(),
 	}),
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	dmSessionId: z.string(),
-	profileId: z.bigint(),
+	profileId: z.coerce.bigint(),
 	sentAt: z.coerce.date(),
 	content: z.string(),
 	contentType: z.nativeEnum(ContentType),
@@ -27,10 +27,10 @@ export const DmMessageSchema = z.object({
 })
 
 export const DmParticipantSchema = z.object({
-	id: z.bigint(),
+	id: z.coerce.bigint(),
 	isNotAllowed: z.boolean(),
 	joinedAt: z.coerce.date(),
-	profileId: z.bigint(),
+	profileId: z.coerce.bigint(),
 	dmSessionId: z.string(),
 })
 
@@ -59,7 +59,7 @@ export const CreateDmSessionBodySchema = z.object({
 	name: z.string(),
 	iconType: z.nativeEnum(IconType),
 	iconData: z.string(),
-	participants: z.array(z.bigint()),
+	participants: z.array(z.coerce.bigint()),
 })
 
 export const CreateDmParticipantParamsSchema = z.object({
@@ -67,7 +67,7 @@ export const CreateDmParticipantParamsSchema = z.object({
 })
 
 export const CreateDmParticipantBodySchema = z.object({
-	profileId: z.bigint(),
+	profileId: z.coerce.bigint(),
 })
 
 export const CreateDmMessageParamsSchema = z.object({

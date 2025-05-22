@@ -126,6 +126,9 @@ const getRoomData = (userProfileIds: bigint[]): Prisma.RoomCreateInput[] => [
 						profileId: userProfileIds[1],
 					},
 					{
+						profileId: userProfileIds[2],
+					},
+					{
 						profileId: userProfileIds[3],
 					},
 				],

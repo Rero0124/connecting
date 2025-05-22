@@ -81,7 +81,7 @@ export default function NewMessageModal({
 				name: title,
 				iconType: imageEncoded ? 'image' : 'text',
 				iconData: imageEncoded ?? title,
-				participants: recipients.map((recipient) => recipient.id),
+				participants: recipients.map((recipient) => recipient.id.toString()),
 			}),
 		})
 		onClose()

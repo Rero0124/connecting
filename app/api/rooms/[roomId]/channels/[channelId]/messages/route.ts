@@ -4,8 +4,10 @@ import {
 	CreateRoomMessageBodySchema,
 	CreateRoomMessageParamsSchema,
 } from '@/src/lib/schemas/room.schema'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
+import { serializeData } from '@/src/lib/util'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -119,9 +121,9 @@ export async function POST(
 
 		socket.emit(
 			'send_roomMessage',
-			roomMessage,
-			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+			serializeData(roomMessage),
+			participantProfileIds.map((participantProfileId) =>
+				participantProfileId.profileId.toString()
 			)
 		)
 
