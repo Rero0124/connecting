@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { VerifySession } from '../../schemas/session.schema'
+import { SerializeData } from '../../util'
 
 interface sessionFeatureState {
-	session: VerifySession
+	session: VerifySessionState
 }
 
 const initialState: sessionFeatureState = {
@@ -15,7 +16,7 @@ export const sessionSlice = createSlice({
 	name: 'session',
 	initialState,
 	reducers: {
-		setSession: (state, action: PayloadAction<VerifySession>) => {
+		setSession: (state, action: PayloadAction<VerifySessionState>) => {
 			state.session = action.payload
 		},
 		deleteSession: (state) => {
@@ -25,5 +26,7 @@ export const sessionSlice = createSlice({
 })
 
 export const { setSession, deleteSession } = sessionSlice.actions
+
+export type VerifySessionState = SerializeData<VerifySession>
 
 export default sessionSlice.reducer

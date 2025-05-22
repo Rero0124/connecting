@@ -61,8 +61,9 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 				if (!sessionRef.current.isAuth) {
 					const newSession = await getSession()
 					if (newSession.isAuth) {
+						console.log(newSession)
 						socket.emit('set_profileId', newSession.profileId.toString())
-						dispatch(setSession(newSession))
+						dispatch(setSession(serializeData(newSession)))
 					} else {
 						location.reload()
 					}
@@ -80,7 +81,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 			})
 
 			socket.on('update_profile', async () => {
-				;``
 				if (sessionRef.current.isAuth) {
 					const profileResponse = await fetchWithValidation(
 						`/api/users/${sessionRef.current.userId}/profiles/${sessionRef.current.profileId}`,
