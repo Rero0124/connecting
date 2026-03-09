@@ -1,10 +1,32 @@
 @import 'tailwindcss';
 
 :root {
-	--background: #ffffff;
-	--background-light: #3a3a3a;
-	--foreground: #171717;
-	--background-room-icon: #b8c4d6;
+	--background: #1a1a2e;
+	--background-secondary: #16213e;
+	--background-tertiary: #0f3460;
+	--background-light: #1f2940;
+	--foreground: #e8e8f0;
+	--foreground-muted: #8b8fa3;
+	--foreground-dim: #5c6078;
+	--accent: #6c5ce7;
+	--accent-hover: #7c6ef7;
+	--accent-muted: rgba(108, 92, 231, 0.15);
+	--success: #00cec9;
+	--warning: #fdcb6e;
+	--danger: #ff6b6b;
+	--danger-hover: #ff5252;
+	--online: #00d97e;
+	--away: #ffc107;
+	--dnd: #ff4757;
+	--offline: #5c6078;
+	--border: rgba(255, 255, 255, 0.06);
+	--border-light: rgba(255, 255, 255, 0.1);
+	--shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+	--shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+	--radius: 12px;
+	--radius-sm: 8px;
+	--radius-full: 9999px;
+	--background-room-icon: #2a3a5c;
 }
 
 * {
@@ -19,20 +41,28 @@
 
 @theme inline {
 	--color-background: var(--background);
+	--color-background-secondary: var(--background-secondary);
+	--color-background-tertiary: var(--background-tertiary);
 	--color-foreground: var(--foreground);
+	--color-foreground-muted: var(--foreground-muted);
+	--color-foreground-dim: var(--foreground-dim);
 	--color-background-light: var(--background-light);
 	--color-background-room-icon: var(--background-room-icon);
+	--color-accent: var(--accent);
+	--color-accent-hover: var(--accent-hover);
+	--color-accent-muted: var(--accent-muted);
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--color-danger: var(--danger);
+	--color-danger-hover: var(--danger-hover);
+	--color-online: var(--online);
+	--color-away: var(--away);
+	--color-dnd: var(--dnd);
+	--color-offline: var(--offline);
+	--color-border: var(--border);
+	--color-border-light: var(--border-light);
 	--font-sans: var(--font-geist-sans);
 	--font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: #0a0a0a;
-		--background-light: #3a3a3a;
-		--foreground: #ededed;
-		--background-room-icon: #4a5565;
-	}
 }
 
 html,
@@ -43,5 +73,88 @@ body {
 body {
 	background: var(--background);
 	color: var(--foreground);
-	font-family: Arial, Helvetica, sans-serif;
+	font-family:
+		var(--font-geist-sans),
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		sans-serif;
+}
+
+/* Smooth transitions for interactive elements */
+button,
+a,
+input,
+textarea,
+select {
+	transition: all 0.2s ease;
+}
+
+/* Custom focus styles */
+input:focus,
+textarea:focus,
+select:focus {
+	outline: none;
+	border-color: var(--accent) !important;
+	box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+/* Tooltip base */
+[data-tooltip] {
+	position: relative;
+}
+[data-tooltip]::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	left: calc(100% + 10px);
+	top: 50%;
+	transform: translateY(-50%);
+	background: #111;
+	color: #fff;
+	padding: 6px 12px;
+	border-radius: 6px;
+	font-size: 13px;
+	white-space: nowrap;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.15s ease;
+	z-index: 100;
+}
+[data-tooltip]:hover::after {
+	opacity: 1;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+}
+
+/* Message bubble animation */
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+.animate-slide-in {
+	animation: slideIn 0.2s ease-out;
+}
+
+/* Pulse animation for online status */
+@keyframes pulse-online {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 rgba(0, 217, 126, 0.4);
+	}
+	50% {
+		box-shadow: 0 0 0 4px rgba(0, 217, 126, 0);
+	}
+}
+.pulse-online {
+	animation: pulse-online 2s ease-in-out infinite;
 }

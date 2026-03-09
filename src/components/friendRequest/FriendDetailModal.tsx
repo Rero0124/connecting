@@ -44,67 +44,95 @@ export default function FriendDetailModal({
 		}
 	}, [friendRequestId])
 
+	if (!friendRequest) return null
+
 	return (
-		friendRequest && (
-			<div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-60 flex justify-center items-center z-50">
-				<div className="bg-[#1e1e1e] text-gray-200 p-6 rounded-md w-[400px] shadow-lg border border-gray-700">
-					<h3 className="text-xl font-semibold mb-4 border-b pb-2">
-						친구 상세 정보
-					</h3>
-
-					<div className="mb-3">
-						<p className="mb-1">
-							<span className="text-gray-400">닉네임:</span>{' '}
-							{friendRequest.profile.name || '(미입력)'}
-						</p>
-						<p className="mb-1">
-							<span className="text-gray-400">태그:</span>{' '}
-							{friendRequest.profile.tag}
-						</p>
-						<p className="mb-1">
-							<span className="text-gray-400">요청일:</span>{' '}
-							{friendRequest.sentAt.toLocaleString()}
-						</p>
-					</div>
-
-					{friendRequest.profile.image && (
-						<div className="mb-4">
+		<div
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+			onClick={onClose}
+		>
+			<div
+				className="bg-background-secondary border border-border-light rounded-2xl shadow-lg w-[380px] overflow-hidden"
+				onClick={(e) => e.stopPropagation()}
+			>
+				{/* Banner + Avatar */}
+				<div className="h-20 bg-gradient-to-r from-accent/50 to-accent/20 relative">
+					<div className="absolute left-1/2 -translate-x-1/2 -bottom-8">
+						{friendRequest.profile.image ? (
 							<Image
 								src={friendRequest.profile.image}
 								alt="profile"
-								width={0}
-								height={0}
-								className="w-20 h-20 rounded-full border border-gray-500 object-cover"
+								width={64}
+								height={64}
+								className="w-16 h-16 rounded-2xl border-4 border-background-secondary object-cover"
 							/>
-						</div>
-					)}
-
-					<div className="flex justify-end gap-2 mt-4">
-						{type === 'receive' && (
-							<button
-								onClick={onAccept}
-								className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-							>
-								⭕ 승인
-							</button>
+						) : (
+							<div className="w-16 h-16 rounded-2xl border-4 border-background-secondary bg-accent/20 flex items-center justify-center text-accent text-lg font-bold">
+								{(friendRequest.profile.name || friendRequest.profile.tag)
+									.charAt(0)
+									.toUpperCase()}
+							</div>
 						)}
-						{type === 'send' && (
-							<button
-								onClick={onCancel}
-								className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-							>
-								✖️ 취소
-							</button>
-						)}
-						<button
-							onClick={onClose}
-							className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded"
-						>
-							닫기
-						</button>
 					</div>
 				</div>
+
+				{/* Info */}
+				<div className="pt-12 px-6 pb-2 text-center">
+					<h3 className="text-base font-bold text-foreground">
+						{friendRequest.profile.name || friendRequest.profile.tag}
+					</h3>
+					<p className="text-xs text-foreground-dim mt-0.5">
+						{friendRequest.profile.tag}
+					</p>
+				</div>
+
+				{/* Details */}
+				<div className="px-6 py-3">
+					<div className="flex items-center justify-between py-2 border-t border-border">
+						<span className="text-xs text-foreground-dim">요청일</span>
+						<span className="text-xs text-foreground-muted">
+							{friendRequest.sentAt.toLocaleDateString()}
+						</span>
+					</div>
+					<div className="flex items-center justify-between py-2 border-t border-border">
+						<span className="text-xs text-foreground-dim">상태</span>
+						<div className="flex items-center gap-1.5">
+							<span
+								className={`w-2 h-2 rounded-full ${friendRequest.profile.isOnline ? 'bg-online' : 'bg-offline'}`}
+							/>
+							<span className="text-xs text-foreground-muted">
+								{friendRequest.profile.isOnline ? '온라인' : '오프라인'}
+							</span>
+						</div>
+					</div>
+				</div>
+
+				{/* Actions */}
+				<div className="flex gap-2 px-6 pb-6">
+					<button
+						onClick={onClose}
+						className="flex-1 h-10 rounded-xl border border-border text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-background-light transition-colors"
+					>
+						닫기
+					</button>
+					{type === 'receive' && onAccept && (
+						<button
+							onClick={onAccept}
+							className="flex-1 h-10 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors"
+						>
+							수락
+						</button>
+					)}
+					{type === 'send' && onCancel && (
+						<button
+							onClick={onCancel}
+							className="flex-1 h-10 rounded-xl bg-danger/15 text-danger hover:bg-danger/25 text-sm font-medium transition-colors"
+						>
+							취소
+						</button>
+					)}
+				</div>
 			</div>
-		)
+		</div>
 	)
 }

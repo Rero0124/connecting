@@ -75,35 +75,68 @@ export const RoomNav = ({
 	}
 	return (
 		<DragAbleDiv
-			classname="bg-background border-r-[1px]"
+			classname="bg-background-secondary border-r border-border"
 			option={dragAbleDivOption}
 			onDragging={onDragging}
 			onDragEnd={onDragEnd}
 		>
 			<div
 				ref={navRef}
-				className="bg-background flex flex-col h-full pl-2.5 pr-1 py-2"
+				className="bg-background-secondary flex flex-col h-full px-2 py-3"
 				style={{ width: navSize }}
 			>
-				<div className="flex flex-row px-2.5 py-0.5 mb-1 justify-between h-10 leading-12">
-					<span>채널 추가</span>
-					<div className="flex flex-row justify-between w-8">
-						<span className="cursor-pointer">+</span>
-					</div>
+				{/* 채널 헤더 */}
+				<div className="flex items-center justify-between px-3 h-8 mb-1">
+					<span className="text-xs font-semibold text-foreground-dim uppercase tracking-wider">
+						채널
+					</span>
+					<button
+						className="w-5 h-5 flex items-center justify-center rounded text-foreground-dim hover:text-foreground hover:bg-background-light transition-colors"
+						title="채널 추가"
+					>
+						<svg
+							className="w-3.5 h-3.5"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							strokeWidth={2.5}
+						>
+							<path d="M12 4.5v15m7.5-7.5h-15" />
+						</svg>
+					</button>
 				</div>
-				{room &&
-					room.channel.map((serializedChannel) => {
-						const channel = deserializeData(serializedChannel)
-						return (
-							<Channel
-								key={`${channel.id}`}
-								channelId={toBigInt(channel.id)}
-								name="send"
-							>
-								{channel.name}
-							</Channel>
-						)
-					})}
+
+				{/* 채널 목록 */}
+				<div className="flex flex-col gap-0.5">
+					{room &&
+						room.channel.map((serializedChannel) => {
+							const channel = deserializeData(serializedChannel)
+							return (
+								<Channel
+									key={`${channel.id}`}
+									channelId={toBigInt(channel.id)}
+									name="send"
+									classname={
+										(toBigInt(channel.id) === selectedChannelId
+											? 'bg-background-light text-foreground'
+											: 'text-foreground-muted hover:bg-background-light hover:text-foreground') +
+										' flex items-center gap-2 px-3 h-9 rounded-lg text-sm transition-colors'
+									}
+								>
+									<svg
+										className="w-4 h-4 shrink-0 text-foreground-dim"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+										strokeWidth={1.8}
+									>
+										<path d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5-3.9 19.5m-2.1-19.5-3.9 19.5" />
+									</svg>
+									<span className="truncate">{channel.name}</span>
+								</Channel>
+							)
+						})}
+				</div>
 			</div>
 		</DragAbleDiv>
 	)

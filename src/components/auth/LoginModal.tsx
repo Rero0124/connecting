@@ -53,58 +53,91 @@ export default function LoginModal({ open, onClose }: Props) {
 	if (!open) return null
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-			<div className="relative bg-background p-8 rounded-lg w-[500px] border border-gray-700">
-				<button
-					onClick={onClose}
-					className="absolute top-3 right-3 text-gray-300 hover:text-white text-xl"
-				>
-					×
-				</button>
-
-				{selectProfileMode && (
-					<LoginProfileSelect
-						profiles={state?.profiles || []}
-						onSelect={selectProfile}
-						onCancel={cancelProfileSelect}
-					/>
-				)}
-				<form
-					ref={formRef}
-					action={action}
-					className={`flex flex-col gap-4 ${selectProfileMode ? 'hidden' : ''}`}
-				>
-					<input ref={profileIdRef} name="profileId" type="hidden" />
-					<h2 className="text-2xl font-bold text-center mb-4">
-						다른 계정으로 로그인
+		<div
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+			onClick={onClose}
+		>
+			<div
+				className="bg-background-secondary border border-border-light rounded-2xl shadow-lg w-[420px]"
+				onClick={(e) => e.stopPropagation()}
+			>
+				{/* Header */}
+				<div className="flex items-center justify-between px-6 pt-6 pb-2">
+					<h2 className="text-lg font-bold text-foreground">
+						{selectProfileMode ? '프로필 선택' : '다른 계정으로 로그인'}
 					</h2>
-					<input
-						type="email"
-						name="email"
-						placeholder="이메일"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						className="p-2 border rounded"
-					/>
-					<input
-						type="password"
-						name="password"
-						placeholder="비밀번호"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						className="p-2 border rounded"
-					/>
-					{state?.message && (
-						<p className="text-sm text-red-500">{state.message}</p>
-					)}
 					<button
-						type="submit"
-						className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-						disabled={pending}
+						onClick={onClose}
+						className="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-light transition-colors"
 					>
-						로그인
+						<svg
+							className="w-4 h-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							strokeWidth={2}
+						>
+							<path d="M6 18 18 6M6 6l12 12" />
+						</svg>
 					</button>
-				</form>
+				</div>
+
+				<div className="px-6 pb-6">
+					{selectProfileMode && (
+						<LoginProfileSelect
+							profiles={state?.profiles || []}
+							onSelect={selectProfile}
+							onCancel={cancelProfileSelect}
+						/>
+					)}
+					<form
+						ref={formRef}
+						action={action}
+						className={`flex flex-col gap-4 ${selectProfileMode ? 'hidden' : ''}`}
+					>
+						<input ref={profileIdRef} name="profileId" type="hidden" />
+
+						<div>
+							<label className="block text-xs font-semibold text-foreground-muted uppercase tracking-wider mb-2">
+								이메일
+							</label>
+							<input
+								type="email"
+								name="email"
+								placeholder="이메일을 입력하세요"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								className="w-full h-11 px-4 bg-background-light border border-border rounded-xl text-sm text-foreground placeholder:text-foreground-dim"
+							/>
+						</div>
+
+						<div>
+							<label className="block text-xs font-semibold text-foreground-muted uppercase tracking-wider mb-2">
+								비밀번호
+							</label>
+							<input
+								type="password"
+								name="password"
+								placeholder="비밀번호를 입력하세요"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								className="w-full h-11 px-4 bg-background-light border border-border rounded-xl text-sm text-foreground placeholder:text-foreground-dim"
+							/>
+						</div>
+
+						{state?.message && (
+							<p className="text-sm text-danger">{state.message}</p>
+						)}
+
+						<button
+							type="submit"
+							className="h-11 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
+							disabled={pending}
+						>
+							{pending ? '로그인 중...' : '로그인'}
+						</button>
+					</form>
+				</div>
 			</div>
 		</div>
 	)

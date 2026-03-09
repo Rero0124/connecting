@@ -114,64 +114,86 @@ export default function FriendAddPage() {
 	}, [message])
 
 	return (
-		<div className="flex flex-col gap-4 p-6">
+		<div className="flex flex-col gap-5 p-6">
 			<div>
-				<h2 className="text-xl font-bold">친구 추가하기</h2>
-				<p className="text-sm text-gray-500 mt-1">
+				<h2 className="text-lg font-bold text-foreground">친구 추가하기</h2>
+				<p className="text-sm text-foreground-muted mt-1">
 					태그명을 사용하여 친구를 추가할 수 있어요.
 				</p>
 			</div>
 
-			<div className="flex flex-row gap-2 items-center">
-				<input
-					ref={inputRef}
-					type="text"
-					placeholder="태그명을 입력하세요 (예: admin)"
-					value={tag}
-					onChange={(e) => setTag(e.target.value)}
-					onKeyDown={handleKeyDown}
-					disabled={loading}
-					className="border p-2 rounded grow"
-				/>
+			<div className="flex gap-2 items-center">
+				<div className="relative flex-1">
+					<svg
+						className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-dim"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						strokeWidth={2}
+					>
+						<circle cx="11" cy="11" r="8" />
+						<path d="m21 21-4.3-4.3" />
+					</svg>
+					<input
+						ref={inputRef}
+						type="text"
+						placeholder="태그명을 입력하세요 (예: admin)"
+						value={tag}
+						onChange={(e) => setTag(e.target.value)}
+						onKeyDown={handleKeyDown}
+						disabled={loading}
+						className="w-full h-11 pl-9 pr-4 bg-background-light border border-border rounded-xl text-sm text-foreground placeholder:text-foreground-dim"
+					/>
+				</div>
 				<button
 					onClick={handleSubmit}
-					disabled={loading}
-					className={`px-4 py-2 rounded text-white ${loading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
+					disabled={loading || !tag.trim()}
+					className="h-11 px-5 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-medium disabled:opacity-50 transition-colors cursor-pointer"
 				>
-					{loading ? '보내는 중...' : '친구 요청 보내기'}
+					{loading ? '보내는 중...' : '요청 보내기'}
 				</button>
 			</div>
 
 			{message && (
 				<p
-					className={`text-sm ${status === 'success' ? 'text-green-500' : 'text-red-500'}`}
+					className={`text-sm ${status === 'success' ? 'text-success' : 'text-danger'}`}
 				>
 					{message}
 				</p>
 			)}
 
 			{profileLoading && (
-				<p className="text-sm text-gray-400">프로필 불러오는 중...</p>
+				<div className="flex items-center gap-2 text-sm text-foreground-dim">
+					<div className="w-4 h-4 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+					프로필 불러오는 중...
+				</div>
 			)}
 			{!profileLoading && profile && (
-				<div className="border rounded p-4 mt-2 bg-white">
-					<div className="flex gap-4 items-center">
-						<Image
-							src={profile.image ?? '/default-profile.png'}
-							alt="프로필 이미지"
-							className="w-12 h-12 rounded-full object-cover"
-						/>
-						<div>
-							<p className="font-semibold text-lg">
-								{profile.name} ({profile.tag})
-							</p>
-							<p className="text-sm text-gray-600">
-								{profile.statusType} -{' '}
-								{profile.information ?? '상태 메시지 없음'}
-							</p>
-							<p className="text-xs text-gray-500">
+				<div className="flex items-center gap-4 p-4 bg-background-light border border-border rounded-xl">
+					<Image
+						src={profile.image ?? '/default-profile.png'}
+						alt="프로필 이미지"
+						width={48}
+						height={48}
+						className="w-12 h-12 rounded-full object-cover"
+					/>
+					<div className="flex-1 min-w-0">
+						<p className="text-sm font-semibold text-foreground">
+							{profile.name}{' '}
+							<span className="text-foreground-muted font-normal">
+								({profile.tag})
+							</span>
+						</p>
+						<p className="text-xs text-foreground-dim mt-0.5">
+							{profile.information || '상태 메시지 없음'}
+						</p>
+						<div className="flex items-center gap-1.5 mt-1">
+							<span
+								className={`w-2 h-2 rounded-full ${profile.isOnline ? 'bg-online' : 'bg-offline'}`}
+							/>
+							<span className="text-xs text-foreground-dim">
 								{profile.isOnline ? '온라인' : '오프라인'}
-							</p>
+							</span>
 						</div>
 					</div>
 				</div>

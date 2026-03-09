@@ -10,26 +10,25 @@ export default function FriendAdd() {
 	const [selectedMenu, setSelectedMenu] = useState<string>('send')
 	const dispatch = useAppDispatch()
 
-	function Menu({
+	function Tab({
 		children,
 		name,
-		classname = '',
 	}: {
 		children: React.ReactNode
 		name: string
-		classname?: string
 	}) {
-		const onclick = () => {
-			setSelectedMenu(name)
-		}
-
+		const isActive = selectedMenu === name
 		return (
-			<div
-				className={`hover:bg-background-light w-22 h-9 p-2 ml-2 my-2 rounded text-center leading-6 cursor-pointer ${classname}`}
-				onClick={onclick}
+			<button
+				className={`h-8 px-3 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+					isActive
+						? 'bg-accent/15 text-accent'
+						: 'text-foreground-muted hover:bg-background-light hover:text-foreground'
+				}`}
+				onClick={() => setSelectedMenu(name)}
 			>
 				{children}
-			</div>
+			</button>
 		)
 	}
 
@@ -38,29 +37,14 @@ export default function FriendAdd() {
 	}, [])
 
 	return (
-		<div className="flex flex-col">
-			<div className="flex flex-row h-13 border-b-[1px]">
-				<Menu
-					name="send"
-					classname={selectedMenu === 'send' ? 'bg-background-light' : ''}
-				>
-					받은 신청
-				</Menu>
-				<Menu
-					name="recive"
-					classname={selectedMenu === 'recive' ? 'bg-background-light' : ''}
-				>
-					보낸 신청
-				</Menu>
-				<Menu
-					name="add"
-					classname={selectedMenu === 'add' ? 'bg-background-light' : ''}
-				>
-					친구 추가
-				</Menu>
+		<div className="flex flex-col h-full bg-background">
+			<div className="flex items-center gap-1 h-12 px-4 border-b border-border shrink-0">
+				<Tab name="send">받은 신청</Tab>
+				<Tab name="recive">보낸 신청</Tab>
+				<Tab name="add">친구 추가</Tab>
 			</div>
 
-			<div className="flex flex-col grow">
+			<div className="flex flex-col grow overflow-hidden">
 				{selectedMenu === 'send' && <FriendReceivePage />}
 				{selectedMenu === 'recive' && <FriendSendPage />}
 				{selectedMenu === 'add' && <FriendAddPage />}

@@ -89,95 +89,136 @@ export default function ProfileEditModal({
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
-			<div className="relative w-[800px] bg-[#1e1f22] rounded-xl overflow-hidden border border-gray-700 shadow-lg">
-				<div className="bg-blue-800 h-36 relative">
+		<div
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+			onClick={onClose}
+		>
+			<div
+				className="relative w-[520px] bg-background-secondary border border-border-light rounded-2xl overflow-hidden shadow-lg"
+				onClick={(e) => e.stopPropagation()}
+			>
+				{/* Banner */}
+				<div className="h-28 bg-gradient-to-r from-accent/60 to-accent/30 relative">
 					<button
 						onClick={onClose}
-						className="absolute top-4 right-4 text-white text-2xl hover:opacity-80"
+						className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg bg-black/30 text-white hover:bg-black/50 transition-colors"
 					>
-						×
+						<svg
+							className="w-4 h-4"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							strokeWidth={2}
+						>
+							<path d="M6 18 18 6M6 6l12 12" />
+						</svg>
 					</button>
-					<div className="absolute left-6 bottom-[-45px]">
+
+					{/* Profile Image */}
+					<div className="absolute left-6 -bottom-10">
 						<label className="cursor-pointer relative group">
 							<input
 								type="file"
 								className="hidden"
 								onChange={handleImageChange}
 							/>
-							{imagePreview ? (
-								<Image
-									src={imagePreview}
-									alt="프로필"
-									width={0}
-									height={0}
-									className="w-24 h-24 rounded-full border-4 border-[#1e1f22] object-cover"
-								/>
-							) : (
-								<div className="w-24 h-24 rounded-full border-4 border-[#1e1f22] bg-gray-700 flex items-center justify-center text-white">
-									No Image
-								</div>
-							)}
-							<div className="absolute bottom-0 w-full bg-black bg-opacity-60 text-xs text-center text-white py-0.5 opacity-0 group-hover:opacity-100">
-								사진 변경
+							<div className="w-20 h-20 rounded-2xl border-4 border-background-secondary overflow-hidden bg-background-light">
+								{imagePreview ? (
+									<Image
+										src={imagePreview}
+										alt="프로필"
+										width={80}
+										height={80}
+										className="w-full h-full object-cover"
+									/>
+								) : (
+									<div className="w-full h-full flex items-center justify-center text-foreground-dim text-xs">
+										No Image
+									</div>
+								)}
+							</div>
+							<div className="absolute inset-0 rounded-2xl border-4 border-transparent bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+								<svg
+									className="w-5 h-5 text-white"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									strokeWidth={1.5}
+								>
+									<path d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+									<path d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
+								</svg>
 							</div>
 						</label>
 					</div>
 				</div>
 
-				<div className="pt-16 px-8 pb-8 text-white">
-					<div className="flex justify-between items-center mb-6">
-						<div>
-							<h2 className="text-2xl font-bold">
-								{userName || '프로필 이름'}
-							</h2>
-							<p className="text-sm text-gray-400">{initialData.userTag}</p>
-						</div>
-						<button
-							onClick={handleSave}
-							className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-5 rounded"
-						>
-							저장
-						</button>
+				{/* Content */}
+				<div className="pt-14 px-6 pb-6">
+					{/* Name & Tag */}
+					<div className="mb-6">
+						<h2 className="text-lg font-bold text-foreground">
+							{userName || '프로필 이름'}
+						</h2>
+						<p className="text-xs text-foreground-dim">{initialData.userTag}</p>
 					</div>
 
-					<div className="space-y-6">
+					{/* Form Fields */}
+					<div className="space-y-4">
 						<div>
-							<label className="text-sm text-gray-400">별명 (user_name)</label>
+							<label className="block text-xs font-semibold text-foreground-muted uppercase tracking-wider mb-2">
+								별명
+							</label>
 							<input
 								type="text"
 								value={userName}
 								onChange={(e) => setUserName(e.target.value)}
-								className="mt-1 w-full p-2 bg-[#2a2b2e] rounded border border-gray-600 text-white"
+								className="w-full h-11 px-4 bg-background-light border border-border rounded-xl text-sm text-foreground placeholder:text-foreground-dim"
 								placeholder="별명을 입력하세요"
 							/>
 						</div>
 
 						<div>
-							<label className="text-sm text-gray-400">
-								상태 메시지 (status_name)
+							<label className="block text-xs font-semibold text-foreground-muted uppercase tracking-wider mb-2">
+								상태 메시지
 							</label>
 							<input
 								type="text"
 								value={statusName}
 								onChange={(e) => setStatusName(e.target.value)}
-								className="mt-1 w-full p-2 bg-[#2a2b2e] rounded border border-gray-600 text-white"
+								className="w-full h-11 px-4 bg-background-light border border-border rounded-xl text-sm text-foreground placeholder:text-foreground-dim"
 								placeholder="상태 메시지를 입력하세요"
 							/>
 						</div>
 
 						<div>
-							<label className="text-sm text-gray-400">
-								한 줄 소개 (information)
+							<label className="block text-xs font-semibold text-foreground-muted uppercase tracking-wider mb-2">
+								한 줄 소개
 							</label>
 							<textarea
 								value={information}
 								onChange={(e) => setInformation(e.target.value)}
-								className="mt-1 w-full p-2 bg-[#2a2b2e] rounded border border-gray-600 text-white"
+								className="w-full px-4 py-3 bg-background-light border border-border rounded-xl text-sm text-foreground placeholder:text-foreground-dim resize-none"
 								rows={3}
 								placeholder="소개글을 입력하세요"
 							/>
 						</div>
+					</div>
+
+					{/* Actions */}
+					<div className="flex gap-2 mt-6">
+						<button
+							onClick={onClose}
+							className="flex-1 h-11 rounded-xl border border-border text-sm font-medium text-foreground-muted hover:text-foreground hover:bg-background-light transition-colors"
+						>
+							취소
+						</button>
+						<button
+							onClick={handleSave}
+							className="flex-1 h-11 rounded-xl bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors"
+						>
+							저장하기
+						</button>
 					</div>
 				</div>
 			</div>

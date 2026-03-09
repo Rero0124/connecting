@@ -36,41 +36,62 @@ export default function FriendSendPage() {
 	}
 
 	return (
-		<div className="p-6">
-			<h2 className="text-xl font-bold mb-4">보낸 친구 신청</h2>
+		<div className="flex flex-col gap-4 p-6">
+			<div>
+				<h2 className="text-lg font-bold text-foreground">보낸 친구 신청</h2>
+				<p className="text-sm text-foreground-muted mt-1">
+					{friendState.sentFriendRequests.length}개의 보낸 신청
+				</p>
+			</div>
+
 			{friendState.sentFriendRequests.length === 0 ? (
-				<p>보낸 친구 신청이 없습니다.</p>
+				<div className="flex flex-col items-center py-12 text-foreground-dim">
+					<svg
+						className="w-12 h-12 mb-3 opacity-30"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						strokeWidth={1}
+					>
+						<path d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+					</svg>
+					<p className="text-sm">보낸 친구 신청이 없습니다</p>
+				</div>
 			) : (
-				<ul className="space-y-3">
+				<div className="flex flex-col gap-2">
 					{friendState.sentFriendRequests.map((friendRequest) => (
-						<li
+						<div
 							key={friendRequest.profile.tag}
-							className="border p-3 rounded flex justify-between items-center hover:bg-gray-100"
+							className="flex items-center justify-between p-3 bg-background-light border border-border rounded-xl hover:border-border-light transition-colors cursor-pointer"
 							onClick={() => handleRowClick(friendRequest.id)}
 						>
-							<div className="cursor-pointer">
-								<div className="font-medium">
-									{friendRequest.profile.name || friendRequest.profile.tag}
+							<div className="flex items-center gap-3 flex-1 min-w-0">
+								<div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center text-accent text-xs font-bold shrink-0">
+									{(friendRequest.profile.name || friendRequest.profile.tag)
+										.charAt(0)
+										.toUpperCase()}
 								</div>
-								<div className="text-sm text-gray-500">
-									{new Date(friendRequest.sentAt).toLocaleString()}
+								<div className="min-w-0">
+									<p className="text-sm font-medium text-foreground truncate">
+										{friendRequest.profile.name || friendRequest.profile.tag}
+									</p>
+									<p className="text-xs text-foreground-dim">
+										{new Date(friendRequest.sentAt).toLocaleDateString()}
+									</p>
 								</div>
 							</div>
-
-							<div className="flex gap-2">
-								<button
-									className="text-red-600 hover:underline"
-									onClick={(e) => {
-										e.stopPropagation() // 이벤트 버블링 방지
-										handleFriendRequestCancel(friendRequest.id)
-									}}
-								>
-									❌
-								</button>
-							</div>
-						</li>
+							<button
+								className="h-8 px-3 text-xs font-medium rounded-lg bg-danger/15 text-danger hover:bg-danger/25 transition-colors shrink-0"
+								onClick={(e) => {
+									e.stopPropagation()
+									handleFriendRequestCancel(friendRequest.id)
+								}}
+							>
+								취소
+							</button>
+						</div>
 					))}
-				</ul>
+				</div>
 			)}
 
 			{selectedFriendRequestId && (

@@ -16,32 +16,15 @@ interface Friend {
 	image?: string
 	statusType: string
 	information?: string
+	isOnline: boolean
 }
 
-const getStatusLabel = (status: string): string => {
-	switch (status) {
-		case 'ONLINE':
-			return '온라인'
-		case 'AWAY':
-			return '자리 비움'
-		case 'DO_NOT_DISTURB':
-			return '방해 금지'
-		default:
-			return '오프라인'
-	}
+const getStatusLabel = (isOnline: boolean): string => {
+	return isOnline ? '온라인' : '오프라인'
 }
 
-const getStatusColor = (status: string): string => {
-	switch (status) {
-		case 'ONLINE':
-			return 'bg-green-500'
-		case 'AWAY':
-			return 'bg-yellow-400'
-		case 'DO_NOT_DISTURB':
-			return 'bg-red-600'
-		default:
-			return 'bg-gray-500'
-	}
+const getStatusColor = (isOnline: boolean): string => {
+	return isOnline ? 'bg-online' : 'bg-offline'
 }
 
 const order: Record<FriendStatus, number> = {
@@ -90,81 +73,93 @@ export default function FriendManage() {
 	}
 
 	return (
-		<div className="flex flex-col gap-4 p-4">
-			{sortedFriends.map((friend: Friend) => (
-				<div
-					key={`key_friend_${friend.tag}`}
-					className="flex items-center justify-between bg-zinc-900 p-3 rounded hover:bg-zinc-800"
-				>
-					{/* 좌측: 프로필 + 정보 */}
-					<div className="flex items-center gap-3">
-						{/* 프로필 이미지 */}
-						<div className="relative w-10 h-10">
-							<Image
-								src={friend.image || '/default-profile.png'}
-								alt="프로필"
-								fill
-								className="rounded-full object-cover"
-							/>
-							<span
-								className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-zinc-900 ${getStatusColor(
-									friend.statusType
-								)}`}
-							></span>
+		<div className="flex flex-col h-full bg-background">
+			{/* 헤더 */}
+			<div className="flex items-center h-12 px-5 border-b border-border shrink-0">
+				<span className="text-xs font-semibold text-foreground-dim uppercase tracking-wider">
+					친구 관리 — {sortedFriends.length}명
+				</span>
+			</div>
+
+			<div className="flex flex-col grow overflow-y-auto px-3 pt-2 gap-0.5">
+				{sortedFriends.map((friend: Friend) => (
+					<div
+						key={`key_friend_${friend.tag}`}
+						className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-background-light transition-colors group"
+					>
+						<div className="flex items-center gap-3 min-w-0">
+							<div className="relative w-9 h-9 shrink-0">
+								<Image
+									src={friend.image || '/default-profile.png'}
+									alt="프로필"
+									fill
+									className="rounded-full object-cover"
+								/>
+								<span
+									className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-background ${getStatusColor(
+										!!friend.isOnline
+									)}`}
+								/>
+							</div>
+							<div className="flex flex-col min-w-0">
+								<span className="text-sm font-medium text-foreground truncate">
+									{friend.name ?? friend.tag}
+								</span>
+								<span className="text-xs text-foreground-dim truncate">
+									{getStatusLabel(!!friend.isOnline)}
+									{friend.information ? ` · ${friend.information}` : ''}
+								</span>
+							</div>
 						</div>
 
-						{/* 이름 및 정보 */}
-						<div className="flex flex-col">
-							<span className="font-semibold">{friend.name ?? friend.tag}</span>
-							<span className="text-sm text-gray-400">
-								{getStatusLabel(friend.statusType)}
-								{friend.information ? ` · ${friend.information}` : ''}
-							</span>
-						</div>
-					</div>
-
-					{/* 우측: 메시지 & 더보기 */}
-					<div className="flex items-center gap-2">
-						{/* 메시지 이동 */}
-						<button
-							title="메시지"
-							className="text-sm text-blue-400 hover:underline"
-							onClick={() => router.push(`/dm/${friend.tag}`)}
-						>
-							메세지
-						</button>
-
-						{/* 더보기 버튼 */}
-						<div className="relative">
+						<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
 							<button
-								title="더 보기"
-								className="text-gray-400 text-xl px-2 cursor-pointer hover:text-white"
-								onClick={() =>
-									setActiveFriendTag((prev) =>
-										prev === friend.tag ? null : friend.tag
-									)
-								}
+								title="메시지"
+								className="h-8 px-3 text-xs font-medium rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-light border border-border transition-colors"
+								onClick={() => router.push(`/dm/${friend.tag}`)}
 							>
-								⋮
+								메시지
 							</button>
 
-							{activeFriendTag === friend.tag && (
-								<div
-									ref={menuRef}
-									className="absolute right-0 mt-2 bg-zinc-800 border border-zinc-700 rounded shadow-lg z-10"
+							<div className="relative">
+								<button
+									title="더 보기"
+									className="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-light transition-colors"
+									onClick={() =>
+										setActiveFriendTag((prev) =>
+											prev === friend.tag ? null : friend.tag
+										)
+									}
 								>
-									<button
-										className="px-4 py-2 text-sm text-red-500 hover:bg-zinc-700 text-center whitespace-nowrap"
-										onClick={() => handleDeleteFriend(friend.tag)}
+									<svg
+										className="w-4 h-4"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+										strokeWidth={2}
 									>
-										친구 삭제하기
-									</button>
-								</div>
-							)}
+										<path d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+									</svg>
+								</button>
+
+								{activeFriendTag === friend.tag && (
+									<div
+										ref={menuRef}
+										className="absolute right-0 mt-1 bg-background-secondary border border-border-light rounded-xl shadow-lg z-10 overflow-hidden w-40"
+									>
+										<button
+											className="w-full px-4 py-2.5 text-sm text-danger hover:bg-danger/10 text-left transition-colors"
+											onClick={() => handleDeleteFriend(friend.tag)}
+										>
+											친구 삭제
+										</button>
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
-				</div>
-			))}
+				))}
+			</div>
 		</div>
 	)
 }
