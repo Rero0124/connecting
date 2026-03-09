@@ -1,68 +1,59 @@
-# 📘 Connecting – 음성채팅 플랫폼폼
+# 📘 Connecting – WebRTC 기반 실시간 음성/화면공유 플랫폼
 
-Connecting은 
-
----
-
-## 🔧 기술 스택
-
-- **Frontend**: NextJS
-- **Backend**: NextJS, SocketIO
-- **Database**: PostgreSQL 13+
-- **Auth**: JWT + cookie
-- **ORM/Query**: Prisma
+Connecting은 mediasoup SFU 서버를 직접 구성하여 다중 참여자 간 실시간 음성 채팅 및 화면 공유를 구현한 플랫폼입니다.
+WebRTC 송신(Producer) 구현 및 테스트 완료, 수신(Consumer) 연결 구조까지 설계되어 있습니다.
 
 ---
 
-## 📂 주요 디렉터리 구조
+## ✅ 구현 완료 기능
 
-```
-app/                  # NextJS Frontend 페이지
-├── api/              # NextJS Backend 페이지
-prisma/               # Prisma 설정
-public/               # logo 등 정적 파일
-src/
-├── components/       # React Compoenets (NextJS 에서 불러와서 사용)
-├── provider/         # Redux, Socket 등 전역 Provider
-├── server/           # Socekt, Electron 등 서버 관련
-├── types/            # 공통으로 사용 하는 타입
-└── lib/              # Express 진입점
-    ├── constants/    # 전역 상수 값 
-    ├── features/     # Redux의 Slice
-    ├── form/         # React From Actions API Hook
-    ├── hooks/        # 커스텀 hook
-    ├── openapi/      # openapi(swagger) 설정
-    └── schemas/      # zod 스키마
-```
+- mediasoup Worker/Router/Transport 직접 구성
+- - WebRTC 음성(Opus) 및 화면공유(VP8/H264) 송신(Producer) 구현 및 테스트 완료
+  - - Socket.IO 기반 실시간 시그널링
+    - - JWT + cookie 인증
+      - - Electron 데스크탑 앱 지원
+        - - HTTP/1, HTTP/2, HTTP/3 소켓 지원 옵션
+          - - Swagger(/api-docs) API 문서화
+            - - Zod 스키마 기반 입력 검증
+             
+              - ---
 
-## ⚙️ 실행 방법
+              ## 🔧 기술 스택
 
-### 1. `.env` 파일 설정
+              - **Frontend**: NextJS, Redux Toolkit
+              - - **Backend**: NextJS, Socket.IO, mediasoup
+                - - **Database**: PostgreSQL 13+
+                  - - **Auth**: JWT + cookie
+                    - - **ORM/Query**: Prisma
+                      - - **Desktop**: Electron
+                        - - **Validation**: Zod, OpenAPI/Swagger
+                         
+                          - ---
 
-```
-DATABASE_URL="postgresql://user:password@localhost:5432/connecting?schema=public"
-HOST=localhost
-PORT=3000
-SOCKET_HOST=localhost
-SOCKET_PORT=4000
-HTTPS=false
-SOCKET_HTTP=HTTP/1
-#SOCKET_HTTP=HTTPS
-#SOCKET_HTTP=HTTP/2
-#SOCKET_HTTP=HTTP/3
-SESSION_SECRET="secret key"
-NEXT_PUBLIC_BASE_URL=https://your.nextjs.host.com
-NEXT_PUBLIC_SOCKET_URL=https://your.socket.host.com
-NEXT_PUBLIC_MEDIASOUP_URL=111.111.111.111   #loopback 제외
-```
+                          ## ⚙️ 실행 방법
 
-### 2. 설치 및 실행
+                          ### 1. .env 파일 설정
 
-```bash
-yarn
-yarn prisma migrate reset
-yarn dev # or build and start
-yarn socekt
-yarn electron # 필요시
-```
----
+                          ```env
+                          DATABASE_URL="postgresql://user:password@localhost:5432/connecting?schema=public"
+                          HOST=localhost
+                          PORT=3000
+                          SOCKET_HOST=localhost
+                          SOCKET_PORT=4000
+                          HTTPS=false
+                          SOCKET_HTTP=HTTP/1
+                          SESSION_SECRET="secret key"
+                          NEXT_PUBLIC_BASE_URL=https://your.nextjs.host.com
+                          NEXT_PUBLIC_SOCKET_URL=https://your.socket.host.com
+                          NEXT_PUBLIC_MEDIASOUP_URL=111.111.111.111
+                          ```
+
+                          ### 2. 설치 및 실행
+
+                          ```bash
+                          yarn
+                          yarn prisma migrate reset
+                          yarn dev
+                          yarn socket
+                          yarn electron
+                          ```
