@@ -3,19 +3,20 @@
 import DragAbleDiv, { DragAbleDivOption } from '@/src/components/ui/DragAbleDiv'
 import { setNavSize } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
-import { setContextMenu } from '@/src/provider/ContextMenuProvider'
-import { redirect } from 'next/navigation'
+import { useContextMenu } from '@/src/provider/ContextMenuProvider'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 
 export const FriendNav = () => {
 	const { navSize, selectedFriendMenu } = useAppSelector(
 		(state) => state.viewContext
 	)
 	const dispatch = useAppDispatch()
+	const router = useRouter()
+	const contextMenu = useContextMenu()
 
 	const navRef = useRef<HTMLDivElement>(null)
-	const contextRef = useRef<HTMLDivElement>(null)
 
 	const onDragEnd = ({ x }: { x: number }) => {
 		dispatch(setNavSize(x))
@@ -27,30 +28,22 @@ export const FriendNav = () => {
 		}
 	}
 
-	useEffect(() => {
-		if (contextRef.current) {
-			setContextMenu(contextRef.current, [
-				{
-					name: '친구목록',
-					callback: () => {
-						redirect('/friend/list')
-					},
-				},
-				{
-					name: '친구추가',
-					callback: () => {
-						redirect('/friend/request')
-					},
-				},
-				{
-					name: '친구 관리',
-					callback: () => {
-						redirect('/friend/manage')
-					},
-				},
-			])
-		}
-	}, [])
+	const handleContextMenu = (e: React.MouseEvent) => {
+		contextMenu.open(e, [
+			{
+				label: '친구 목록',
+				onClick: () => router.push('/friend/list'),
+			},
+			{
+				label: '친구 요청',
+				onClick: () => router.push('/friend/request'),
+			},
+			{
+				label: '친구 관리',
+				onClick: () => router.push('/friend/manage'),
+			},
+		])
+	}
 
 	const dragAbleDivOption: DragAbleDivOption = {
 		direction: 'right',
@@ -81,7 +74,6 @@ export const FriendNav = () => {
 	}
 	return (
 		<DragAbleDiv
-			ref={contextRef}
 			classname="bg-background-secondary border-r border-border"
 			option={dragAbleDivOption}
 			onDragging={onDragging}
@@ -91,6 +83,7 @@ export const FriendNav = () => {
 				ref={navRef}
 				className="bg-background-secondary flex flex-col h-full px-2 py-3"
 				style={{ width: navSize }}
+				onContextMenu={handleContextMenu}
 			>
 				{/* 섹션 헤더 */}
 				<div className="px-3 h-8 flex items-center mb-1">

@@ -150,34 +150,68 @@ export const DmSessionRoom = () => {
 
 			{/* Call Bar */}
 			{isCalling && (
-				<div className="flex items-center gap-2 px-4 py-2.5 bg-success/10 border-b border-success/20 shrink-0">
-					<div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-					<span className="text-xs font-medium text-success mr-auto">
-						통화 중
-					</span>
+				<div className="flex items-center justify-center gap-2 px-4 py-2 bg-success/10 border-b border-success/20 shrink-0">
+					<div className="flex items-center gap-1.5 mr-auto">
+						<span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+						<span className="text-xs font-medium text-success">통화 중</span>
+					</div>
+					{/* 마이크 */}
 					<button
-						className="h-7 px-3 text-xs font-medium rounded-lg bg-background-light text-foreground-muted hover:text-foreground border border-border transition-colors"
+						className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+							isMicOn
+								? 'bg-background-light text-foreground-muted hover:text-foreground'
+								: 'bg-danger/20 text-danger hover:bg-danger/30'
+						}`}
 						onClick={handleCallingMute}
+						title={isMicOn ? '음소거' : '음소거 해제'}
 					>
-						{isMicOn ? '음소거' : '음소거 해제'}
+						{isMicOn ? (
+							<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+								<path d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+							</svg>
+						) : (
+							<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+								<path d="m3 3 18 18M12 18.75a6 6 0 0 0 6-6v-1.5M12 18.75a6 6 0 0 1-6-6v-1.5M12 18.75v3.75m-3.75 0h7.5M9 4.5a3 3 0 0 1 6 0v8.25" />
+							</svg>
+						)}
 					</button>
+					{/* 카메라 */}
 					<button
-						className="h-7 px-3 text-xs font-medium rounded-lg bg-background-light text-foreground-muted hover:text-foreground border border-border transition-colors"
+						className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+							isCameraOn
+								? 'bg-accent/20 text-accent hover:bg-accent/30'
+								: 'bg-background-light text-foreground-dim hover:text-foreground'
+						}`}
 						onClick={handleCamera}
+						title={isCameraOn ? '카메라 끄기' : '카메라 켜기'}
 					>
-						{isCameraOn ? '카메라 끄기' : '카메라 켜기'}
+						<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+							<path d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+						</svg>
 					</button>
+					{/* 화면 공유 */}
 					<button
-						className="h-7 px-3 text-xs font-medium rounded-lg bg-background-light text-foreground-muted hover:text-foreground border border-border transition-colors"
+						className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+							isScreenOn
+								? 'bg-accent/20 text-accent hover:bg-accent/30'
+								: 'bg-background-light text-foreground-dim hover:text-foreground'
+						}`}
 						onClick={handleScreenShare}
+						title={isScreenOn ? '화면 공유 중지' : '화면 공유'}
 					>
-						{isScreenOn ? '공유 중지' : '화면 공유'}
+						<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+							<path d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25Z" />
+						</svg>
 					</button>
+					{/* 통화 종료 */}
 					<button
-						className="h-7 px-3 text-xs font-medium rounded-lg bg-danger/20 text-danger hover:bg-danger/30 transition-colors"
+						className="w-8 h-8 flex items-center justify-center rounded-full bg-danger hover:bg-danger-hover text-white transition-colors ml-1"
 						onClick={handleCallingStop}
+						title="통화 종료"
 					>
-						통화 종료
+						<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+							<path d="M15.75 3.75 18 6m0 0 2.25 2.25M18 6l2.25-2.25M18 6l-2.25 2.25m1.5 13.5c-8.284 0-15-6.716-15-15V4.5A2.25 2.25 0 0 1 4.5 2.25h1.372c.516 0 .966.351 1.091.852l1.106 4.423c.11.44-.054.902-.417 1.173l-1.293.97a1.062 1.062 0 0 0-.38 1.21 12.035 12.035 0 0 0 7.143 7.143c.441.162.928-.004 1.21-.38l.97-1.293a1.125 1.125 0 0 1 1.173-.417l4.423 1.106c.5.125.852.575.852 1.091V19.5a2.25 2.25 0 0 1-2.25 2.25h-2.25Z" />
+						</svg>
 					</button>
 				</div>
 			)}

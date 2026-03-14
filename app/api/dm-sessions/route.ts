@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 			},
 		})
 
-		socket.emit('update_dmSessions', [sessionCheck.profileId])
+		socket.emit('update_dmSessions', [sessionCheck.profileId.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

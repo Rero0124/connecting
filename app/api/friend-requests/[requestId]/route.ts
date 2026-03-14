@@ -99,8 +99,8 @@ export async function PATCH(
 				})
 
 				socket.emit('update_friends', [
-					friendRequest.profileId,
-					friendRequest.requestProfileId,
+					friendRequest.profileId.toString(),
+					friendRequest.requestProfileId.toString(),
 				])
 
 				await prisma.friendRequest.delete({
@@ -110,8 +110,8 @@ export async function PATCH(
 				})
 
 				socket.emit('update_friendRequests', [
-					friendRequest.profileId,
-					friendRequest.requestProfileId,
+					friendRequest.profileId.toString(),
+					friendRequest.requestProfileId.toString(),
 				])
 
 				return apiJsonResponse<SuccessResponse>(
@@ -130,8 +130,8 @@ export async function PATCH(
 				})
 
 				socket.emit('update_friendRequests', [
-					friendRequest.profileId,
-					friendRequest.requestProfileId,
+					friendRequest.profileId.toString(),
+					friendRequest.requestProfileId.toString(),
 				])
 
 				return apiJsonResponse<SuccessResponse>(
@@ -223,8 +223,8 @@ export async function DELETE(
 		})
 
 		socket.emit('update_friendRequests', [
-			friendRequest.profileId,
-			friendRequest.requestProfileId,
+			friendRequest.profileId.toString(),
+			friendRequest.requestProfileId.toString(),
 		])
 
 		return apiJsonResponse<SuccessResponse>(

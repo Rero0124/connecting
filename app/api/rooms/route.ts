@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 			},
 		})
 
-		socket.emit('update_rooms', [sessionCheck.profileId])
+		socket.emit('update_rooms', [sessionCheck.profileId.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

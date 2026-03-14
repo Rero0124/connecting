@@ -8,14 +8,14 @@ import { UpdateFriendRequestBodySchema } from '@/src/lib/schemas/friend.schema'
 export default function FriendSendPage() {
 	const friendState = useAppSelector((state) => state.friend)
 	const [selectedFriendRequestId, setSelectedFriendRequestId] =
-		useState<bigint>()
+		useState<bigint | string>()
 
 	// row 클릭 시 호출되는 함수
-	const handleRowClick = (friendRequestId: bigint) => {
+	const handleRowClick = (friendRequestId: bigint | string) => {
 		setSelectedFriendRequestId(friendRequestId)
 	}
 
-	const handleFriendRequestCancel = async (friendRequestId: bigint) => {
+	const handleFriendRequestCancel = async (friendRequestId: bigint | string) => {
 		try {
 			const response = await fetchWithValidation(
 				`/api/friend-requests/${friendRequestId}`,

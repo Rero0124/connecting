@@ -202,10 +202,10 @@ export async function PATCH(
 
 		socket.emit(
 			'update_friends',
-			friendProfileIds.map((friendProfileId) => friendProfileId.friendProfileId)
+			friendProfileIds.map((friendProfileId) => friendProfileId.friendProfileId.toString())
 		)
 
-		socket.emit('update_profile', [profile.id])
+		socket.emit('update_profile', [profile.id.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

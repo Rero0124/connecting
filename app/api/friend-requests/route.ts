@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
 				},
 			})
 
-			socket.emit('update_friends', [sessionCheck.profileId, profile.id])
+			socket.emit('update_friends', [sessionCheck.profileId.toString(), profile.id.toString()])
 		} else {
 			await prisma.friendRequest.create({
 				data: {
@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
 			})
 		}
 
-		socket.emit('update_friendRequests', [sessionCheck.profileId, profile.id])
+		socket.emit('update_friendRequests', [sessionCheck.profileId.toString(), profile.id.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import ProfileEditModal from '@/src/components/profile/ProfileEditModal'
 import CreateRoomModal from '@/src/components/room/CreateRoomModal'
+import JoinRoomModal from '@/src/components/room/JoinRoomModal'
 
 const NavButton = ({
 	href,
@@ -61,6 +62,7 @@ export const MainNav = () => {
 	const [showSettings, setShowSettings] = useState(false)
 	const [showProfileModal, setShowProfileModal] = useState(false)
 	const [showCreateRoomModal, setShowCreateRoomModal] = useState(false)
+	const [showJoinRoomModal, setShowJoinRoomModal] = useState(false)
 	const settingsRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -140,7 +142,7 @@ export const MainNav = () => {
 						</NavButton>
 
 						{/* 탐색 */}
-						<NavButton tooltip="탐색">
+						<NavButton onClick={() => setShowJoinRoomModal(true)} tooltip="탐색">
 							<svg
 								className="w-5 h-5"
 								fill="none"
@@ -230,6 +232,11 @@ export const MainNav = () => {
 			<CreateRoomModal
 				isOpen={showCreateRoomModal}
 				onClose={() => setShowCreateRoomModal(false)}
+			/>
+
+			<JoinRoomModal
+				isOpen={showJoinRoomModal}
+				onClose={() => setShowJoinRoomModal(false)}
 			/>
 		</>
 	)

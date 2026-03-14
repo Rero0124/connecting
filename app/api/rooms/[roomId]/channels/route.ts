@@ -146,7 +146,7 @@ export async function POST(
 		socket.emit(
 			'update_roomChannels',
 			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+				(participantProfileId) => participantProfileId.profileId.toString()
 			),
 			paramsFields.data.roomId
 		)

@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 interface FriendDetailModalProps {
-	friendRequestId: bigint
+	friendRequestId: bigint | string
 	type: 'send' | 'receive'
 	onClose: () => void
 	onAccept?: () => void
@@ -37,7 +37,8 @@ export default function FriendDetailModal({
 	}>()
 	useEffect(() => {
 		if (friendRequestId) {
-			const request = getFriendRequests(friendState, friendRequestId)
+			const id = typeof friendRequestId === 'string' ? BigInt(friendRequestId) : friendRequestId
+			const request = getFriendRequests(friendState, id)
 			if (request && !Array.isArray(request)) {
 				setFriendRequest(deserializeData(request))
 			}

@@ -167,7 +167,7 @@ export function useVoiceCall(
 		const device = deviceRef.current ?? new mediasoupClient.Device()
 		if (!device.loaded) {
 			const routerRtpCapabilities = await new Promise<RtpCapabilities>(
-				(resolve) => socket.emit('call_getRouterRtpCapabilities', resolve)
+				(resolve) => socket.emit('call_getRouterRtpCapabilities', (caps: unknown) => resolve(caps as RtpCapabilities))
 			)
 			await device.load({ routerRtpCapabilities })
 		}
@@ -285,8 +285,8 @@ export function useVoiceCall(
 			async ({ kind, rtpParameters }, callback) => {
 				socket.emit(
 					'call_produce',
-					{ kind, rtpParameters, callId },
-					({ id }) => {
+					{ kind, rtpParameters: rtpParameters as any, callId },
+					({ id }: { id: string }) => {
 						callback({ id })
 					}
 				)
@@ -325,11 +325,11 @@ export function useVoiceCall(
 					producerId,
 					callId,
 					kind,
-					rtpCapabilities: deviceRef.current.rtpCapabilities,
+					rtpCapabilities: deviceRef.current.rtpCapabilities as any,
 				},
-				async (consumerParams) => {
+				async (consumerParams: any) => {
 					if ('error' in consumerParams) return
-					const consumer = await newRecvTransport.consume(consumerParams)
+					const consumer = await newRecvTransport.consume(consumerParams as any)
 					await consumer.resume()
 					consumersRef.current.push(consumer)
 

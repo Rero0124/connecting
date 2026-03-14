@@ -13,9 +13,9 @@ export default function FriendReceivePage() {
 	const [receivedFriendRequests, setReceivedFriendRequests] =
 		useState(initialRequests)
 	const [selectedFriendRequestId, setSelectedFriendRequestId] =
-		useState<bigint>()
+		useState<bigint | string>()
 
-	const handleFriendRequestAccept = async (friendRequestId: bigint) => {
+	const handleFriendRequestAccept = async (friendRequestId: bigint | string) => {
 		try {
 			const response = await fetchWithValidation(
 				`/api/friend-requests/${friendRequestId}`,
@@ -42,7 +42,7 @@ export default function FriendReceivePage() {
 		}
 	}
 
-	const handleFriendRequestReject = async (friendRequestId: bigint) => {
+	const handleFriendRequestReject = async (friendRequestId: bigint | string) => {
 		try {
 			const response = await fetchWithValidation(
 				`/api/friend-requests/${friendRequestId}`,

@@ -71,7 +71,7 @@ export async function DELETE(
 			},
 		})
 
-		socket.emit('update_friends', [friend.profileId, friend.friendProfileId])
+		socket.emit('update_friends', [friend.profileId.toString(), friend.friendProfileId.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

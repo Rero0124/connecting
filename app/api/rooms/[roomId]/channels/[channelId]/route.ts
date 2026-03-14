@@ -7,6 +7,7 @@ import {
 } from '@/src/lib/schemas/room.schema'
 import { verifySession } from '@/src/lib/session'
 import { socket } from '@/src/lib/socket'
+import { apiJsonResponse } from '@/src/lib/serverUtil'
 import { ResponseDictionary } from '@/src/types/dictionaries/res/dict'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,7 +15,7 @@ export async function PATCH(
 	request: NextRequest,
 	{
 		params,
-	}: { params: Promise<{ roomId: string; channelId: StringConstructor }> }
+	}: { params: Promise<{ roomId: string; channelId: string }> }
 ) {
 	const { roomId } = await params
 
@@ -128,7 +129,7 @@ export async function PATCH(
 		socket.emit(
 			'update_rooms',
 			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+				(participantProfileId) => participantProfileId.profileId.toString()
 			)
 		)
 
@@ -241,7 +242,7 @@ export async function DELETE(
 		socket.emit(
 			'update_roomChannels',
 			participantProfileIds.map(
-				(participantProfileId) => participantProfileId.profileId
+				(participantProfileId) => participantProfileId.profileId.toString()
 			),
 			paramsFields.data.roomId
 		)

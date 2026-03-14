@@ -122,7 +122,7 @@ export async function DELETE(
 			},
 		})
 
-		socket.emit('update_rooms', [paramsFields.data.profileId])
+		socket.emit('update_rooms', [paramsFields.data.profileId.toString()])
 
 		return apiJsonResponse<SuccessResponse>(
 			{

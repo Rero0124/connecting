@@ -117,7 +117,10 @@ export default function VoiceChannel({
 					{channelName}
 				</span>
 				{joined && (
-					<span className="ml-2 text-xs text-green-400">● 연결됨</span>
+					<span className="ml-2 flex items-center gap-1.5 text-xs text-online">
+						<span className="w-2 h-2 rounded-full bg-online pulse-online" />
+						연결됨
+					</span>
 				)}
 			</div>
 

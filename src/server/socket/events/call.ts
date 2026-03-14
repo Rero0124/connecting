@@ -133,7 +133,7 @@ export function registerCallEvents(
 			const transport = globalData.sendTransports[socket.id]
 			if (!transport) return
 
-			const producer = await transport.produce({ kind, rtpParameters })
+			const producer = await transport.produce({ kind, rtpParameters: rtpParameters as any })
 			if (!globalData.producers[socket.id]) {
 				globalData.producers[socket.id] = []
 			}
@@ -151,7 +151,7 @@ export function registerCallEvents(
 		}
 	)
 
-	socket.on('call_getRouterRtpCapabilities', (callback) => {
+	socket.on('call_getRouterRtpCapabilities', (callback: (caps: any) => void) => {
 		callback(globalData.router.rtpCapabilities)
 	})
 
@@ -192,7 +192,7 @@ export function registerCallEvents(
 
 			if (
 				!producer ||
-				!globalData.router.canConsume({ producerId, rtpCapabilities }) ||
+				!globalData.router.canConsume({ producerId, rtpCapabilities: rtpCapabilities as any }) ||
 				!transport
 			) {
 				return callback({ error: 'Cannot consume' })
@@ -200,7 +200,7 @@ export function registerCallEvents(
 
 			const consumer = await transport.consume({
 				producerId,
-				rtpCapabilities,
+				rtpCapabilities: rtpCapabilities as any,
 				paused: false,
 			})
 
@@ -208,7 +208,7 @@ export function registerCallEvents(
 				id: consumer.id,
 				producerId: consumer.producerId,
 				kind: consumer.kind,
-				rtpParameters: consumer.rtpParameters,
+				rtpParameters: consumer.rtpParameters as any,
 			})
 		}
 	)
