@@ -16,6 +16,7 @@ import {
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useContextMenu, type ContextMenuEntry } from '@/src/provider/ContextMenuProvider'
 
 export const DmSessionRoom = () => {
 	const dmState = useAppSelector((state) => state.dm)
@@ -31,6 +32,7 @@ export const DmSessionRoom = () => {
 		toggleScreen,
 		isScreenOn,
 	} = useVoiceCall()
+	const contextMenu = useContextMenu()
 	const [pendingMessage, setPendingMessage] = useState<string>('')
 	const [isCalling, setIsCalling] = useState(false)
 	let pastMessageProfileId = -1n
@@ -84,6 +86,34 @@ export const DmSessionRoom = () => {
 			})
 		}
 	}, [dmState])
+
+	const getDmMessageMenuItems = (
+		content: string,
+		messageId: bigint | number | string,
+		isMe: boolean
+	): ContextMenuEntry[] => [
+		{
+			label: '메시지 복사',
+			onClick: () => navigator.clipboard.writeText(content),
+		},
+		...(isMe
+			? [
+					{ separator: true } as const,
+					{
+						label: '메시지 삭제',
+						danger: true,
+						onClick: () => {
+							if (confirm('이 메시지를 삭제하시겠습니까?')) {
+								fetch(
+									`/api/dm-sessions/${dmSessionId}/messages/${messageId}`,
+									{ method: 'DELETE' }
+								)
+							}
+						},
+					},
+				]
+			: []),
+	]
 
 	return (
 		<div className="flex flex-col justify-between h-full bg-background">
@@ -161,11 +191,13 @@ export const DmSessionRoom = () => {
 						const pastMessageSameUser = msg.profileId === pastMessageProfileId
 						pastMessageProfileId = msg.profileId
 						const isMe = message.profileId === viewContextState.profile?.id
+						const menuItems = getDmMessageMenuItems(message.content, message.id, isMe)
 
 						return isMe ? (
 							<div
 								key={`DmMessage_${message.dmSessionId}_${message.id}`}
 								className="flex justify-end animate-slide-in"
+								onContextMenu={(e) => contextMenu.open(e, menuItems)}
 							>
 								<div className="max-w-[70%] px-3.5 py-2 rounded-2xl rounded-br-md bg-accent text-white text-sm">
 									{message.content}
@@ -175,6 +207,7 @@ export const DmSessionRoom = () => {
 							<div
 								key={`DmMessage_${message.dmSessionId}_${message.id}`}
 								className="flex items-start gap-2.5 animate-slide-in"
+								onContextMenu={(e) => contextMenu.open(e, menuItems)}
 							>
 								{!pastMessageSameUser ? (
 									<Image

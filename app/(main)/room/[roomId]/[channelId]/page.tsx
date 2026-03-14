@@ -1,4 +1,4 @@
-import { RoomChannel } from '@/src/components/room/RoomChannel'
+import ChannelView from '@/src/components/room/ChannelView'
 import RoomNav from '@/src/components/room/RoomNav'
 import { toBigInt } from '@/src/lib/util'
 
@@ -12,7 +12,7 @@ export default async function Layout({
 	return (
 		<>
 			<RoomNav roomId={roomId} channelId={toBigInt(channelId)} />
-			<RoomChannel roomId={roomId} channelId={toBigInt(channelId)} />
+			<ChannelView roomId={roomId} channelId={toBigInt(channelId)} />
 		</>
 	)
 }

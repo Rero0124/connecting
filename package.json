@@ -36,6 +36,7 @@
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.18",
     "swc-node": "^1.0.0",
+    "tsx": "^4.21.0",
     "zod": "3.25",
     "zod-openapi": "^4.2.4"
   },

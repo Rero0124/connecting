@@ -128,7 +128,7 @@ export default function NewMessageModal({
 			onClick={onClose}
 		>
 			<div
-				className="bg-background-secondary border border-border-light rounded-2xl shadow-lg w-[440px] max-h-[85vh] overflow-y-auto"
+				className="bg-background-secondary border border-border-light rounded-2xl shadow-lg w-[90vw] max-w-110 max-h-[85vh] overflow-y-auto"
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Header */}

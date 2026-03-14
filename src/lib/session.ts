@@ -7,7 +7,13 @@ const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)
 
 export async function encrypt(payload: Session) {
-	return new SignJWT(payload)
+	const jwtPayload = {
+		...payload,
+		userId: payload?.userId != null ? Number(payload.userId) : undefined,
+		profileId:
+			payload?.profileId != null ? Number(payload.profileId) : undefined,
+	}
+	return new SignJWT(jwtPayload)
 		.setProtectedHeader({ alg: 'HS256' })
 		.setIssuedAt()
 		.setExpirationTime('7d')
@@ -30,7 +36,7 @@ export async function createSession(userId: bigint, profileId: bigint) {
 
 	cookieStore.set('session', session, {
 		httpOnly: true,
-		secure: true,
+		secure: process.env.NODE_ENV === 'production',
 		expires: expiresAt,
 		sameSite: 'lax',
 		path: '/',

@@ -94,7 +94,7 @@ export default function ProfileEditModal({
 			onClick={onClose}
 		>
 			<div
-				className="relative w-[520px] bg-background-secondary border border-border-light rounded-2xl overflow-hidden shadow-lg"
+				className="relative w-[90vw] max-w-130 bg-background-secondary border border-border-light rounded-2xl overflow-hidden shadow-lg"
 				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Banner */}

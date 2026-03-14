@@ -4,13 +4,12 @@ import { JoinFormState, LoginFormState } from '@/src/lib/form/auth'
 import prisma from '@/src/lib/prisma'
 import {
 	AuthGetProfilesInputSchema,
-	AuthJoinBodySchema,
 	AuthJoinInputSchema,
 	AuthLoginInputSchema,
 } from '@/src/lib/schemas/auth.schema'
 import { getAuthUserProfiles } from '@/src/lib/serverUtil'
 import { createSession } from '@/src/lib/session'
-import { fetchWithValidation } from '@/src/lib/util'
+import bcryptjs from 'bcryptjs'
 
 export async function login(
 	state: LoginFormState,
@@ -132,35 +131,44 @@ export async function join(
 
 	const { tag, name, email, password } = joinFields.data
 
-	const joinResponse = await fetchWithValidation(`/api/users`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		cache: 'no-cache',
-		body: {
-			tag,
-			name,
-			email,
-			password,
-		},
-		bodySchema: AuthJoinBodySchema,
-	})
+	let user
+	try {
+		const hashedPassword = await bcryptjs.hash(password, 10)
 
-	if (joinResponse.status === 'error') {
+		user = await prisma.user.create({
+			data: { email, password: hashedPassword },
+		})
+
+		await prisma.profile.create({
+			data: {
+				tag,
+				userId: user.id,
+				name,
+				information: '',
+				statusType: 'common',
+				statusId: 0,
+			},
+		})
+
 		return {
 			data: {
 				email: formData.get('email')?.toString(),
 				password: formData.get('password')?.toString(),
 			},
-			message: joinResponse.message,
+			message: '회원가입에 성공했습니다.',
+			isJoin: true,
 		}
-	}
+	} catch {
+		if (user) {
+			await prisma.user.delete({ where: { id: user.id } })
+		}
 
-	return {
-		data: {
-			email: formData.get('email')?.toString(),
-			password: formData.get('password')?.toString(),
-		},
-		message: joinResponse.message,
-		isJoin: true,
+		return {
+			data: {
+				email: formData.get('email')?.toString(),
+				password: formData.get('password')?.toString(),
+			},
+			message: '회원가입에 실패했습니다. 이미 사용 중인 이메일일 수 있습니다.',
+		}
 	}
 }

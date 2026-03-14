@@ -4,6 +4,7 @@ import { useAppSelector } from '@/src/lib/hooks'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import ProfileEditModal from '@/src/components/profile/ProfileEditModal'
+import CreateRoomModal from '@/src/components/room/CreateRoomModal'
 
 const NavButton = ({
 	href,
@@ -59,6 +60,7 @@ export const MainNav = () => {
 	const profile = useAppSelector((state) => state.viewContext.profile)
 	const [showSettings, setShowSettings] = useState(false)
 	const [showProfileModal, setShowProfileModal] = useState(false)
+	const [showCreateRoomModal, setShowCreateRoomModal] = useState(false)
 	const settingsRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -122,7 +124,10 @@ export const MainNav = () => {
 						{roomState.rooms.length > 0 && <NavSepar />}
 
 						{/* 방 생성 */}
-						<NavButton href="/" tooltip="방 만들기">
+						<NavButton
+							onClick={() => setShowCreateRoomModal(true)}
+							tooltip="방 만들기"
+						>
 							<svg
 								className="w-5 h-5"
 								fill="none"
@@ -135,7 +140,7 @@ export const MainNav = () => {
 						</NavButton>
 
 						{/* 탐색 */}
-						<NavButton href="/" tooltip="탐색">
+						<NavButton tooltip="탐색">
 							<svg
 								className="w-5 h-5"
 								fill="none"
@@ -196,7 +201,13 @@ export const MainNav = () => {
 					</div>
 
 					{/* 프로필 아바타 */}
-					<NavButton href="/" tooltip="내 프로필">
+					<NavButton
+						onClick={() => {
+							setShowProfileModal(true)
+							setShowSettings(false)
+						}}
+						tooltip="내 프로필"
+					>
 						<span className="text-xs font-bold">
 							{(profile?.name ?? profile?.tag ?? '?').charAt(0).toUpperCase()}
 						</span>
@@ -215,6 +226,11 @@ export const MainNav = () => {
 					}}
 				/>
 			)}
+
+			<CreateRoomModal
+				isOpen={showCreateRoomModal}
+				onClose={() => setShowCreateRoomModal(false)}
+			/>
 		</>
 	)
 }

@@ -164,7 +164,7 @@ export const MainLayout = ({
 									<path d="m21 21-4.3-4.3" />
 								</svg>
 								<input
-									className="h-8 w-44 pl-8 pr-3 rounded-lg bg-background-light border border-border text-sm text-foreground placeholder:text-foreground-dim focus:w-56 transition-all"
+									className="h-8 w-48 pl-8 pr-3 rounded-lg bg-background-light border border-border text-sm text-foreground placeholder:text-foreground-dim"
 									placeholder="검색..."
 								/>
 							</div>
@@ -195,7 +195,9 @@ export const MainLayout = ({
 
 					<div className="flex flex-row grow overflow-hidden">
 						<MainNav />
-						<main className="flex-1 overflow-hidden">{children}</main>
+						<main className="flex flex-row flex-1 overflow-hidden">
+							{children}
+						</main>
 					</div>
 
 					<ChangeProfileModal
@@ -216,7 +218,7 @@ export const MainLayout = ({
 					/>
 				</>
 			) : (
-				<div className="flex items-center justify-center h-screen bg-background">
+				<div className="flex items-center justify-center grow bg-background">
 					<div className="flex flex-col items-center space-y-4">
 						<div className="w-10 h-10 border-3 border-accent/30 border-t-accent rounded-full animate-spin" />
 						<p className="text-sm text-foreground-muted">로딩 중...</p>

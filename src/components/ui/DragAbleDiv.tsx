@@ -68,19 +68,28 @@ export default function DragAbleDiv({
 	}
 
 	useEffect(() => {
-		if (currentRef.current && childRef.current) {
-			currentRef.current.addEventListener('mousedown', mouseDownHandler)
-			childRef.current.addEventListener('mousedown', (e: Event) => {
-				e.stopPropagation()
-			})
+		const current = currentRef.current
+		const child = childRef.current
+		const stopPropagation = (e: Event) => e.stopPropagation()
+
+		if (current && child) {
+			current.addEventListener('mousedown', mouseDownHandler)
+			child.addEventListener('mousedown', stopPropagation)
 		}
-	}, [currentRef, childRef])
+
+		return () => {
+			if (current && child) {
+				current.removeEventListener('mousedown', mouseDownHandler)
+				child.removeEventListener('mousedown', stopPropagation)
+			}
+		}
+	}, [])
 
 	const hoverSize = option.hoverSize ?? 4
 	const minWidth = option.minWidth ?? 100
 	const minHeight = option.minHeight ?? 100
 	const maxWidth = option.maxWidth ?? 800
-	const maxHeight = option.maxWidth ?? 800
+	const maxHeight = option.maxHeight ?? 800
 	const onDraggingInterval = option.onDraggingInterval ?? 100
 	let onDraggingAllow = true
 	const basicStyle: React.CSSProperties = {}
@@ -166,12 +175,18 @@ export default function DragAbleDiv({
 					{children}
 				</div>
 				<div
-					className={
-						'border-r-[1px]' +
-						(option.hoverColor &&
-							` hover:bg-${option.hoverColor} hover:border-${option.hoverColor}`)
-					}
+					className="border-r transition-colors"
 					style={{ width: hoverSize, cursor: 'w-resize' }}
+					onMouseEnter={(e) => {
+						if (option.hoverColor) {
+							e.currentTarget.style.backgroundColor = `var(--color-${option.hoverColor})`
+							e.currentTarget.style.borderColor = `var(--color-${option.hoverColor})`
+						}
+					}}
+					onMouseLeave={(e) => {
+						e.currentTarget.style.backgroundColor = ''
+						e.currentTarget.style.borderColor = ''
+					}}
 				></div>
 			</div>
 		</div>

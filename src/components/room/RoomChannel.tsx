@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
+import { useContextMenu, type ContextMenuEntry } from '@/src/provider/ContextMenuProvider'
 import {
 	getRoomTextChannel,
 	setRoomDetail,
@@ -11,11 +12,6 @@ import {
 	CreateRoomMessageBodySchema,
 	GetRoomResponseSchema,
 } from '@/src/lib/schemas/room.schema'
-import { z } from 'zod'
-import {
-	ApiResponseSchema,
-	SuccessResponseSchema,
-} from '@/src/lib/schemas/api.schema'
 
 export const RoomChannel = ({
 	roomId,
@@ -26,7 +22,10 @@ export const RoomChannel = ({
 }) => {
 	const [pendingMessage, setPendingMessage] = useState<string>('')
 	const roomState = useAppSelector((state) => state.room)
+	const viewContextState = useAppSelector((state) => state.viewContext)
 	const dispatch = useAppDispatch()
+	const contextMenu = useContextMenu()
+	let pastMessageProfileId: string = ''
 
 	const channel = getRoomTextChannel(roomState, roomId, channelId ?? undefined)
 
@@ -59,6 +58,34 @@ export const RoomChannel = ({
 		}
 	}, [roomState])
 
+	const getMessageMenuItems = (
+		messageContent: string,
+		messageId: bigint | number | string,
+		isMe: boolean
+	): ContextMenuEntry[] => [
+		{
+			label: '메시지 복사',
+			onClick: () => navigator.clipboard.writeText(messageContent),
+		},
+		...(isMe
+			? [
+					{ separator: true } as const,
+					{
+						label: '메시지 삭제',
+						danger: true,
+						onClick: () => {
+							if (confirm('이 메시지를 삭제하시겠습니까?')) {
+								fetch(
+									`/api/rooms/${roomId}/channels/${channelId}/messages/${messageId}`,
+									{ method: 'DELETE' }
+								)
+							}
+						},
+					},
+				]
+			: []),
+	]
+
 	return (
 		<div className="flex flex-col justify-between h-full bg-background">
 			{/* Channel Header */}
@@ -78,16 +105,55 @@ export const RoomChannel = ({
 			</div>
 
 			{/* Messages */}
-			<div className="flex flex-col grow overflow-y-auto h-0 px-4 py-3 gap-1">
+			<div className="flex flex-col grow overflow-y-auto h-0 px-4 py-3 gap-0.5">
 				{channel &&
-					channel.message.map((message) => (
-						<div
-							key={`RoomMessage_${message.roomId}_${message.id}`}
-							className="px-3.5 py-2 rounded-2xl rounded-bl-md bg-background-light text-sm text-foreground max-w-[70%] animate-slide-in"
-						>
-							{message.content}
-						</div>
-					))}
+					channel.message.map((message) => {
+						const isMe = message.profileId === viewContextState.profile?.id
+						const pastMessageSameUser = message.profileId === pastMessageProfileId
+						pastMessageProfileId = message.profileId
+						const menuItems = getMessageMenuItems(message.content, message.id, isMe)
+
+						return isMe ? (
+							<div
+								key={`RoomMessage_${message.roomId}_${message.id}`}
+								className="flex justify-end animate-slide-in"
+								onContextMenu={(e) => contextMenu.open(e, menuItems)}
+							>
+								<div className="max-w-[70%] px-3.5 py-2 rounded-2xl rounded-br-md bg-accent text-white text-sm">
+									{message.content}
+								</div>
+							</div>
+						) : (
+							<div
+								key={`RoomMessage_${message.roomId}_${message.id}`}
+								className="flex items-start gap-2.5 animate-slide-in"
+								onContextMenu={(e) => contextMenu.open(e, menuItems)}
+							>
+								{!pastMessageSameUser ? (
+									<div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent text-xs font-bold shrink-0 mt-0.5">
+										{(message.profile.name ?? message.profile.tag).charAt(0).toUpperCase()}
+									</div>
+								) : (
+									<div className="w-8 shrink-0" />
+								)}
+								<div className="flex flex-col max-w-[70%]">
+									{!pastMessageSameUser && (
+										<div className="flex items-baseline gap-2 mb-0.5">
+											<span className="text-sm font-semibold text-foreground">
+												{message.profile.name ?? message.profile.tag}
+											</span>
+											<span className="text-[11px] text-foreground-dim">
+												{new Date(message.sentAt).toLocaleString()}
+											</span>
+										</div>
+									)}
+									<div className="px-3.5 py-2 rounded-2xl rounded-bl-md bg-background-light text-sm text-foreground">
+										{message.content}
+									</div>
+								</div>
+							</div>
+						)
+					})}
 				{(!channel || channel.message.length === 0) && (
 					<div className="flex flex-col items-center justify-center flex-1 text-foreground-dim">
 						<svg

@@ -73,7 +73,7 @@ export const FriendNav = () => {
 		return (
 			<Link
 				href={`/friend/${name}`}
-				className={`block h-12 px-2.5 py-0.5 leading-12 mb-1 rounded ${classname}`}
+				className={classname}
 			>
 				{children}
 			</Link>

@@ -9,6 +9,8 @@ import { RootState } from '@/src/lib/store'
 import { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useContextMenu } from '@/src/provider/ContextMenuProvider'
 
 type FriendStatus = 'ONLINE' | 'AWAY' | 'DO_NOT_DISTURB' | 'OFFLINE'
 
@@ -22,6 +24,29 @@ export default function FriendList() {
 		(state: RootState) => state.viewContext
 	)
 	const dispatch = useAppDispatch()
+	const router = useRouter()
+	const contextMenu = useContextMenu()
+
+	const startDm = async (friendTag: string, friendName: string | null) => {
+		try {
+			const res = await fetch('/api/dm-sessions', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					name: friendName ?? friendTag,
+					iconType: 'text',
+					iconData: friendName ?? friendTag,
+					participants: [],
+					tag: friendTag,
+				}),
+			})
+			if (res.ok) {
+				router.push('/dm')
+			}
+		} catch {
+			router.push('/dm')
+		}
+	}
 
 	useEffect(() => {
 		dispatch(setSelectedFriendMenu('list'))
@@ -101,6 +126,28 @@ export default function FriendList() {
 						<div
 							key={`key_friend_${friend.tag}`}
 							className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-background-light cursor-pointer transition-colors group"
+							onContextMenu={(e) =>
+								contextMenu.open(e, [
+									{
+										label: '메시지 보내기',
+										onClick: () => startDm(friend.tag, friend.name),
+									},
+									{
+										label: '프로필 보기',
+										onClick: () => router.push(`/user/${friend.tag}`),
+									},
+									{ separator: true },
+									{
+										label: '친구 삭제',
+										danger: true,
+										onClick: () => {
+											if (confirm(`${friend.name ?? friend.tag}님을 친구에서 삭제하시겠습니까?`)) {
+												fetch(`/api/friends/${friend.tag}`, { method: 'DELETE' })
+											}
+										},
+									},
+								])
+							}
 						>
 							<div className="relative w-9 h-9 shrink-0">
 								<Image
@@ -125,7 +172,13 @@ export default function FriendList() {
 							</div>
 							{/* 호버 시 액션 버튼 */}
 							<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-								<button className="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-light">
+								<button
+									onClick={(e) => {
+										e.stopPropagation()
+										startDm(friend.tag, friend.name)
+									}}
+									className="w-8 h-8 flex items-center justify-center rounded-lg text-foreground-muted hover:text-foreground hover:bg-background-light"
+								>
 									<svg
 										className="w-4 h-4"
 										fill="none"

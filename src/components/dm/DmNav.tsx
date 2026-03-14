@@ -3,11 +3,11 @@
 import DragAbleDiv, { DragAbleDivOption } from '@/src/components/ui/DragAbleDiv'
 import { setNavSize } from '@/src/lib/features/viewContext/viewContextSlice'
 import { useAppDispatch, useAppSelector } from '@/src/lib/hooks'
-import { setContextMenu } from '@/src/provider/ContextMenuProvider'
+import { useContextMenu } from '@/src/provider/ContextMenuProvider'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import AddDmModal from '@/src/components/dm/AddDmModal'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 export const DmNav = () => {
 	const { navSize, selectedMessageMenu } = useAppSelector(
@@ -15,10 +15,11 @@ export const DmNav = () => {
 	)
 	const dmState = useAppSelector((state) => state.dm)
 	const dispatch = useAppDispatch()
+	const router = useRouter()
+	const contextMenu = useContextMenu()
 
 	const [addMessageModalOpen, setAddMessageModalOpen] = useState<boolean>(false)
 	const navRef = useRef<HTMLDivElement>(null)
-	const contextRef = useRef<HTMLDivElement>(null)
 
 	const onDragEnd = ({ x }: { x: number }) => {
 		dispatch(setNavSize(x))
@@ -39,25 +40,6 @@ export const DmNav = () => {
 		hoverColor: 'background-light',
 	}
 
-	useEffect(() => {
-		if (contextRef.current) {
-			setContextMenu(contextRef.current, [
-				{
-					name: '메세지 요청&스팸',
-					callback: () => {
-						redirect('/dm/notAllow')
-					},
-				},
-				...dmState.allowedDmSessions.map((dmSession) => ({
-					name: dmSession.name,
-					callback: () => {
-						redirect('/dm/session/' + dmSession.id)
-					},
-				})),
-			])
-		}
-	}, [])
-
 	function Menu({
 		children,
 		name,
@@ -70,7 +52,7 @@ export const DmNav = () => {
 		return (
 			<Link
 				href={'/dm/' + name}
-				className={`${classname} block h-12 px-2.5 py-0.5 leading-12 mb-1 rounded`}
+				className={classname}
 			>
 				{children}
 			</Link>
@@ -81,10 +63,28 @@ export const DmNav = () => {
 		setAddMessageModalOpen(true)
 	}
 
+	const handleDmContextMenu = (e: React.MouseEvent, dmSessionId: string, dmName: string) => {
+		contextMenu.open(e, [
+			{
+				label: `${dmName} 열기`,
+				onClick: () => router.push(`/dm/session/${dmSessionId}`),
+			},
+			{ separator: true },
+			{
+				label: 'DM 나가기',
+				onClick: () => {
+					if (confirm(`"${dmName}" DM을 나가시겠습니까?`)) {
+						fetch(`/api/dm-sessions/${dmSessionId}`, { method: 'DELETE' })
+					}
+				},
+				danger: true,
+			},
+		])
+	}
+
 	return (
 		<>
 			<DragAbleDiv
-				ref={contextRef}
 				classname="bg-background-secondary border-r border-border"
 				option={dragAbleDivOption}
 				onDragging={onDragging}
@@ -150,16 +150,22 @@ export const DmNav = () => {
 							</p>
 						) : (
 							dmState.allowedDmSessions.map((dmSession) => (
-								<Menu
+								<div
 									key={`dm_session_${dmSession.id}_menu`}
-									name={`session/${dmSession.id}`}
-									classname="flex items-center gap-2.5 px-3 h-10 rounded-lg text-sm text-foreground-muted hover:bg-background-light hover:text-foreground transition-colors"
+									onContextMenu={(e) =>
+										handleDmContextMenu(e, String(dmSession.id), dmSession.name)
+									}
 								>
-									<div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center text-accent text-xs font-bold shrink-0">
-										{dmSession.name.charAt(0).toUpperCase()}
-									</div>
-									<span className="truncate">{dmSession.name}</span>
-								</Menu>
+									<Menu
+										name={`session/${dmSession.id}`}
+										classname="flex items-center gap-2.5 px-3 h-10 rounded-lg text-sm text-foreground-muted hover:bg-background-light hover:text-foreground transition-colors"
+									>
+										<div className="w-7 h-7 rounded-full bg-accent/20 flex items-center justify-center text-accent text-xs font-bold shrink-0">
+											{dmSession.name.charAt(0).toUpperCase()}
+										</div>
+										<span className="truncate">{dmSession.name}</span>
+									</Menu>
+								</div>
 							))
 						)}
 					</div>
